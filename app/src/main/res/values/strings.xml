@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">Geo Action</string>
+
+                            <!--    API Keys   -->
+    <string name="backendless_key">E7EF3DA5-FE66-15DC-FF2D-32B0EFA9C800</string>
+    <string name="backendless_app_id">C337AADB-C5FF-6F79-FF35-1C8CCE400600</string>
+
+                            <!--    UI strings   -->
+    <string name="login_btn_text">Login</string>
+    <string name="login_btn_text2">Back to login</string>
+    <string name="register_btn_text">Register</string>
+    <string name="password_field_hint">password</string>
+    <string name="re_enter_password_field_hint">re-enter password</string>
+    <string name="email_field_hint">email</string>
+
+
 </resources>
