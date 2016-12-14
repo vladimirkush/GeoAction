@@ -65,31 +65,10 @@ public class LoginActivity extends AppCompatActivity {
             mLoginMode = !mLoginMode;
             setUI(mLoginMode);
         }else{
-            // TODO check input
-            BackendlessUser user = new BackendlessUser();
-            user.setEmail( mEmailEt.getText().toString() );
-            user.setPassword( mPasswordEt.getText().toString() );
-
-            Backendless.UserService.register( user, new AsyncCallback<BackendlessUser>() {
-                @Override
-                public void handleResponse( BackendlessUser backendlessUser ) {
-                    Log.d( LOG_TAG, backendlessUser.getEmail() + " successfully registered" );
-                    Toast.makeText(getApplicationContext(), "registration successfull", Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                public void handleFault(BackendlessFault backendlessFault) {
-                    if (backendlessFault.getCode().equals("3033")){
-                        Toast.makeText(getApplicationContext(), "user already registered", Toast.LENGTH_LONG).show();
-                        Log.e(LOG_TAG, backendlessFault.getMessage());
-
-                    }else{
-                        Toast.makeText(getApplicationContext(), backendlessFault.getMessage(), Toast.LENGTH_LONG).show();
-                        Log.e(LOG_TAG, backendlessFault.getMessage());
-                    }
-
-                }
-            } );
+            // check input and register
+            if(checkInput()) {
+                attemptRegister();
+            }
         }
 
     }
@@ -97,24 +76,11 @@ public class LoginActivity extends AppCompatActivity {
 
     public void loginOnClick(View view) {
         if(mLoginMode){
-            // TODO check input
-            String email = mEmailEt.getText().toString();
-            String pass = mPasswordEt.getText().toString();
-
-            Backendless.UserService.login( email, pass, new AsyncCallback<BackendlessUser>() {
-                public void handleResponse( BackendlessUser user ) {
-                    // user has been logged in
-                    Log.d(LOG_TAG, user.getEmail() + " has logged in");
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(intent);
-                }
-
-                public void handleFault( BackendlessFault fault ) {
-                    // login failed
-                    Log.d(LOG_TAG, "failed:" + fault.getCode() + ":\n"+fault.getMessage());
-                }
-            });   //// true for stay logged in
-        }else{
+            // check input and login
+            if(checkInput()) {
+                attemptLogin();
+            }
+        }else{  // "back to login" clicked
             mLoginMode = !mLoginMode;
             setUI(mLoginMode);
 
@@ -130,6 +96,119 @@ public class LoginActivity extends AppCompatActivity {
             mLoginBtn.setText(R.string.login_btn_text2);
             mReenterPasswordEt.setVisibility(View.VISIBLE);
         }
+        clearUI();
+    }
+
+    private void setUIEnabled(boolean enabled){
+        mEmailEt.setEnabled(enabled);
+        mPasswordEt.setEnabled(enabled);
+        mReenterPasswordEt.setEnabled(enabled);
+        mLoginBtn.setEnabled(enabled);
+        mRegisterBtn.setEnabled(enabled);
+    }
+
+    private boolean checkInput(){
+        boolean inputValidated = true;
+
+        String email = mEmailEt.getText().toString();
+        String pass = mPasswordEt.getText().toString();
+        String reenterPass = mReenterPasswordEt.getText().toString();
+
+        if(email.isEmpty()) {
+            mEmailEt.setError("Email cannot be empty");
+            inputValidated = false;
+        }else if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            mEmailEt.setError("Email not valid");
+            inputValidated = false;
+        }
+
+        if(pass.isEmpty()){
+            mPasswordEt.setError("Password cannot be empty");
+            inputValidated = false;
+        }
+
+        if(!mLoginMode){    // user makes registration
+            if(!pass.equals(reenterPass)){
+                mReenterPasswordEt.setError("Passwords don't match");
+                inputValidated = false;
+            }
+        }
+
+
+
+
+        if(inputValidated) {    // clear all errors
+            mEmailEt.setError(null);
+            mPasswordEt.setError(null);
+            mReenterPasswordEt.setError(null);
+        }
+        return inputValidated;
+    }
+
+    private void attemptLogin(){
+        setUIEnabled(false); // disable UI
+        String email = mEmailEt.getText().toString();
+        String pass = mPasswordEt.getText().toString();
+
+        Backendless.UserService.login( email, pass, new AsyncCallback<BackendlessUser>() {
+            public void handleResponse( BackendlessUser user ) {
+                // user has been logged in
+                Log.d(LOG_TAG, user.getEmail() + " has logged in");
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+                setUIEnabled(true); // enable UI
+                clearUI();
+            }
+
+            public void handleFault( BackendlessFault fault ) {
+                // login failed
+                setUIEnabled(true); // enable UI
+                if(fault.getCode().equals("3003")){
+                    Toast.makeText(getApplicationContext(), "Wrong email or password", Toast.LENGTH_LONG).show();
+                }else{
+                    Toast.makeText(getApplicationContext(), fault.getMessage(), Toast.LENGTH_LONG).show();
+                }
+                Log.d(LOG_TAG, "failed:" + fault.getCode() + ":\n"+fault.getMessage());
+            }
+        });   //// true for stay logged in
+    }
+
+    private void attemptRegister(){
+        setUIEnabled(false); // disable UI
+        BackendlessUser user = new BackendlessUser();
+        user.setEmail( mEmailEt.getText().toString() );
+        user.setPassword( mPasswordEt.getText().toString() );
+
+        Backendless.UserService.register( user, new AsyncCallback<BackendlessUser>() {
+            @Override
+            public void handleResponse( BackendlessUser backendlessUser ) {
+                Log.d( LOG_TAG, backendlessUser.getEmail() + " successfully registered" );
+                Toast.makeText(getApplicationContext(), "registration successfull", Toast.LENGTH_LONG).show();
+                setUIEnabled(true); // enable UI
+                clearUI();
+                loginOnClick(mLoginBtn); // return to login state
+            }
+
+            @Override
+            public void handleFault(BackendlessFault backendlessFault) {
+                if (backendlessFault.getCode().equals("3033")){
+                    Toast.makeText(getApplicationContext(), "user already registered", Toast.LENGTH_LONG).show();
+                    Log.e(LOG_TAG, backendlessFault.getMessage());
+
+                }else{
+                    Toast.makeText(getApplicationContext(), backendlessFault.getMessage(), Toast.LENGTH_LONG).show();
+                    Log.e(LOG_TAG, backendlessFault.getMessage());
+                }
+                setUIEnabled(true); // enable UI
+            }
+        } );
+    }
+
+    // clear all text fields
+    private void clearUI(){
+        mEmailEt.setText("");
+        mPasswordEt.setText("");
+        mReenterPasswordEt.setText("");
     }
 
 }
