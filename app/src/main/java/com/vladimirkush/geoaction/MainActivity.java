@@ -1,7 +1,9 @@
 package com.vladimirkush.geoaction;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -10,10 +12,15 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
+import com.backendless.persistence.local.UserIdStorageFactory;
+import com.vladimirkush.geoaction.Utils.Constants;
 
 public class MainActivity extends AppCompatActivity {
+    private final String LOG_TAG = "LOGTAG";
 
     private TextView tvLabel;
+    private BackendlessUser user;
+    private boolean mIsLoginPersistent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,14 +28,32 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         tvLabel = (TextView) findViewById(R.id.label_logged_in);
-
-
+        mIsLoginPersistent = (boolean)getIntent().getExtras().get(Constants.LOGIN_IS_PERSISTENT_KEY);
 
         Backendless.UserService.isValidLogin(new AsyncCallback<Boolean>() {
             @Override
             public void handleResponse(Boolean aBoolean) {
-                BackendlessUser user = Backendless.UserService.CurrentUser();
-                tvLabel.setText(user.getEmail());
+               String currentUserObjectId = UserIdStorageFactory.instance().getStorage().get();
+                Backendless.Data.of( BackendlessUser.class ).findById( currentUserObjectId, new AsyncCallback<BackendlessUser>(){
+
+                    @Override
+                    public void handleResponse(BackendlessUser backendlessUser) {
+                        Log.d(LOG_TAG, "login validation success");
+                        user = backendlessUser;
+                        tvLabel.setText(user.getEmail());
+                    }
+
+                    @Override
+                    public void handleFault(BackendlessFault backendlessFault) {
+                        Toast.makeText(getApplicationContext(), "login validation failed", Toast.LENGTH_SHORT).show();
+                        Log.d(LOG_TAG, "login validation failed: "+ backendlessFault.getMessage());
+                    }
+                } );
+
+                if(!mIsLoginPersistent) {
+                    user = Backendless.UserService.CurrentUser();
+                    tvLabel.setText(user.getEmail());
+                }
             }
 
             @Override
@@ -52,5 +77,11 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "failed to log out", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    /* open Action Creation activity */
+    public void newActionOnClick(View view) {
+        Intent intent = new Intent(this,ActionCreate.class);
+        startActivity(intent);
     }
 }

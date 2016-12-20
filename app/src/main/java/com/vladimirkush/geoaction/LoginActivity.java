@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.vladimirkush.geoaction.Utils.Constants;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
@@ -26,6 +27,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button mRegisterBtn;
 
     private boolean mLoginMode = true;
+    private boolean mPersistantLogin = true;
 
 
     @Override
@@ -49,11 +51,14 @@ public class LoginActivity extends AppCompatActivity {
         Backendless.initApp( this, backendlessAppId, backendlessKey, version );
 
         // check if logged in using StayLoggedIn
-        String userToken = UserTokenStorageFactory.instance().getStorage().get();
-        if( userToken != null && !userToken.equals( "" ) ) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
+        if(mPersistantLogin) {
+            String userToken = UserTokenStorageFactory.instance().getStorage().get();
+            if (userToken != null && !userToken.equals("")) {
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.putExtra(Constants.LOGIN_IS_PERSISTENT_KEY, mPersistantLogin);
+                startActivity(intent);
+                finish();
+            }
         }
 
     }
@@ -155,6 +160,7 @@ public class LoginActivity extends AppCompatActivity {
                 // user has been logged in
                 Log.d(LOG_TAG, user.getEmail() + " has logged in");
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent.putExtra(Constants.LOGIN_IS_PERSISTENT_KEY, mPersistantLogin);
                 startActivity(intent);
                 setUIEnabled(true); // enable UI
                 clearUI();
@@ -170,7 +176,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 Log.d(LOG_TAG, "failed:" + fault.getCode() + ":\n"+fault.getMessage());
             }
-        });   //// true for stay logged in
+        }, mPersistantLogin);   //// true for stay logged in
     }
 
     private void attemptRegister(){

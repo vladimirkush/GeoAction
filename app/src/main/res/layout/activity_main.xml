@@ -11,18 +11,31 @@
     android:orientation="vertical"
     tools:context="com.vladimirkush.geoaction.MainActivity"
     android:weightSum="10">
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_weight="9"
+        android:layout_height="0dp"/>
     <TextView
         android:id="@+id/label_logged_in"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
-    <Button
-        android:onClick="logOutOnClick"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:layout_gravity="center_horizontal"
-        android:text="Logout"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+       >
+        <Button
+            android:onClick="logOutOnClick"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:text="Logout"/>
+        <Button
+            android:onClick="newActionOnClick"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:text="New Action"/>
+    </LinearLayout>
 </LinearLayout>
