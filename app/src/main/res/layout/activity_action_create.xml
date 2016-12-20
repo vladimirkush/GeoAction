@@ -11,6 +11,7 @@
     tools:context="com.vladimirkush.geoaction.ActionCreate">
 
     <LinearLayout
+
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -33,8 +34,7 @@
 
         <RadioGroup
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="7"
+            android:layout_height="wrap_content"
             android:weightSum="3"
             android:orientation="horizontal"
             android:padding="5dp">
@@ -63,10 +63,12 @@
 
         </RadioGroup>
 
+        <View style="@style/Divider"/>
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Chose location parameters:"
+            android:text="Chose trigger area for action:"
             android:padding="5dp"/>
 
         <ImageButton
@@ -77,6 +79,194 @@
             android:onClick="onLocationChooserClick"
             android:layout_gravity="center_horizontal"/>
 
+        <TextView
+            android:id="@+id/label_radius"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Radius:"
+            android:gravity="center_horizontal"
+            android:padding="2dp"/>
+
+        <View style="@style/Divider"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Chose trigger area direction:"
+            android:padding="5dp"/>
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="2"
+            android:orientation="horizontal"
+            android:padding="5dp">
+
+            <RadioButton
+                android:id="@+id/radio_enter"
+                android:text="Entering area"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                />
+            <RadioButton
+                android:id="@+id/radio_exit"
+                android:text="Exiting area"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                />
+
+        </RadioGroup>
+
+        <View style="@style/Divider"/>
+
+        <LinearLayout
+            android:id="@+id/reminder_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Add reminder title and text:"
+                android:padding="5dp"/>
+
+           <EditText
+               android:id="@+id/et_reminder_title"
+               android:layout_width="match_parent"
+               android:layout_height="0dp"
+               android:paddingBottom="5dp"
+               android:layout_weight="1"
+               android:hint="Title"/>
+
+            <EditText
+                android:id="@+id/et_reminder_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:gravity="start"
+                android:scrollbars="vertical"
+                android:hint="Text"
+                />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/sms_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Set up SMS message:"
+                android:padding="5dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_sms_to"
+                    android:text="To:"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="2dp"
+                    android:paddingRight="2dp"/>
+
+                <EditText
+                    android:id="@+id/et_sms_to"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="5"
+                    android:paddingLeft="2dp"/>
+
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/et_sms_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:gravity="start"
+                android:scrollbars="vertical"
+                android:hint="Message"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/email_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Set up email message:"
+                android:padding="5dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_email_to"
+                    android:text="To:"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="2dp"
+                    android:paddingRight="2dp"/>
+
+                <EditText
+                    android:id="@+id/et_email_to"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="5"
+                    android:paddingLeft="2dp"/>
+
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/et_email_subj"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Subject"
+                />
+
+            <EditText
+                android:id="@+id/et_email_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:gravity="start"
+                android:scrollbars="vertical"
+                android:hint="Message"
+                />
+
+        </LinearLayout>
+
+
+        <View style="@style/Divider"/>
+        <Button
+            android:id="@+id/btn_save_action"
+            android:text="Save"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:onClick="onSaveActionClick"/>
     </LinearLayout>
 
 </ScrollView>

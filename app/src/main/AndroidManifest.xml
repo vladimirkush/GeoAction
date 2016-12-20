@@ -19,7 +19,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity" />
-        <activity android:name=".ActionCreate"></activity>
+        <activity android:name=".ActionCreate"
+            android:windowSoftInputMode="stateHidden"></activity>
     </application>
 
 </manifest>
