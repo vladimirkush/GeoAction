@@ -4,6 +4,7 @@
     <!--    API Keys   -->
     <string name="backendless_key">E7EF3DA5-FE66-15DC-FF2D-32B0EFA9C800</string>
     <string name="backendless_app_id">C337AADB-C5FF-6F79-FF35-1C8CCE400600</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCHDz4zO9JeG6JIiNhY9d3IQYiKHYpduDk</string>
 
     <!--    UI strings   -->
     <string name="login_btn_text">Login</string>
@@ -12,6 +13,10 @@
     <string name="password_field_hint">password</string>
     <string name="re_enter_password_field_hint">re-enter password</string>
     <string name="email_field_hint">email</string>
+
+    <string name="locatioNnotGrantedMsg">This app needs access to your location</string>
+    <string name="locatioNnotGrantedTitle">Location Not Found</string>
+    <string name="locatioNnotGrantedButtonText">Close app</string>
 
 
 </resources>
