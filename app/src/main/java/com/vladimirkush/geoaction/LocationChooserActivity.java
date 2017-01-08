@@ -1,6 +1,7 @@
 package com.vladimirkush.geoaction;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
@@ -10,6 +11,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -315,5 +317,19 @@ public class LocationChooserActivity extends AppCompatActivity
         float[] results = new float[3];
         Location.distanceBetween(src.latitude, src.longitude,dest.latitude,dest.longitude, results);
         return results[0];
+    }
+
+    public void onConfirmClick(View view) {
+        Intent returnIntent = new Intent();
+        if(mCircle !=null) {
+            returnIntent.putExtra(Constants.AREA_CENTER_KEY, mCircle.getCenter());
+            returnIntent.putExtra(Constants.AREA_RADIUS_KEY, (int) mCircle.getRadius());
+            setResult(Constants.MAP_DATA_RESULT_OK,returnIntent);
+
+        }else{
+            setResult(Constants.MAP_DATA_RESULT_CANCEL,returnIntent);
+        }
+
+        finish();
     }
 }
