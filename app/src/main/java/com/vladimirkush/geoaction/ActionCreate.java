@@ -1,7 +1,10 @@
 package com.vladimirkush.geoaction;
 
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -10,13 +13,21 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+import com.vladimirkush.geoaction.Services.GeofenceTransitionsIntentService;
 import com.google.android.gms.maps.model.LatLng;
 import com.vladimirkush.geoaction.Utils.Constants;
 
 
-public class ActionCreate extends AppCompatActivity {
+public class ActionCreate extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private final String LOG_TAG = "LOGTAG";
     private Constants.ActionType actionType = Constants.ActionType.REMINDER;
+
+    //fields
+    private PendingIntent mGeofencePendingIntent;
+    private GoogleApiClient mGoogleApiClient;
     // views
     private RadioButton mRadioReminder;
     private RadioButton mRadioSMS;
@@ -33,6 +44,15 @@ public class ActionCreate extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action_create);
+
+        // Create an instance of GoogleAPIClient.
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
 
         // assign views
         mRadioReminder = (RadioButton) findViewById(R.id.radio_reminder);
@@ -83,6 +103,7 @@ public class ActionCreate extends AppCompatActivity {
     }
 
     public void onSaveActionClick(View view) {
+        // TODO -  save LB action , register geofence and update on cloud
     }
 
     /* setup views according to chosen type of action */
@@ -125,5 +146,43 @@ public class ActionCreate extends AppCompatActivity {
                 Log.d(LOG_TAG, "area trigger chosing cancelled");
             }
         }
+    }
+
+    // request Pending Intent from the system
+    private PendingIntent getGeofencePendingIntent() {
+        // Reuse the PendingIntent if we already have it.
+        if (mGeofencePendingIntent != null) {
+            return mGeofencePendingIntent;
+        }
+        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
+        // calling addGeofences() and removeGeofences().
+        return PendingIntent.getService(this, 0, intent, PendingIntent.
+                FLAG_UPDATE_CURRENT);
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
     }
 }
