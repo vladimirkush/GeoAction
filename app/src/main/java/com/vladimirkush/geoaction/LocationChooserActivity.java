@@ -130,7 +130,9 @@ public class LocationChooserActivity extends AppCompatActivity
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-               adjustCircleRadius(latLng, mMarker.getPosition());
+                if(mCircle != null && mMarker != null) {
+                    adjustCircleRadius(latLng, mMarker.getPosition());
+                }
             }
         });
 
@@ -306,11 +308,11 @@ public class LocationChooserActivity extends AppCompatActivity
     }
 
     private void adjustCircleRadius(LatLng clickPosition, LatLng center ){
-        if(mCircle != null && mMarker != null){
-            int radius = (int)getDistanceBetween(clickPosition, center );
-            mCircle.setRadius(radius);
-            mRadiusTextView.setText("Radius: "+ radius + "m");
-        }
+
+        int radius = (int)getDistanceBetween(clickPosition, center );
+        mCircle.setRadius(radius);
+        mRadiusTextView.setText("Radius: "+ radius + "m");
+
     }
 
     private double getDistanceBetween(LatLng src, LatLng dest){

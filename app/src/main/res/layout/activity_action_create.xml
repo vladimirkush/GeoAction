@@ -269,6 +269,13 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:onClick="onSaveActionClick"/>
+        <Button
+            android:id="@+id/btn_delete_action"
+            android:text="Delete actions"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:onClick="onDeleteActionClick"/>
     </LinearLayout>
 
 </ScrollView>

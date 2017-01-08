@@ -1,13 +1,14 @@
 package com.vladimirkush.geoaction.Models;
 
 
+import com.vladimirkush.geoaction.Utils.Constants;
 
 public class LBReminder extends LBAction {
     private String title;
     private String message;
 
     public LBReminder() {
-
+        setActionType(Constants.ActionType.REMINDER);
     }
 
     public String getTitle() {

@@ -1,6 +1,8 @@
 package com.vladimirkush.geoaction.Models;
 
 
+import com.vladimirkush.geoaction.Utils.Constants;
+
 import java.util.List;
 
 public class LBEmail extends LBAction {
@@ -9,6 +11,7 @@ public class LBEmail extends LBAction {
     private String message;
 
     public LBEmail() {
+        setActionType(Constants.ActionType.EMAIL);
     }
 
     public List<String> getTo() {
