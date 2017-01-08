@@ -10,6 +10,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -27,7 +28,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.vladimirkush.geoaction.Utils.Constants;
 
 public class LocationChooserActivity extends AppCompatActivity
@@ -40,7 +45,13 @@ public class LocationChooserActivity extends AppCompatActivity
     private GoogleApiClient mGoogleApiClient;
     private Location        mLastLocation;
     private LocationRequest mLocationRequest;
+    private Marker          mMarker;
+    private Circle          mCircle;
+    private int          mRadius = 200;
 
+    private TextView        mRadiusTextView;
+
+    private boolean         mZoomOnceFlag;
     private boolean         mIsLocationUpdateStarted = false;
 
     @Override
@@ -48,6 +59,7 @@ public class LocationChooserActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location_chooser);
 
+        mRadiusTextView = (TextView) findViewById(R.id.tv_radius);
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -64,6 +76,9 @@ public class LocationChooserActivity extends AppCompatActivity
         MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        mZoomOnceFlag = false;
+       // mRadius = 50;
     }
 
     @Override
@@ -109,6 +124,45 @@ public class LocationChooserActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+               adjustCircleRadius(latLng, mMarker.getPosition());
+            }
+        });
+
+        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                if(mMarker != null)
+                    mMarker.remove();
+
+                if(mCircle != null)
+                    mCircle.remove();
+
+                mMarker = mMap.addMarker(new MarkerOptions()
+                        .position(latLng)
+                        .title("center of area")
+                        .draggable(false));
+
+                mCircle = mMap.addCircle(new CircleOptions()
+                                        .center(latLng)
+                                        .radius(mRadius)
+                                        .clickable(false));
+                mRadiusTextView.setText("Radius: "+ (int)mCircle.getRadius() + "m");
+                Log.d(LOG_TAG, "marker pos: lat "+mMarker.getPosition().latitude+ " lon "+mMarker.getPosition().latitude);
+            }
+        });
+
+
+        // needed to disable default click event on marker
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                return true;
+            }
+        });
 
         showLastKnownLocationOnMap();
 
@@ -208,6 +262,7 @@ public class LocationChooserActivity extends AppCompatActivity
 
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
+        mZoomOnceFlag = false; // here we allow to center map on location for one time
     }
 
     /* if permission denied, alert user and exit */
@@ -236,11 +291,29 @@ public class LocationChooserActivity extends AppCompatActivity
 
             }
 
-            // center camera on device's location
-            LatLng lastLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-            CameraUpdate upd = CameraUpdateFactory.newLatLngZoom(lastLatLng, ZOOM_RATE);
-            mMap.moveCamera(upd);
+            // center camera on device's location only for the first time
+            if(!mZoomOnceFlag) {
+                LatLng lastLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                CameraUpdate upd = CameraUpdateFactory.newLatLngZoom(lastLatLng, ZOOM_RATE);
+                mMap.moveCamera(upd);
+                mZoomOnceFlag = true;
+            }
+
 
         }
+    }
+
+    private void adjustCircleRadius(LatLng clickPosition, LatLng center ){
+        if(mCircle != null && mMarker != null){
+            int radius = (int)getDistanceBetween(clickPosition, center );
+            mCircle.setRadius(radius);
+            mRadiusTextView.setText("Radius: "+ radius + "m");
+        }
+    }
+
+    private double getDistanceBetween(LatLng src, LatLng dest){
+        float[] results = new float[3];
+        Location.distanceBetween(src.latitude, src.longitude,dest.latitude,dest.longitude, results);
+        return results[0];
     }
 }
