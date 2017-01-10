@@ -216,6 +216,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         super.onStop();
     }
 
+    //Creates request for registering a Geofence in the system for tracking
     private GeofencingRequest getGeofencingRequest(LBAction lbAction) {
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);// change upon params
