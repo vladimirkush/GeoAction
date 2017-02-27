@@ -125,7 +125,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         if(mRadioReminder.isChecked()){ // create LBRemainder
             LBReminder reminder = new LBReminder();
             reminder.setDirectionTrigger(mRadioEnterArea.isChecked()? LBAction.DirectionTrigger.ENTER :  LBAction.DirectionTrigger.EXIT);
-            reminder.setID("temp id");
+            reminder.setID("temp id"); // generate
             reminder.setTitle(mReminderTitle.getText().toString());
             reminder.setMessage(mReminderText.getText().toString());
             reminder.setRadius(mRadius);
@@ -249,6 +249,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
             return mGeofencePendingIntent;
         }
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+        // TODO set id for further searching in DB
         intent.putExtra("Title", ((LBReminder)lbAction).getTitle());
         intent.putExtra("Text", ((LBReminder)lbAction).getMessage());
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when

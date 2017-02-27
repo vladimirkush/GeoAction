@@ -1,6 +1,8 @@
 package com.vladimirkush.geoaction.Models;
 
 
+import android.text.TextUtils;
+
 import com.vladimirkush.geoaction.Utils.Constants;
 
 import java.util.List;
@@ -36,5 +38,10 @@ public class LBEmail extends LBAction {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return  TextUtils.join(",", to);
     }
 }
