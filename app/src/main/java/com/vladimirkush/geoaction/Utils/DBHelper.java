@@ -215,12 +215,11 @@ public class DBHelper extends SQLiteOpenHelper {
         return  lbAction;
     }
 
+
+
+
     //delete action by id
-    //drop table
-
-
     //return all actions as actions
-
     //update action status
     //update action (multiple params)
     //TODO
