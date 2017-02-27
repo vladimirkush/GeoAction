@@ -12,7 +12,8 @@ public class LBSms extends LBAction {
     private String message;
 
     public LBSms() {
-        setActionType(Constants.ActionType.SMS);
+        setActionType(ActionType.SMS);
+        setStatus(Status.ACTIVE);
     }
 
     public List<String> getTo() {

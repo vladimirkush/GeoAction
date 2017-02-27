@@ -9,6 +9,7 @@ public class LBReminder extends LBAction {
 
     public LBReminder() {
         setActionType(Constants.ActionType.REMINDER);
+        setStatus(Status.ACTIVE);
     }
 
     public String getTitle() {

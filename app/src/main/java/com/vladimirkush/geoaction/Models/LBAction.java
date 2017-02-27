@@ -2,16 +2,18 @@ package com.vladimirkush.geoaction.Models;
 
 
 import com.google.android.gms.maps.model.LatLng;
-import com.vladimirkush.geoaction.Utils.Constants;
 
 public abstract class LBAction {
     public enum DirectionTrigger {ENTER, EXIT};
+    public enum Status {ACTIVE, PAUSED};
+    public enum ActionType{REMINDER, SMS, EMAIL};
 
-    private Constants.ActionType actionType;
-    private String ID;
+    private ActionType actionType;
+    private long ID;
     private int radius;
     private DirectionTrigger directionTrigger;
     private LatLng triggerCenter;
+    private Status status;
 
 
 
@@ -24,19 +26,19 @@ public abstract class LBAction {
         this.triggerCenter = triggerCenter;
     }
 
-    public Constants.ActionType getActionType() {
+    public ActionType getActionType() {
         return actionType;
     }
 
-    public void setActionType(Constants.ActionType actionType) {
+    public void setActionType(ActionType actionType) {
         this.actionType = actionType;
     }
 
-    public String getID() {
+    public long getID() {
         return ID;
     }
 
-    public void setID(String ID) {
+    public void setID(long ID) {
         this.ID = ID;
     }
 
@@ -50,6 +52,14 @@ public abstract class LBAction {
 
     public DirectionTrigger getDirectionTrigger() {
         return directionTrigger;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public void setDirectionTrigger(DirectionTrigger directionTrigger) {

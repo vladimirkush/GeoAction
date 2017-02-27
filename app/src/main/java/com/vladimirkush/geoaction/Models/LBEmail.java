@@ -13,7 +13,8 @@ public class LBEmail extends LBAction {
     private String message;
 
     public LBEmail() {
-        setActionType(Constants.ActionType.EMAIL);
+        setActionType(ActionType.EMAIL);
+        setStatus(Status.ACTIVE);
     }
 
     public List<String> getTo() {

@@ -24,6 +24,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.vladimirkush.geoaction.Models.LBAction;
+import com.vladimirkush.geoaction.Models.LBAction.ActionType;
 import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
 import com.vladimirkush.geoaction.Models.LBSms;
@@ -34,7 +35,7 @@ import com.vladimirkush.geoaction.Utils.Constants;
 
 public class ActionCreate extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback {
     private final String LOG_TAG = "LOGTAG";
-    private Constants.ActionType actionType = Constants.ActionType.REMINDER;
+    private ActionType actionType = ActionType.REMINDER;
 
     //fields
     private PendingIntent   mGeofencePendingIntent;
@@ -86,7 +87,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
 
         mRadioReminder.setChecked(true);    // default checked radio
         mRadioEnterArea.setChecked(true);
-        setViewByActionType(Constants.ActionType.REMINDER);
+        setViewByActionType(ActionType.REMINDER);
     }
 
     public void onRadioButtonClick(View view) {
@@ -98,17 +99,17 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
             case R.id.radio_reminder:
                 if (checked)
                     // reminder
-                    setViewByActionType(Constants.ActionType.REMINDER);
+                    setViewByActionType(ActionType.REMINDER);
                 break;
             case R.id.radio_sms:
                 if (checked)
                     // SMS
-                    setViewByActionType(Constants.ActionType.SMS);
+                    setViewByActionType(ActionType.SMS);
                 break;
             case R.id.radio_email:
                 if (checked)
                     // email
-                    setViewByActionType(Constants.ActionType.EMAIL);
+                    setViewByActionType(ActionType.EMAIL);
                 break;
         }
     }
@@ -125,7 +126,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         if(mRadioReminder.isChecked()){ // create LBRemainder
             LBReminder reminder = new LBReminder();
             reminder.setDirectionTrigger(mRadioEnterArea.isChecked()? LBAction.DirectionTrigger.ENTER :  LBAction.DirectionTrigger.EXIT);
-            reminder.setID("temp id"); // generate
+            reminder.setID(100); //TODO generate by DB
             reminder.setTitle(mReminderTitle.getText().toString());
             reminder.setMessage(mReminderText.getText().toString());
             reminder.setRadius(mRadius);
@@ -149,7 +150,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     }
 
     /* setup views according to chosen type of action */
-    private void setViewByActionType(Constants.ActionType type) {
+    private void setViewByActionType(ActionType type) {
         actionType = type;
         switch (type) {
 
@@ -228,7 +229,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         Geofence geofence = new Geofence.Builder()
                 // Set the request ID of the geofence. This is a string to identify this
                 // geofence.
-                .setRequestId(lbAction.getID())
+                .setRequestId(lbAction.getID()+"")
                 .setCircularRegion(
                         lbAction.getTriggerCenter().latitude,
                         lbAction.getTriggerCenter().longitude,

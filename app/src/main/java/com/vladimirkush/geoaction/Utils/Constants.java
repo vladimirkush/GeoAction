@@ -15,5 +15,5 @@ public class Constants {
 
 
 
-    public enum ActionType{REMINDER, SMS, EMAIL};
+
 }
