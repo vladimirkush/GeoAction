@@ -63,26 +63,27 @@ public class GeofenceTransitionsIntentService extends IntentService {
             );
 
             //Get the action(s) associated by the geofence(s) from db
-
             for(Geofence g : triggeringGeofences){
                 long id = Long.valueOf(g.getRequestId());
                 Log.d(LOG_TAG, "IS: id received:" + id);
-                LBAction lbAction = dbHelper.getAction(id);
-                // handle reaction
-                switch (lbAction.getActionType()){
-                    case REMINDER:
-                        handleReminderAction((LBReminder)lbAction);
-                        break;
-                    case SMS:
-                        handleSMSAction((LBSms) lbAction);
-                        break;
+                if(id >= 0) {                               // workaround for unregistered geofence triggering
+                    LBAction lbAction = dbHelper.getAction(id);
+                    // handle reaction
+                    switch (lbAction.getActionType()) {
+                        case REMINDER:
+                            handleReminderAction((LBReminder) lbAction);
+                            break;
+                        case SMS:
+                            handleSMSAction((LBSms) lbAction);
+                            break;
 
-                    case EMAIL:
-                        handleEmailAction((LBEmail) lbAction);
-                        break;
-                    default:
-                        Log.d(LOG_TAG, "IS: lbAzction received from DB has illegal type");
-                        break;
+                        case EMAIL:
+                            handleEmailAction((LBEmail) lbAction);
+                            break;
+                        default:
+                            Log.d(LOG_TAG, "IS: lbAzction received from DB has illegal type");
+                            break;
+                    }
                 }
 
             }
