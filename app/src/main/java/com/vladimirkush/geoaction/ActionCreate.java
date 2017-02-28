@@ -31,6 +31,10 @@ import com.vladimirkush.geoaction.Models.LBSms;
 import com.vladimirkush.geoaction.Services.GeofenceTransitionsIntentService;
 import com.google.android.gms.maps.model.LatLng;
 import com.vladimirkush.geoaction.Utils.Constants;
+import com.vladimirkush.geoaction.Utils.DBHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class ActionCreate extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback {
@@ -56,12 +60,17 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
 
     private EditText        mReminderTitle;
     private EditText        mReminderText;
-    private LBAction tempAction;
+
+    private DBHelper        dbHelper;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action_create);
+
+        dbHelper = new DBHelper(getApplicationContext());
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -123,16 +132,22 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     public void onSaveActionClick(View view) {
         // TODO -  save LB action , register geofence and update on cloud
 
+
+
         if(mRadioReminder.isChecked()){ // create LBRemainder
             LBReminder reminder = new LBReminder();
             reminder.setDirectionTrigger(mRadioEnterArea.isChecked()? LBAction.DirectionTrigger.ENTER :  LBAction.DirectionTrigger.EXIT);
-            reminder.setID(100); //TODO generate by DB
+            //reminder.setID(100); //TODO generate by DB
             reminder.setTitle(mReminderTitle.getText().toString());
             reminder.setMessage(mReminderText.getText().toString());
             reminder.setRadius(mRadius);
             reminder.setTriggerCenter(mAreaCenter);
 
-            tempAction = reminder;
+            long id = dbHelper.insertAction(reminder);  // insert in the db and get ID
+            reminder.setID(id);                         // assign ID
+            Log.d(LOG_TAG, "Assigned id: "+id);
+
+            //tempAction = reminder;
             registerGeofence(reminder);
 
         }else if(mRadioSMS.isChecked()){// create LBSms
@@ -191,7 +206,11 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
-
+    @Override
+    protected void onDestroy() {
+        dbHelper.close();
+        super.onDestroy();
+    }
     @Override
     public void onConnected(@Nullable Bundle bundle) {
 
@@ -251,20 +270,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         }
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
         // TODO set id for further searching in DB
-        intent.putExtra("Title", ((LBReminder)lbAction).getTitle());
-        intent.putExtra("Text", ((LBReminder)lbAction).getMessage());
-        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
-        // calling addGeofences() and removeGeofences().
-        return PendingIntent.getService(this, 0, intent, PendingIntent.
-                FLAG_UPDATE_CURRENT);
-    }
-
-    private PendingIntent getGeofencePendingIntentTemp() {
-        // Reuse the PendingIntent if we already have it.
-        if (mGeofencePendingIntent != null) {
-            return mGeofencePendingIntent;
-        }
-        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+        intent.putExtra("ID", lbAction.getID());
 
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
         // calling addGeofences() and removeGeofences().
@@ -280,7 +286,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                     android.Manifest.permission.ACCESS_COARSE_LOCATION}, Constants.PERMISSION_LOCATION_REQUEST);
                 // TODO no permissions granted
         } else {
-
+            //pIntent = getGeofencePendingIntent(lbAction);
             LocationServices.GeofencingApi.addGeofences(
                     mGoogleApiClient,
                     getGeofencingRequest(lbAction),
@@ -291,13 +297,15 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
-    private void unregisterGeofences(LBAction lbAction){
+    private void unregisterGeofences(List<String> geofenceIDs){
+
         LocationServices.GeofencingApi.removeGeofences(
                 mGoogleApiClient,
                 // This is the same pending intent that was used in addGeofences().
-                getGeofencePendingIntentTemp())
+                geofenceIDs
+               )
                 .setResultCallback(this); // Result processed in onResult().
-        Toast.makeText(this, "Geofence unregistered", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Geofence id's unregistered: "+ geofenceIDs.size(), Toast.LENGTH_LONG).show();
     }
 
     // handles result of a pending intent
@@ -307,7 +315,12 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     }
 
     public void onDeleteActionClick(View view) {
-
-        unregisterGeofences(tempAction);
+        List<LBAction> actions = dbHelper.getAllActions();
+        List<String> IDs = new ArrayList<String>();
+        for(LBAction act:actions){
+            IDs.add(act.getID()+"");
+        }
+        unregisterGeofences(IDs);
+        dbHelper.deleteAllActions();
     }
 }

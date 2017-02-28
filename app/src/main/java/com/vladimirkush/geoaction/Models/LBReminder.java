@@ -8,7 +8,7 @@ public class LBReminder extends LBAction {
     private String message;
 
     public LBReminder() {
-        setActionType(Constants.ActionType.REMINDER);
+        setActionType(ActionType.REMINDER);
         setStatus(Status.ACTIVE);
     }
 

@@ -13,14 +13,19 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.vladimirkush.geoaction.LoginActivity;
 import com.vladimirkush.geoaction.MainActivity;
+import com.vladimirkush.geoaction.Models.LBAction;
+import com.vladimirkush.geoaction.Models.LBEmail;
+import com.vladimirkush.geoaction.Models.LBReminder;
+import com.vladimirkush.geoaction.Models.LBSms;
 import com.vladimirkush.geoaction.R;
+import com.vladimirkush.geoaction.Utils.DBHelper;
 import com.vladimirkush.geoaction.Utils.GeofenceErrorMessages;
 
 import java.util.List;
 
 public class GeofenceTransitionsIntentService extends IntentService {
     private final String LOG_TAG = "LOGTAG";
-
+    private DBHelper dbHelper;
 
     public GeofenceTransitionsIntentService() {
         super("GeofenceTransitionsIntentService");
@@ -29,6 +34,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        dbHelper = new DBHelper(getApplicationContext());       // init dbHelper
+
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if (geofencingEvent.hasError()) {
             String errorMessage = GeofenceErrorMessages.getErrorString(this,
@@ -46,7 +53,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
             // Get the geofences that were triggered. A single event can trigger
             // multiple geofences.
-            List triggeringGeofences = geofencingEvent.getTriggeringGeofences();
+            List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
 
             // Get the transition details as a String.
             String geofenceTransitionDetails = getGeofenceTransitionDetails(
@@ -55,15 +62,48 @@ public class GeofenceTransitionsIntentService extends IntentService {
                     triggeringGeofences
             );
 
-            // Send notification and log the transition details.
-            String title = intent.getStringExtra("Title");
-            String text = intent.getStringExtra("Text");
-            sendNotification(title, text);
+            //Get the action(s) associated by the geofence(s) from db
+
+            for(Geofence g : triggeringGeofences){
+                long id = Long.valueOf(g.getRequestId());
+                Log.d(LOG_TAG, "IS: id received:" + id);
+                LBAction lbAction = dbHelper.getAction(id);
+                // handle reaction
+                switch (lbAction.getActionType()){
+                    case REMINDER:
+                        handleReminderAction((LBReminder)lbAction);
+                        break;
+                    case SMS:
+                        handleSMSAction((LBSms) lbAction);
+                        break;
+
+                    case EMAIL:
+                        handleEmailAction((LBEmail) lbAction);
+                        break;
+                    default:
+                        Log.d(LOG_TAG, "IS: lbAzction received from DB has illegal type");
+                        break;
+                }
+
+            }
+
+            //long id = intent.getLongExtra("ID", -1);
+
             Log.d(LOG_TAG, geofenceTransitionDetails);
+
         } else {
             // Log the error.
             Log.e(LOG_TAG, "invalid transition type");
         }
+
+
+        dbHelper.close();
+    }
+
+    private void handleReminderAction(LBReminder rem){
+        // Send notification and log the transition details.
+        sendNotification(rem.getTitle(), rem.getMessage());
+
     }
 
     private void sendNotification(String title, String text) {
@@ -100,6 +140,16 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
     private String getGeofenceTransitionDetails(GeofenceTransitionsIntentService geofenceTransitionsIntentService, int geofenceTransition, List triggeringGeofences) {
         return "stub";
+    }
+
+
+
+    private void handleSMSAction(LBSms sms){
+
+    }
+
+    private void handleEmailAction(LBEmail email){
+
     }
 
 }

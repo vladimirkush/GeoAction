@@ -13,7 +13,9 @@ import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.local.UserIdStorageFactory;
+import com.vladimirkush.geoaction.Utils.AndroidDatabaseManager;
 import com.vladimirkush.geoaction.Utils.Constants;
+import com.vladimirkush.geoaction.Utils.DBHelper;
 
 public class MainActivity extends AppCompatActivity {
     private final String LOG_TAG = "LOGTAG";
@@ -26,6 +28,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //debug
+        //DBHelper dbHelper = new DBHelper(getApplicationContext());
+        //dbHelper.deleteDB();
 
         tvLabel = (TextView) findViewById(R.id.label_logged_in);
         mIsLoginPersistent = (boolean)getIntent().getExtras().get(Constants.LOGIN_IS_PERSISTENT_KEY);
@@ -83,5 +89,11 @@ public class MainActivity extends AppCompatActivity {
     public void newActionOnClick(View view) {
         Intent intent = new Intent(this,ActionCreate.class);
         startActivity(intent);
+    }
+
+    public void dbmanagerClick(View view) {
+
+        Intent dbmanager = new Intent(this, AndroidDatabaseManager.class);
+        startActivity(dbmanager);
     }
 }

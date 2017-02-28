@@ -32,7 +32,8 @@
             android:name=".ActionCreate"
             android:windowSoftInputMode="stateHidden" />
         <activity android:name=".LocationChooserActivity" />
-
+        <activity android:name="com.vladimirkush.geoaction.Utils.AndroidDatabaseManager"
+            android:theme="@style/Theme.AppCompat.Light"/>
         <service
             android:name=".Services.GeofenceTransitionsIntentService"
             android:exported="false"></service>
