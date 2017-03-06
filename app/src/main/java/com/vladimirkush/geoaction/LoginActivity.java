@@ -164,6 +164,7 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(intent);
                 setUIEnabled(true); // enable UI
                 clearUI();
+                finish();
             }
 
             public void handleFault( BackendlessFault fault ) {
