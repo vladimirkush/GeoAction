@@ -35,6 +35,12 @@ public class MainActivity extends AppCompatActivity {
         tvLabel = (TextView) findViewById(R.id.label_logged_in);
         mIsLoginPersistent = (boolean)getIntent().getExtras().get(Constants.LOGIN_IS_PERSISTENT_KEY);
 
+        // init Backendless API
+        String backendlessKey = getString(R.string.backendless_key);
+        String backendlessAppId = getString(R.string.backendless_app_id);
+        String version = "v1";
+        Backendless.initApp( this, backendlessAppId, backendlessKey, version );
+
         Backendless.UserService.isValidLogin(new AsyncCallback<Boolean>() {
             @Override
             public void handleResponse(Boolean aBoolean) {

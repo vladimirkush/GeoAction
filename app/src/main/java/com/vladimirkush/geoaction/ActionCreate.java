@@ -1,15 +1,21 @@
 package com.vladimirkush.geoaction;
 
+import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -23,17 +29,17 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Models.LBAction.ActionType;
-import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
 import com.vladimirkush.geoaction.Models.LBSms;
 import com.vladimirkush.geoaction.Services.GeofenceTransitionsIntentService;
-import com.google.android.gms.maps.model.LatLng;
 import com.vladimirkush.geoaction.Utils.Constants;
 import com.vladimirkush.geoaction.Utils.DBHelper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -58,8 +64,11 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     private LinearLayout    mEmailLayout;
     private TextView        mRadiusLabel;
 
+    private EditText        mSmsTo;
+    private EditText        mSmsMessage;
     private EditText        mReminderTitle;
     private EditText        mReminderText;
+    private Button          mSmsToBtn;
 
     private DBHelper        dbHelper;
 
@@ -93,6 +102,9 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         mRadiusLabel = (TextView) findViewById(R.id.label_radius);
         mReminderTitle = (EditText) findViewById(R.id.et_reminder_title);
         mReminderText = (EditText) findViewById(R.id.et_reminder_text);
+        mSmsTo = (EditText) findViewById(R.id.et_sms_to);
+        mSmsMessage = (EditText) findViewById(R.id.et_sms_text);
+        mSmsToBtn = (Button) findViewById(R.id.btn_sms_to);
 
         mRadioReminder.setChecked(true);    // default checked radio
         mRadioEnterArea.setChecked(true);
@@ -113,7 +125,22 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
             case R.id.radio_sms:
                 if (checked)
                     // SMS
-                    setViewByActionType(ActionType.SMS);
+                    // check permissions
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+
+                        if (checkSelfPermission(Manifest.permission.SEND_SMS)
+                                == PackageManager.PERMISSION_DENIED) {
+
+                            Log.d(LOG_TAG, "permission denied to SEND_SMS - requesting it");
+                            String[] permissions = {Manifest.permission.SEND_SMS};
+
+                            requestPermissions(permissions, Constants.PERMISSION_SEND_SMS_REQUEST);
+
+                        } else {
+                            setViewByActionType(ActionType.SMS);
+
+                        }
+                    }
                 break;
             case R.id.radio_email:
                 if (checked)
@@ -121,6 +148,15 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                     setViewByActionType(ActionType.EMAIL);
                 break;
         }
+    }
+
+    // SMS mode - clicked "To:"
+    public void btnSMSToOnclick(View view) {
+        // TODO request phonebook, get numberts of selected, put to numbers box
+
+        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+        startActivityForResult(intent, Constants.CONTACT_PICK_REQUEST_CODE);
     }
 
     public void onLocationChooserClick(View view) {
@@ -153,6 +189,23 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         }else if(mRadioSMS.isChecked()){// create LBSms
 
             // TODO implement action = new LBSms();
+            // 1 get phone number(s)
+            // 2 get message
+            // 3 create and register
+            LBSms lbSMS = new LBSms();
+            lbSMS.setDirectionTrigger(mRadioEnterArea.isChecked()? LBAction.DirectionTrigger.ENTER :  LBAction.DirectionTrigger.EXIT);
+            String toNumbers = mSmsTo.getText().toString();
+            String [] numbers = TextUtils.split(toNumbers, ",");
+            List<String> numsList = new ArrayList<String>(Arrays.asList(numbers)) ;
+            lbSMS.setTo(numsList);
+            lbSMS.setMessage(mSmsMessage.getText().toString());
+            lbSMS.setRadius(mRadius);
+            lbSMS.setTriggerCenter(mAreaCenter);
+
+            long id = dbHelper.insertAction(lbSMS);  // insert in the db and get ID
+            lbSMS.setID(id);                         // assign ID
+            Log.d(LOG_TAG, "Assigned id: "+id);
+            registerGeofence(lbSMS);
 
 
         }else {                         // create LBEmail
@@ -202,6 +255,25 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
             }
             if (resultCode == Constants.MAP_DATA_RESULT_CANCEL) {
                 Log.d(LOG_TAG, "area trigger chosing cancelled");
+            }
+        }else  if (requestCode == Constants.CONTACT_PICK_REQUEST_CODE) {
+            if(resultCode == RESULT_OK){
+                Uri contactUri = data.getData();
+                // We only need the NUMBER column, because there will be only one row in the result
+                String[] projection = {ContactsContract.CommonDataKinds.Phone.NUMBER};
+
+                Cursor cursor = getContentResolver()
+                        .query(contactUri, projection, null, null, null);
+                cursor.moveToFirst();
+
+                // Retrieve the phone number from the NUMBER column
+                int column = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                String number = cursor.getString(column);
+                if(mSmsTo.getText().length() == 0) {
+                    mSmsTo.append(number);
+                }else{
+                    mSmsTo.append(", "+number);
+                }
             }
         }
     }
@@ -323,4 +395,6 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         unregisterGeofences(IDs);
         dbHelper.deleteAllActions();
     }
+
+
 }

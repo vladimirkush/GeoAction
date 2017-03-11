@@ -4,15 +4,15 @@ import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
+import android.telephony.SmsManager;
 import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.vladimirkush.geoaction.LoginActivity;
-import com.vladimirkush.geoaction.MainActivity;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
@@ -146,7 +146,12 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
 
     private void handleSMSAction(LBSms sms){
-
+        // TODO rewrite in a nicer way with pending intents and number preediting
+        SmsManager smsManager =  SmsManager.getDefault();
+        for(String num : sms.getTo()) {
+            smsManager.sendTextMessage(num, null, sms.getMessage(), null, null);
+            Log.d(LOG_TAG, "Sent SMS to: "+ num +", text: "+ sms.getMessage());
+        }
     }
 
     private void handleEmailAction(LBEmail email){

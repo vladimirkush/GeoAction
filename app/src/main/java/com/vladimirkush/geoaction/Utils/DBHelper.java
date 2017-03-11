@@ -4,22 +4,23 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.database.MatrixCursor;
 import android.database.SQLException;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.vladimirkush.geoaction.Models.LBAction;
-import com.vladimirkush.geoaction.Models.LBAction.*;
+import com.vladimirkush.geoaction.Models.LBAction.ActionType;
+import com.vladimirkush.geoaction.Models.LBAction.DirectionTrigger;
+import com.vladimirkush.geoaction.Models.LBAction.Status;
 import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
 import com.vladimirkush.geoaction.Models.LBSms;
-import android.database.MatrixCursor;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -263,7 +264,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
             case SMS:
                 LBSms actSms = new LBSms();
-                String toSms = cursor.getString(cursor.getColumnIndexOrThrow(ActionsEntry.ACTIONS_COLUMN_SUBJECT));
+                String toSms = cursor.getString(cursor.getColumnIndexOrThrow(ActionsEntry.ACTIONS_COLUMN_TO));
                 String[] arrTo = TextUtils.split(toSms, ",");                            //split "to" by comma into array
                 List<String> strings = new ArrayList<String>(Arrays.asList(arrTo));   // turn array into list
                 actSms.setTo(strings);

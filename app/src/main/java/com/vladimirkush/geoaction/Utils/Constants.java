@@ -8,9 +8,17 @@ public class Constants {
 
 
     public static final int PERMISSION_LOCATION_REQUEST = 100;
-    public static final int MAP_DATA_REQUEST_CODE = 1;  // The request code
-    public static final int MAP_DATA_RESULT_OK = 2;  // The request code
-    public static final int MAP_DATA_RESULT_CANCEL = 3;  // The request code
+    public static final int MAP_DATA_REQUEST_CODE = 101;
+    public static final int MAP_DATA_RESULT_OK = 102;
+    public static final int MAP_DATA_RESULT_CANCEL = 103;
+
+    public static final int CONTACT_PICK_REQUEST_CODE = 200;
+    public static final int CONTACT_PICK_RESULT_OK = 201;
+    public static final int CONTACT_PICK_RESULT_CANCEL = 202;
+
+    public static final int PERMISSION_SEND_SMS_REQUEST = 300;
+
+
 
 
 
