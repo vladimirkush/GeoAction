@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.SmsManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
@@ -81,7 +82,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
                             handleEmailAction((LBEmail) lbAction);
                             break;
                         default:
-                            Log.d(LOG_TAG, "IS: lbAzction received from DB has illegal type");
+                            Log.d(LOG_TAG, "IS: lbAction received from DB has an illegal type");
                             break;
                     }
                 }
@@ -156,6 +157,9 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
     private void handleEmailAction(LBEmail email){
 
+        String[] recipients = (String[]) email.getTo().toArray();
+        String recs = TextUtils.join(",", recipients);
+        Log.d(LOG_TAG, "Email sent to:"+recs);
     }
 
 }

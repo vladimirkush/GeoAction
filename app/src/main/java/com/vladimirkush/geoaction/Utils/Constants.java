@@ -17,6 +17,7 @@ public class Constants {
     public static final int CONTACT_PICK_RESULT_CANCEL = 202;
 
     public static final int PERMISSION_SEND_SMS_REQUEST = 300;
+    public static final int CONTACT_EMAILS_PICK_REQUEST_CODE = 400;
 
 
 

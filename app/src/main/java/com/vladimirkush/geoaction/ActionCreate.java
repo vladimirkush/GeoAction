@@ -32,6 +32,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Models.LBAction.ActionType;
+import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
 import com.vladimirkush.geoaction.Models.LBSms;
 import com.vladimirkush.geoaction.Services.GeofenceTransitionsIntentService;
@@ -48,30 +49,34 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     private ActionType actionType = ActionType.REMINDER;
 
     //fields
-    private PendingIntent   mGeofencePendingIntent;
+    private PendingIntent mGeofencePendingIntent;
     private GoogleApiClient mGoogleApiClient;
-    private Geofence        mGeofence;
-    private LatLng          mAreaCenter;
-    private int             mRadius;
+    private Geofence mGeofence;
+    private LatLng mAreaCenter;
+    private int mRadius;
     // views
-    private RadioButton     mRadioReminder;
-    private RadioButton     mRadioSMS;
-    private RadioButton     mRadioEmail;
-    private RadioButton     mRadioEnterArea;
-    private RadioButton     mRadioExitArea;
-    private LinearLayout    mReminderLayout;
-    private LinearLayout    mSMSLayout;
-    private LinearLayout    mEmailLayout;
-    private TextView        mRadiusLabel;
+    private RadioButton mRadioReminder;
+    private RadioButton mRadioSMS;
+    private RadioButton mRadioEmail;
+    private RadioButton mRadioEnterArea;
+    private RadioButton mRadioExitArea;
+    private LinearLayout mReminderLayout;
+    private LinearLayout mSMSLayout;
+    private LinearLayout mEmailLayout;
+    private TextView mRadiusLabel;
 
-    private EditText        mSmsTo;
-    private EditText        mSmsMessage;
-    private EditText        mReminderTitle;
-    private EditText        mReminderText;
-    private Button          mSmsToBtn;
+    private EditText mSmsTo;
+    private EditText mSmsMessage;
+    private EditText mReminderTitle;
+    private EditText mReminderText;
+    private Button mSmsToBtn;
 
-    private DBHelper        dbHelper;
+    private EditText mEmailTo;
+    private EditText mEmailSubject;
+    private EditText mEmailMessage;
+    private Button mEmailToBtn;
 
+    private DBHelper dbHelper;
 
 
     @Override
@@ -105,6 +110,9 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         mSmsTo = (EditText) findViewById(R.id.et_sms_to);
         mSmsMessage = (EditText) findViewById(R.id.et_sms_text);
         mSmsToBtn = (Button) findViewById(R.id.btn_sms_to);
+        mEmailTo = (EditText) findViewById(R.id.et_email_to);
+        mEmailSubject = (EditText) findViewById(R.id.et_email_subj);
+        mEmailMessage = (EditText) findViewById(R.id.et_email_text);
 
         mRadioReminder.setChecked(true);    // default checked radio
         mRadioEnterArea.setChecked(true);
@@ -159,21 +167,26 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         startActivityForResult(intent, Constants.CONTACT_PICK_REQUEST_CODE);
     }
 
+    // EMAIL mode - clicked "To:"
+    public void btnEmailToOnClick(View view) {
+        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        intent.setType(ContactsContract.CommonDataKinds.Email.CONTENT_TYPE);
+        startActivityForResult(intent, Constants.CONTACT_EMAILS_PICK_REQUEST_CODE);
+    }
+
+
     public void onLocationChooserClick(View view) {
         //Toast.makeText(this, "clicked chose map", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, LocationChooserActivity.class);
         startActivityForResult(intent, Constants.MAP_DATA_REQUEST_CODE);
     }
 
+    // Collect all the text data, create an LB action and register a geofence for it
     public void onSaveActionClick(View view) {
-        // TODO -  save LB action , register geofence and update on cloud
 
-
-
-        if(mRadioReminder.isChecked()){ // create LBRemainder
+        if (mRadioReminder.isChecked()) { // create LBRemainder TODO check input
             LBReminder reminder = new LBReminder();
-            reminder.setDirectionTrigger(mRadioEnterArea.isChecked()? LBAction.DirectionTrigger.ENTER :  LBAction.DirectionTrigger.EXIT);
-            //reminder.setID(100); //TODO generate by DB
+            reminder.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
             reminder.setTitle(mReminderTitle.getText().toString());
             reminder.setMessage(mReminderText.getText().toString());
             reminder.setRadius(mRadius);
@@ -181,22 +194,17 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
 
             long id = dbHelper.insertAction(reminder);  // insert in the db and get ID
             reminder.setID(id);                         // assign ID
-            Log.d(LOG_TAG, "Assigned id: "+id);
+            Log.d(LOG_TAG, "REMINDER Assigned id: " + id);
 
             //tempAction = reminder;
             registerGeofence(reminder);
 
-        }else if(mRadioSMS.isChecked()){// create LBSms
-
-            // TODO implement action = new LBSms();
-            // 1 get phone number(s)
-            // 2 get message
-            // 3 create and register
+        } else if (mRadioSMS.isChecked()) {// create LBSms TODO check input
             LBSms lbSMS = new LBSms();
-            lbSMS.setDirectionTrigger(mRadioEnterArea.isChecked()? LBAction.DirectionTrigger.ENTER :  LBAction.DirectionTrigger.EXIT);
+            lbSMS.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
             String toNumbers = mSmsTo.getText().toString();
-            String [] numbers = TextUtils.split(toNumbers, ",");
-            List<String> numsList = new ArrayList<String>(Arrays.asList(numbers)) ;
+            String[] numbers = TextUtils.split(toNumbers, ",");
+            List<String> numsList = new ArrayList<String>(Arrays.asList(numbers));
             lbSMS.setTo(numsList);
             lbSMS.setMessage(mSmsMessage.getText().toString());
             lbSMS.setRadius(mRadius);
@@ -204,20 +212,31 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
 
             long id = dbHelper.insertAction(lbSMS);  // insert in the db and get ID
             lbSMS.setID(id);                         // assign ID
-            Log.d(LOG_TAG, "Assigned id: "+id);
+            Log.d(LOG_TAG, "SMS Assigned id: " + id);
             registerGeofence(lbSMS);
 
 
-        }else {                         // create LBEmail
-            return;
-            // TODO implement action = new LBEmail();
+        } else {                         // create LBEmail, TODO check input
+            LBEmail lbEmail = new LBEmail();
+            lbEmail.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
+            String toAddresses = mEmailTo.getText().toString();
+            String[] addressesArr = TextUtils.split(toAddresses, ",");
+            List<String> addressList = new ArrayList<String>(Arrays.asList(addressesArr));
+            lbEmail.setTo(addressList);
+            lbEmail.setSubject(mEmailSubject.getText().toString());
+            lbEmail.setMessage(mEmailMessage.getText().toString());
+            lbEmail.setRadius(mRadius);
+            lbEmail.setTriggerCenter(mAreaCenter);
 
-
+            long id = dbHelper.insertAction(lbEmail);  // insert in the db and get ID
+            lbEmail.setID(id);                         // assign ID
+            Log.d(LOG_TAG, "EMAIL Assigned id: " + id);
+            registerGeofence(lbEmail);
         }
         finish();
     }
 
-    /* setup views according to chosen type of action */
+    // setup views according to chosen type of action
     private void setViewByActionType(ActionType type) {
         actionType = type;
         switch (type) {
@@ -256,8 +275,8 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
             if (resultCode == Constants.MAP_DATA_RESULT_CANCEL) {
                 Log.d(LOG_TAG, "area trigger chosing cancelled");
             }
-        }else  if (requestCode == Constants.CONTACT_PICK_REQUEST_CODE) {
-            if(resultCode == RESULT_OK){
+        } else if (requestCode == Constants.CONTACT_PICK_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
                 Uri contactUri = data.getData();
                 // We only need the NUMBER column, because there will be only one row in the result
                 String[] projection = {ContactsContract.CommonDataKinds.Phone.NUMBER};
@@ -269,10 +288,26 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                 // Retrieve the phone number from the NUMBER column
                 int column = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
                 String number = cursor.getString(column);
-                if(mSmsTo.getText().length() == 0) {
+                if (mSmsTo.getText().length() == 0) {
                     mSmsTo.append(number);
-                }else{
-                    mSmsTo.append(", "+number);
+                } else {
+                    mSmsTo.append(", " + number);
+                }
+            }
+        } else if (requestCode == Constants.CONTACT_EMAILS_PICK_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Uri contactUri = data.getData();
+                String[] projection = {ContactsContract.CommonDataKinds.Email.ADDRESS};
+
+                Cursor cursor = getContentResolver()
+                        .query(contactUri, projection, null, null, null);
+                cursor.moveToFirst();
+                int column = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS);
+                String emailAddr = cursor.getString(column);
+                if (mEmailTo.getText().length() == 0) {
+                    mEmailTo.append(emailAddr);
+                } else {
+                    mEmailTo.append(", " + emailAddr);
                 }
             }
         }
@@ -283,6 +318,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         dbHelper.close();
         super.onDestroy();
     }
+
     @Override
     public void onConnected(@Nullable Bundle bundle) {
 
@@ -320,7 +356,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         Geofence geofence = new Geofence.Builder()
                 // Set the request ID of the geofence. This is a string to identify this
                 // geofence.
-                .setRequestId(lbAction.getID()+"")
+                .setRequestId(lbAction.getID() + "")
                 .setCircularRegion(
                         lbAction.getTriggerCenter().latitude,
                         lbAction.getTriggerCenter().longitude,
@@ -356,7 +392,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                 ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
                     android.Manifest.permission.ACCESS_COARSE_LOCATION}, Constants.PERMISSION_LOCATION_REQUEST);
-                // TODO no permissions granted
+            // TODO no permissions granted
         } else {
             //pIntent = getGeofencePendingIntent(lbAction);
             LocationServices.GeofencingApi.addGeofences(
@@ -369,15 +405,15 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
-    private void unregisterGeofences(List<String> geofenceIDs){
+    private void unregisterGeofences(List<String> geofenceIDs) {
 
         LocationServices.GeofencingApi.removeGeofences(
                 mGoogleApiClient,
                 // This is the same pending intent that was used in addGeofences().
                 geofenceIDs
-               )
+        )
                 .setResultCallback(this); // Result processed in onResult().
-        Toast.makeText(this, "Geofence id's unregistered: "+ geofenceIDs.size(), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Geofence id's unregistered: " + geofenceIDs.size(), Toast.LENGTH_LONG).show();
     }
 
     // handles result of a pending intent
@@ -389,12 +425,12 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     public void onDeleteActionClick(View view) {
         List<LBAction> actions = dbHelper.getAllActions();
         List<String> IDs = new ArrayList<String>();
-        for(LBAction act:actions){
-            IDs.add(act.getID()+"");
+        for (LBAction act : actions) {
+            IDs.add(act.getID() + "");
         }
         unregisterGeofences(IDs);
         dbHelper.deleteAllActions();
     }
-
-
 }
+
+
