@@ -2,8 +2,10 @@ package com.vladimirkush.geoaction;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,9 +18,10 @@ import com.backendless.persistence.local.UserIdStorageFactory;
 import com.vladimirkush.geoaction.Utils.AndroidDatabaseManager;
 import com.vladimirkush.geoaction.Utils.Constants;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
     private final String LOG_TAG = "LOGTAG";
 
+    private FloatingActionButton fab;
     private TextView tvLabel;
     private BackendlessUser user;
     private boolean mIsLoginPersistent;
@@ -31,7 +34,8 @@ public class MainActivity extends AppCompatActivity {
         //debug
         //DBHelper dbHelper = new DBHelper(getApplicationContext());
         //dbHelper.deleteDB();
-
+        fab = (FloatingActionButton) findViewById(R.id.fab) ;
+        fab.setOnTouchListener(this);
         tvLabel = (TextView) findViewById(R.id.label_logged_in);
         mIsLoginPersistent = (boolean)getIntent().getExtras().get(Constants.LOGIN_IS_PERSISTENT_KEY);
 
@@ -95,13 +99,22 @@ public class MainActivity extends AppCompatActivity {
 
     /* open Action Creation activity */
     public void newActionOnClick(View view) {
-        Intent intent = new Intent(this,ActionCreate.class);
-        startActivity(intent);
+        //Intent intent = new Intent(this,ActionCreate.class);
+        //startActivity(intent);
     }
 
     public void dbmanagerClick(View view) {
 
         Intent dbmanager = new Intent(this, AndroidDatabaseManager.class);
         startActivity(dbmanager);
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+            Intent intent = new Intent(this, ActionCreate.class);
+            startActivity(intent);
+        }
+        return true;
     }
 }
