@@ -11,6 +11,7 @@ import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.backendless.Backendless;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.vladimirkush.geoaction.LoginActivity;
@@ -77,7 +78,6 @@ public class GeofenceTransitionsIntentService extends IntentService {
                         case SMS:
                             handleSMSAction((LBSms) lbAction);
                             break;
-
                         case EMAIL:
                             handleEmailAction((LBEmail) lbAction);
                             break;
@@ -156,10 +156,11 @@ public class GeofenceTransitionsIntentService extends IntentService {
     }
 
     private void handleEmailAction(LBEmail email){
-
-        String[] recipients = (String[]) email.getTo().toArray();
-        String recs = TextUtils.join(",", recipients);
-        Log.d(LOG_TAG, "Email sent to:"+recs);
+       Backendless.Messaging.sendHTMLEmail(email.getSubject(),email.getMessage(), email.getTo());
+       List<String> recipients = email.getTo();
+       for (String rec: recipients) {
+           Log.d(LOG_TAG, "Email sent to:" + rec);
+       }
     }
 
 }

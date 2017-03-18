@@ -274,7 +274,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
             case EMAIL:
                 LBEmail actEmail = new LBEmail();
-                String toEml = cursor.getString(cursor.getColumnIndexOrThrow(ActionsEntry.ACTIONS_COLUMN_SUBJECT));
+                String toEml = cursor.getString(cursor.getColumnIndexOrThrow(ActionsEntry.ACTIONS_COLUMN_TO));
                 String[] arrEml = TextUtils.split(toEml, ",");                            //split "to" by comma into array
                 List<String> stringsEml = new ArrayList<String>(Arrays.asList(arrEml));   // turn array into list
                 actEmail.setTo(stringsEml);
