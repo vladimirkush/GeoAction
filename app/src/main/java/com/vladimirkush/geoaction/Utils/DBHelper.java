@@ -191,9 +191,9 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // GET all data from database as list
-    public List<LBAction> getAllActions(){
+    public ArrayList<LBAction> getAllActions(){
         SQLiteDatabase db = this.getReadableDatabase();
-        List<LBAction> actionsList = new ArrayList<LBAction>();
+        ArrayList<LBAction> actionsList = new ArrayList<LBAction>();
         Cursor  cursor = db.rawQuery("select * from " + ActionsEntry.ACTIONS_TABLE_NAME, null);
 
         if (cursor.moveToFirst()) {
@@ -233,12 +233,12 @@ public class DBHelper extends SQLiteOpenHelper {
         }else if(lbAction instanceof LBEmail){
             LBEmail emailAct = (LBEmail) lbAction;
             contentValues.put(ActionsEntry.ACTIONS_COLUMN_SUBJECT, emailAct.getSubject());
-            contentValues.put(ActionsEntry.ACTIONS_COLUMN_TO, emailAct.getTo().toString());
+            contentValues.put(ActionsEntry.ACTIONS_COLUMN_TO, emailAct.getToAsSingleString());
             contentValues.put(ActionsEntry.ACTIONS_COLUMN_MESSAGE, emailAct.getMessage());
 
         }else if (lbAction instanceof LBSms){
             LBSms smsAct = (LBSms) lbAction;
-            contentValues.put(ActionsEntry.ACTIONS_COLUMN_TO, smsAct.getTo().toString());
+            contentValues.put(ActionsEntry.ACTIONS_COLUMN_TO, smsAct.getToAsSingleString());
             contentValues.put(ActionsEntry.ACTIONS_COLUMN_MESSAGE, smsAct.getMessage());
         }else {
             Log.e(LOG_TAG, "DB: insertion error - lbAction subtype not compatible");

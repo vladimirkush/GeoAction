@@ -19,6 +19,10 @@ public class Constants {
     public static final int PERMISSION_SEND_SMS_REQUEST = 300;
     public static final int CONTACT_EMAILS_PICK_REQUEST_CODE = 400;
 
+    public static final int CREATE_NEW_LBACTION_REQUEST = 500;
+
+
+
 
 
 

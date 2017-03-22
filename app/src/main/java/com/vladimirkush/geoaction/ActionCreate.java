@@ -233,6 +233,8 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
             Log.d(LOG_TAG, "EMAIL Assigned id: " + id);
             registerGeofence(lbEmail);
         }
+        Intent returnIntent = new Intent();
+        setResult(RESULT_OK,returnIntent);
         finish();
     }
 
@@ -430,6 +432,10 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         }
         unregisterGeofences(IDs);
         dbHelper.deleteAllActions();
+
+        Intent returnIntent = new Intent();
+        setResult(RESULT_OK,returnIntent);
+
     }
 }
 

@@ -1,8 +1,12 @@
 apply plugin: 'com.android.application'
 
+ext {
+    supportLibVersion = '25.2.0'  // variable that can be referenced to keep support libs consistent
+}
+
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.vladimirkush.geoaction"
         minSdkVersion 19
@@ -21,9 +25,6 @@ android {
     }
 }
 
-ext {
-    supportLibVersion = '25.2.0'  // variable that can be referenced to keep support libs consistent
-}
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
@@ -33,6 +34,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile files('libs/backendless.jar')
     compile 'com.google.android.gms:play-services:9.8.0'
+    compile "com.android.support:recyclerview-v7:25.2.0"
     compile 'com.google.maps.android:android-maps-utils:0.4+'
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
     compile "com.android.support:design:${supportLibVersion}"

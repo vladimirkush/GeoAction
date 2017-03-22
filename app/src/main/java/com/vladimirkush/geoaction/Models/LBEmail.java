@@ -41,8 +41,14 @@ public class LBEmail extends LBAction {
         this.message = message;
     }
 
-    @Override
-    public String toString() {
-        return  TextUtils.join(",", to);
+    public String getToAsSingleString(){
+        StringBuilder listString = new StringBuilder();
+        int i;
+        for (i =0; i<to.size()-1; i++){
+            listString.append(to.get(i)+", ");
+        }
+        listString.append(to.get(i));
+        return listString.toString();
+
     }
 }

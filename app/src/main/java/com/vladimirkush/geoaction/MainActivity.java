@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -15,16 +17,27 @@ import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.local.UserIdStorageFactory;
+import com.vladimirkush.geoaction.Adapters.ActionsListAdapter;
+import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Utils.AndroidDatabaseManager;
 import com.vladimirkush.geoaction.Utils.Constants;
+import com.vladimirkush.geoaction.Utils.DBHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
     private final String LOG_TAG = "LOGTAG";
 
+    private ArrayList<LBAction> mActionList;
+    private DBHelper dbHelper;
+    private ActionsListAdapter adapter;
     private FloatingActionButton fab;
     private TextView tvLabel;
     private BackendlessUser user;
     private boolean mIsLoginPersistent;
+    private RecyclerView rvActionList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +47,17 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         //debug
         //DBHelper dbHelper = new DBHelper(getApplicationContext());
         //dbHelper.deleteDB();
+        dbHelper = new DBHelper(getApplicationContext());
         fab = (FloatingActionButton) findViewById(R.id.fab) ;
         fab.setOnTouchListener(this);
         tvLabel = (TextView) findViewById(R.id.label_logged_in);
         mIsLoginPersistent = (boolean)getIntent().getExtras().get(Constants.LOGIN_IS_PERSISTENT_KEY);
+        rvActionList = (RecyclerView) findViewById(R.id.rvActionsList);
+
+        mActionList = dbHelper.getAllActions();
+        adapter = new ActionsListAdapter(this, mActionList);
+        rvActionList.setAdapter(adapter);
+        rvActionList.setLayoutManager(new LinearLayoutManager(this));
 
         // init Backendless API
         String backendlessKey = getString(R.string.backendless_key);
@@ -110,8 +130,25 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     public boolean onTouch(View view, MotionEvent motionEvent) {
         if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
             Intent intent = new Intent(this, ActionCreate.class);
-            startActivity(intent);
+            startActivityForResult(intent, Constants.CREATE_NEW_LBACTION_REQUEST);
         }
         return true;
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == Constants.CREATE_NEW_LBACTION_REQUEST){
+            if(resultCode == RESULT_OK){
+                ArrayList<LBAction> actions = dbHelper.getAllActions();
+                mActionList.clear();
+                mActionList.addAll(actions);
+                adapter.notifyDataSetChanged();
+
+            }
+        }
+
+
+    }
+
+
 }
