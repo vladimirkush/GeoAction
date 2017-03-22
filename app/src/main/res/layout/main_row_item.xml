@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="88dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:weightSum="100"
+    >
+
+    <ImageView
+        android:id="@+id/image_type"
+        android:layout_width="0dp"
+        android:layout_weight="25"
+        android:layout_height="match_parent"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:layout_gravity="center"
+        android:src="@mipmap/ic_default"
+         />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="55"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Test message 1"
+            android:textSize="22sp"
+            android:textColor="#000000"
+            android:ellipsize="end"
+            android:layout_weight="4"
+            android:lines="1"/>
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:ellipsize="end"
+            android:lines="1"
+            android:text="Test message 2 very long 2"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/tv_to"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:lines="1"
+            android:layout_weight="2"
+            android:textSize="15sp"
+            android:text="Test message 3"/>
+
+    </LinearLayout>
+
+    <ImageButton
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:layout_weight="20"
+        android:src="@drawable/circle_green"
+        android:background="none"
+        android:id="@+id/imgb_pause_activate" />
+
+</LinearLayout>

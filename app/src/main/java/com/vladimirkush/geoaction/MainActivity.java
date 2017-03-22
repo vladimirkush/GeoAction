@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             @Override
             public void handleFault(BackendlessFault backendlessFault) {
                 tvLabel.setText("not logged in");
-
+                logOutOnClick(null);
             }
         });
 
@@ -97,11 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         });
     }
 
-    /* open Action Creation activity */
-    public void newActionOnClick(View view) {
-        //Intent intent = new Intent(this,ActionCreate.class);
-        //startActivity(intent);
-    }
+
 
     public void dbmanagerClick(View view) {
 
@@ -109,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         startActivity(dbmanager);
     }
 
+    /* open Action Creation activity */
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         if (motionEvent.getAction() == MotionEvent.ACTION_UP) {

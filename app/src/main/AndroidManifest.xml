@@ -26,20 +26,23 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".LoginActivity">
+        <activity android:name=".LoginActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
+        <activity android:name=".MainActivity" android:screenOrientation="portrait"/>
         <activity
             android:name=".ActionCreate"
-            android:windowSoftInputMode="stateHidden" />
-        <activity android:name=".LocationChooserActivity" />
+            android:windowSoftInputMode="stateHidden"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".LocationChooserActivity"
+            android:screenOrientation="portrait"/>
         <activity android:name="com.vladimirkush.geoaction.Utils.AndroidDatabaseManager"
-            android:theme="@style/Theme.AppCompat.Light"/>
+            android:theme="@style/Theme.AppCompat.Light"
+            android:screenOrientation="portrait"/>
         <service
             android:name=".Services.GeofenceTransitionsIntentService"
             android:exported="false"></service>
