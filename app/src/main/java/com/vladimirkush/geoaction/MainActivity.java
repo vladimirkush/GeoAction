@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -24,7 +25,6 @@ import com.vladimirkush.geoaction.Utils.Constants;
 import com.vladimirkush.geoaction.Utils.DBHelper;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
@@ -58,6 +58,11 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         adapter = new ActionsListAdapter(this, mActionList);
         rvActionList.setAdapter(adapter);
         rvActionList.setLayoutManager(new LinearLayoutManager(this));
+
+        // decorate RecyclerView
+        RecyclerView.ItemDecoration itemDecoration = new
+                DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        rvActionList.addItemDecoration(itemDecoration);
 
         // init Backendless API
         String backendlessKey = getString(R.string.backendless_key);

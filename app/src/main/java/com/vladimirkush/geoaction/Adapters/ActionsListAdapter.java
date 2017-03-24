@@ -3,7 +3,6 @@ package com.vladimirkush.geoaction.Adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,16 +39,20 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
         public TextView toTv;
         public ImageButton statusBtn;
 
+        public View v;
+
         // We also create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
         public ViewHolder(View itemView) {
             super(itemView);
-
+            v=itemView;
             imageType = (ImageView) itemView.findViewById(R.id.image_type);
             messageTv = (TextView) itemView.findViewById(R.id.tv_message);
             titleTv = (TextView) itemView.findViewById(R.id.tv_title);
             toTv = (TextView) itemView.findViewById(R.id.tv_to);
             statusBtn = (ImageButton)itemView.findViewById(R.id.imgb_pause_activate);
+
+
         }
     }
 
@@ -62,13 +65,14 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
         // inflate a layout for the view
         View actionView = inflater.inflate(R.layout.main_row_item, parent, false);
 
+
         // Return a new holder instance
         ViewHolder viewHolder = new ViewHolder(actionView);
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, final int position) {
         LBAction lbAction = mActionList.get(position);
 
         switch (lbAction.getActionType()) {
@@ -77,6 +81,7 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
                 holder.imageType.setImageResource(R.mipmap.ic_reminder);
                 holder.messageTv.setText(reminder.getMessage());
                 holder.titleTv.setText(reminder.getTitle());
+                holder.toTv.setText("");
                 break;
             case SMS:
                 LBSms sms = (LBSms) lbAction;
@@ -101,6 +106,26 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
         }else{
             holder.statusBtn.setImageResource(R.drawable.circle_yellow);
         }
+
+        holder.v.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(LOG_TAG, "clicked id "+ mActionList.get(position).getID());
+            }
+        });
+        holder.v.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Log.d(LOG_TAG, "long clicked id "+ mActionList.get(position).getID());
+                return true;
+            }
+        });
+        holder.statusBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(LOG_TAG, "clicked status btn of id "+ mActionList.get(position).getID());
+            }
+        });
 
     }
 
