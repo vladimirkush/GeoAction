@@ -1,7 +1,9 @@
 package com.vladimirkush.geoaction.Adapters;
 
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,11 +13,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.vladimirkush.geoaction.ActionCreate;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
 import com.vladimirkush.geoaction.Models.LBSms;
 import com.vladimirkush.geoaction.R;
+import com.vladimirkush.geoaction.Utils.Constants;
+import com.vladimirkush.geoaction.Utils.DBHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,11 +30,13 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
 
     private List<LBAction> mActionList;
     private Context mContext;
+    private DBHelper dbHelper;
 
     // ctor
     public ActionsListAdapter(Context mContext, ArrayList<LBAction> mActionList) {
         this.mActionList = mActionList;
         this.mContext = mContext;
+        dbHelper = new DBHelper(mContext);       // init dbHelper
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -72,7 +79,7 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         LBAction lbAction = mActionList.get(position);
 
         switch (lbAction.getActionType()) {
@@ -107,23 +114,46 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
             holder.statusBtn.setImageResource(R.drawable.circle_yellow);
         }
 
+        // click listeners
         holder.v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(LOG_TAG, "clicked id "+ mActionList.get(position).getID());
+                LBAction action = mActionList.get(holder.getAdapterPosition());
+                Log.d(LOG_TAG, "clicked id "+ action.getID());
+
+                Intent intent = new Intent(getContext(), ActionCreate.class);
+                intent.putExtra(Constants.EDIT_MODE_KEY, true);
+                intent.putExtra(Constants.LBACTION_ID_KEY, action.getID());
+                ((Activity)mContext).startActivityForResult(intent, Constants.EDIT_EXISTING_LBACTION_REQUEST);
             }
         });
         holder.v.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Log.d(LOG_TAG, "long clicked id "+ mActionList.get(position).getID());
+                Log.d(LOG_TAG, "long clicked id "+ mActionList.get(holder.getAdapterPosition()).getID());
                 return true;
             }
         });
         holder.statusBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(LOG_TAG, "clicked status btn of id "+ mActionList.get(position).getID());
+                Log.d(LOG_TAG, "clicked status btn of id "+ mActionList.get(holder.getAdapterPosition()).getID());
+                int position = holder.getAdapterPosition();
+                LBAction action = mActionList.get(position);
+                LBAction.Status status = action.getStatus();
+                if(status == LBAction.Status.ACTIVE){   // pause action
+                    action.setStatus(LBAction.Status.PAUSED);
+                    dbHelper.updateAction(action);
+                    holder.statusBtn.setImageResource(R.drawable.circle_yellow);
+                    Log.d(LOG_TAG, "ADAPTER: action with id "+ action.getID()+" is now PAUSED");
+                }else{  // unpause action
+                    action.setStatus(LBAction.Status.ACTIVE);
+                    dbHelper.updateAction(action);
+                    holder.statusBtn.setImageResource(R.drawable.circle_green);
+                    Log.d(LOG_TAG, "ADAPTER: action with id "+ action.getID()+" is now ACTIVE");
+
+                }
+                notifyItemChanged(position);
             }
         });
 
@@ -147,4 +177,5 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
         listString.append(list.get(i));
         return listString.toString();
     }
+
 }

@@ -124,6 +124,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
 
 
+
+
     public void dbmanagerClick(View view) {
 
         Intent dbmanager = new Intent(this, AndroidDatabaseManager.class);
@@ -142,7 +144,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == Constants.CREATE_NEW_LBACTION_REQUEST){
+        if(requestCode == Constants.CREATE_NEW_LBACTION_REQUEST ||
+                requestCode == Constants.EDIT_EXISTING_LBACTION_REQUEST ){
             if(resultCode == RESULT_OK){
                 ArrayList<LBAction> actions = dbHelper.getAllActions();
                 mActionList.clear();

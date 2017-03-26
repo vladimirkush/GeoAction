@@ -5,6 +5,10 @@ public class Constants {
     public static final String LOGIN_IS_PERSISTENT_KEY = "Is login persistent";
     public static final String AREA_CENTER_KEY = "area_center";
     public static final String AREA_RADIUS_KEY = "area_radius";
+    public static final String EDIT_MODE_KEY = "edit_mode";
+    public static final String LBACTION_ID_KEY = "lbaction_id";
+
+
 
 
     public static final int PERMISSION_LOCATION_REQUEST = 100;
@@ -20,6 +24,7 @@ public class Constants {
     public static final int CONTACT_EMAILS_PICK_REQUEST_CODE = 400;
 
     public static final int CREATE_NEW_LBACTION_REQUEST = 500;
+    public static final int EDIT_EXISTING_LBACTION_REQUEST = 501;
 
 
 

@@ -70,26 +70,30 @@ public class GeofenceTransitionsIntentService extends IntentService {
                 Log.d(LOG_TAG, "IS: id received:" + id);
                 if(id >= 0) {                               // workaround for unregistered geofence triggering
                     LBAction lbAction = dbHelper.getAction(id);
-                    // handle reaction
-                    switch (lbAction.getActionType()) {
-                        case REMINDER:
-                            handleReminderAction((LBReminder) lbAction);
-                            break;
-                        case SMS:
-                            handleSMSAction((LBSms) lbAction);
-                            break;
-                        case EMAIL:
-                            handleEmailAction((LBEmail) lbAction);
-                            break;
-                        default:
-                            Log.d(LOG_TAG, "IS: lbAction received from DB has an illegal type");
-                            break;
+
+                    // trigger action only if it has active status
+                    if(lbAction.getStatus() == LBAction.Status.ACTIVE) {
+                        // handle reaction
+                        switch (lbAction.getActionType()) {
+                            case REMINDER:
+                                handleReminderAction((LBReminder) lbAction);
+                                break;
+                            case SMS:
+                                handleSMSAction((LBSms) lbAction);
+                                break;
+                            case EMAIL:
+                                handleEmailAction((LBEmail) lbAction);
+                                break;
+                            default:
+                                Log.d(LOG_TAG, "IS: lbAction received from DB has an illegal type");
+                                break;
+                        }
+                    }else{
+                        Log.d(LOG_TAG, "Detected paused action: "+lbAction.getID() + "of type "+lbAction.getActionType());
                     }
                 }
 
             }
-
-            //long id = intent.getLongExtra("ID", -1);
 
             Log.d(LOG_TAG, geofenceTransitionDetails);
 
