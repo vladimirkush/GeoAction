@@ -2,6 +2,8 @@ package com.vladimirkush.geoaction;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -18,18 +20,26 @@ import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.local.UserIdStorageFactory;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Result;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.LocationServices;
 import com.vladimirkush.geoaction.Adapters.ActionsListAdapter;
+import com.vladimirkush.geoaction.Interfaces.DeleteItemHandler;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Utils.AndroidDatabaseManager;
 import com.vladimirkush.geoaction.Utils.Constants;
 import com.vladimirkush.geoaction.Utils.DBHelper;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
+public class MainActivity extends AppCompatActivity implements View.OnTouchListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback, DeleteItemHandler {
     private final String LOG_TAG = "LOGTAG";
 
+    private GoogleApiClient mGoogleApiClient;
     private ArrayList<LBAction> mActionList;
     private DBHelper dbHelper;
     private ActionsListAdapter adapter;
@@ -47,6 +57,16 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         //debug
         //DBHelper dbHelper = new DBHelper(getApplicationContext());
         //dbHelper.deleteDB();
+
+        // Create an instance of GoogleAPIClient.
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+
         dbHelper = new DBHelper(getApplicationContext());
         fab = (FloatingActionButton) findViewById(R.id.fab) ;
         fab.setOnTouchListener(this);
@@ -58,11 +78,14 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         adapter = new ActionsListAdapter(this, mActionList);
         rvActionList.setAdapter(adapter);
         rvActionList.setLayoutManager(new LinearLayoutManager(this));
+        registerForContextMenu(rvActionList);
 
         // decorate RecyclerView
         RecyclerView.ItemDecoration itemDecoration = new
                 DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         rvActionList.addItemDecoration(itemDecoration);
+
+        adapter.setDeleteItemHandler(this);
 
         // init Backendless API
         String backendlessKey = getString(R.string.backendless_key);
@@ -158,5 +181,58 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     }
 
+    private void unregisterGeofences(List<String> geofenceIDs) {
 
+        LocationServices.GeofencingApi.removeGeofences(
+                mGoogleApiClient,
+                // This is the same pending intent that was used in addGeofences().
+                geofenceIDs
+        )
+                .setResultCallback(this); // Result processed in onResult().
+        Toast.makeText(this, "Geofence id's unregistered: " + geofenceIDs.size(), Toast.LENGTH_LONG).show();
+    }
+
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onResult(@NonNull Result result) {
+
+    }
+
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
+    public void deleteItem(int adapterPosition, LBAction action) {
+        long actionID = action.getID();
+        int res =  dbHelper.deleteAction(actionID);
+        if (res == 1){
+            mActionList.remove(action);
+            List <String> ids = new ArrayList<String>();
+            ids.add(actionID+"");
+            unregisterGeofences(ids);
+            adapter.notifyItemRemoved(adapterPosition);
+        }
+    }
 }

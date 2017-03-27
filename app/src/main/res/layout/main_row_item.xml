@@ -6,9 +6,11 @@
     android:paddingTop="10dp"
     android:paddingBottom="10dp"
     android:weightSum="100"
-    android:background="?android:attr/selectableItemBackground"
-    >
+    android:background="@drawable/selector_row_main"
 
+
+    >
+    <!-- android:background="?android:attr/selectableItemBackground" -->
     <ImageView
         android:id="@+id/image_type"
         android:layout_width="0dp"

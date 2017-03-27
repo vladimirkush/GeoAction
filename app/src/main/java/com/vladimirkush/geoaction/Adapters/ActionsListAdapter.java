@@ -4,9 +4,13 @@ package com.vladimirkush.geoaction.Adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -14,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.vladimirkush.geoaction.ActionCreate;
+import com.vladimirkush.geoaction.Interfaces.DeleteItemHandler;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
@@ -25,12 +30,15 @@ import com.vladimirkush.geoaction.Utils.DBHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapter.ViewHolder>{
+
+public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapter.ViewHolder>  {
     private final String LOG_TAG = "LOGTAG";
 
     private List<LBAction> mActionList;
     private Context mContext;
     private DBHelper dbHelper;
+    private DeleteItemHandler mDeleteItemHandler;
+
 
     // ctor
     public ActionsListAdapter(Context mContext, ArrayList<LBAction> mActionList) {
@@ -39,7 +47,9 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
         dbHelper = new DBHelper(mContext);       // init dbHelper
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+
+
+    public static class ViewHolder extends RecyclerView.ViewHolder   {
         public ImageView imageType;
         public TextView messageTv;
         public TextView titleTv;
@@ -59,13 +69,14 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
             toTv = (TextView) itemView.findViewById(R.id.tv_to);
             statusBtn = (ImageButton)itemView.findViewById(R.id.imgb_pause_activate);
 
-
         }
+
+
     }
 
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder (ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
 
@@ -95,14 +106,14 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
                 holder.imageType.setImageResource(R.mipmap.ic_sms);
                 holder.messageTv.setText(sms.getMessage());
                 holder.titleTv.setText("");
-                holder.toTv.setText(stringFromArrayListStrings(sms.getTo()));
+                holder.toTv.setText(sms.getToAsSingleString());
                 break;
             case EMAIL:
                 LBEmail email = (LBEmail) lbAction;
                 holder.imageType.setImageResource(R.mipmap.ic_mail);
                 holder.messageTv.setText(email.getMessage());
                 holder.titleTv.setText(email.getSubject());
-                holder.toTv.setText(stringFromArrayListStrings(email.getTo()));
+                holder.toTv.setText(email.getToAsSingleString());
                 break;
             default:
                 Log.d(LOG_TAG, "IS: lbAction received from DB has an illegal type");
@@ -127,13 +138,53 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
                 ((Activity)mContext).startActivityForResult(intent, Constants.EDIT_EXISTING_LBACTION_REQUEST);
             }
         });
+
         holder.v.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                holder.v.setSelected(true);
                 Log.d(LOG_TAG, "long clicked id "+ mActionList.get(holder.getAdapterPosition()).getID());
+                PopupMenu popup = new PopupMenu(v.getContext(), v);
+                popup.inflate(R.menu.ctx_menu_main);
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        int position = holder.getAdapterPosition();
+                        LBAction action = mActionList.get(position);
+                        int menuItemID = item.getItemId();
+                        Log.d(LOG_TAG, "Menu item for id: "+action.getID() + " :" + item.getTitle());
+
+                        switch (menuItemID){
+                            case R.id.ctx_send_action:
+                                handleSend(position, action);
+                                break;
+
+                            case R.id.ctx_delete_action:
+                                if(mDeleteItemHandler != null) {
+                                    mDeleteItemHandler.deleteItem(position, action);
+                                }else{
+                                    handleDelete(position, action);
+                                }
+                                break;
+                        }
+
+                        return true;
+                    }
+                });
+
+                popup.setOnDismissListener(new PopupMenu.OnDismissListener() {
+                    @Override
+                    public void onDismiss(PopupMenu menu) {
+                        holder.v.setSelected(false);
+                    }
+                });
+                popup.setGravity(Gravity.CENTER);
+                popup.show();
+
                 return true;
             }
         });
+
         holder.statusBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,6 +208,21 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
             }
         });
 
+
+
+    }
+
+    private void handleDelete(int position, LBAction action){
+        Log.d(LOG_TAG, "Handling default delete for id: " + action.getID() + "and pos: "+ position);
+        /*int res =  dbHelper.deleteAction(action.getID());
+        if (res == 1){
+            mActionList.remove(action);
+            notifyItemRemoved(position);
+        }*/
+    }
+
+    private void handleSend(int position, LBAction action){
+        Log.d(LOG_TAG, "Handling default send for id: " + action.getID() + "and pos: "+ position);
     }
 
     @Override
@@ -168,14 +234,12 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
         return mContext;
     }
 
-    private String stringFromArrayListStrings(List<String> list){
-        StringBuilder listString = new StringBuilder();
-        int i;
-        for (i =0; i<list.size()-1; i++){
-            listString.append(list.get(i)+", ");
-        }
-        listString.append(list.get(i));
-        return listString.toString();
+    public DeleteItemHandler getDeleteItemHandler() {
+        return mDeleteItemHandler;
+    }
+
+    public void setDeleteItemHandler(DeleteItemHandler mDeleteItemHandler) {
+        this.mDeleteItemHandler = mDeleteItemHandler;
     }
 
 }
