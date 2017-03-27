@@ -144,7 +144,7 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
             public boolean onLongClick(View v) {
                 holder.v.setSelected(true);
                 Log.d(LOG_TAG, "long clicked id "+ mActionList.get(holder.getAdapterPosition()).getID());
-                PopupMenu popup = new PopupMenu(v.getContext(), v);
+                PopupMenu popup = new PopupMenu(v.getContext(), holder.toTv, Gravity.CENTER_HORIZONTAL);
                 popup.inflate(R.menu.ctx_menu_main);
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
@@ -178,7 +178,6 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
                         holder.v.setSelected(false);
                     }
                 });
-                popup.setGravity(Gravity.CENTER);
                 popup.show();
 
                 return true;
