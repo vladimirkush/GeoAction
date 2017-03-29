@@ -6,9 +6,9 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
+import android.media.RingtoneManager;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.SmsManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.backendless.Backendless;
@@ -73,6 +73,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
                     // trigger action only if it has active status
                     if(lbAction.getStatus() == LBAction.Status.ACTIVE) {
+                        lbAction.setStatus(LBAction.Status.PAUSED); // pause action to not trigger once more
+                        dbHelper.updateAction(lbAction);
                         // handle reaction
                         switch (lbAction.getActionType()) {
                             case REMINDER:
@@ -113,11 +115,14 @@ public class GeofenceTransitionsIntentService extends IntentService {
     }
 
     private void sendNotification(String title, String text) {
+        long when = System.currentTimeMillis();
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.notification_icon)
                         .setContentTitle(title)
                         .setContentText(text)
+                        .setVibrate(new long[]{1000, 1000, 1000})
+                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                         .setAutoCancel(true);
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(this, LoginActivity.class);
@@ -140,7 +145,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
         NotificationManager mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         // mId allows you to update the notification later on.
-        int mId = 100;
+        int mId = (int) when;
         mNotificationManager.notify(mId, mBuilder.build());
     }
 
