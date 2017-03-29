@@ -12,10 +12,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -75,7 +75,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     private EditText mEmailSubject;
     private EditText mEmailMessage;
     private PendingIntent mGeofencePendingIntent;
-
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +92,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                     .addApi(LocationServices.API)
                     .build();
         }
+
 
         // assign views
         mRadioReminder = (RadioButton) findViewById(R.id.radio_reminder);
@@ -111,11 +112,18 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         mEmailSubject = (EditText) findViewById(R.id.et_email_subj);
         mEmailMessage = (EditText) findViewById(R.id.et_email_text);
 
+        mToolbar= (Toolbar) findViewById(R.id.action_create_toolbar);
+        mToolbar.setTitle("Create new action");
+        setSupportActionBar(mToolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 
         Intent intent = getIntent();
         mIsEditMode = intent.getBooleanExtra(Constants.EDIT_MODE_KEY, false);
         if(mIsEditMode){
+            mToolbar.setTitle("Edit the action");
             long id = intent.getLongExtra(Constants.LBACTION_ID_KEY, -1);
             mEditedLBAction = dbHelper.getAction(id);
             Log.d(LOG_TAG, "Editing id: " + id);
@@ -523,20 +531,12 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         Log.d(LOG_TAG, "in onResult");
     }
 
-    public void onDeleteActionClick(View view) {
-        List<LBAction> actions = dbHelper.getAllActions();
-        List<String> IDs = new ArrayList<String>();
-        for (LBAction act : actions) {
-            IDs.add(act.getID() + "");
-        }
-        unregisterGeofences(IDs);
-        dbHelper.deleteAllActions();
 
-        Intent returnIntent = new Intent();
-        setResult(RESULT_OK,returnIntent);
-
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
-
 
 }
 

@@ -37,7 +37,7 @@
         <activity
             android:name=".ActionCreate"
             android:windowSoftInputMode="stateHidden"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity android:name=".LocationChooserActivity"
             android:screenOrientation="portrait"/>
         <activity android:name="com.vladimirkush.geoaction.Utils.AndroidDatabaseManager"

@@ -9,10 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.backendless.Backendless;
@@ -25,6 +25,14 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Result;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.LocationServices;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.vladimirkush.geoaction.Adapters.ActionsListAdapter;
 import com.vladimirkush.geoaction.Interfaces.DeleteItemHandler;
 import com.vladimirkush.geoaction.Models.LBAction;
@@ -44,10 +52,11 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private DBHelper dbHelper;
     private ActionsListAdapter adapter;
     private FloatingActionButton fab;
-    private TextView tvLabel;
     private BackendlessUser user;
     private boolean mIsLoginPersistent;
     private RecyclerView rvActionList;
+    private Drawer mDrawer;
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,14 +75,19 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                     .addApi(LocationServices.API)
                     .build();
         }
+        mToolbar= (Toolbar) findViewById(R.id.main_toolbar);
+        setSupportActionBar(mToolbar);
+
+        setupDrawer();
+
+       // mDrawer.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
 
         dbHelper = new DBHelper(getApplicationContext());
         fab = (FloatingActionButton) findViewById(R.id.fab) ;
         fab.setOnTouchListener(this);
-        tvLabel = (TextView) findViewById(R.id.label_logged_in);
         mIsLoginPersistent = (boolean)getIntent().getExtras().get(Constants.LOGIN_IS_PERSISTENT_KEY);
-        rvActionList = (RecyclerView) findViewById(R.id.rvActionsList);
 
+        rvActionList = (RecyclerView) findViewById(R.id.rvActionsList);
         mActionList = dbHelper.getAllActions();
         adapter = new ActionsListAdapter(this, mActionList);
         rvActionList.setAdapter(adapter);
@@ -103,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                     public void handleResponse(BackendlessUser backendlessUser) {
                         Log.d(LOG_TAG, "login validation success");
                         user = backendlessUser;
-                        tvLabel.setText(user.getEmail());
+                       // tvLabel.setText(user.getEmail());
                     }
 
                     @Override
@@ -115,19 +129,21 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
                 if(!mIsLoginPersistent) {
                     user = Backendless.UserService.CurrentUser();
-                    tvLabel.setText(user.getEmail());
+                    Log.d(LOG_TAG, "Not Persistant Login - user: "+ user.getEmail());
                 }
             }
 
             @Override
             public void handleFault(BackendlessFault backendlessFault) {
-                tvLabel.setText("not logged in");
-                logOutOnClick(null);
+                Log.d(LOG_TAG, "User not logged in");
+                logOutAsync();
             }
         });
 
     }
-    public void logOutOnClick(View view) {
+
+
+    private void logOutAsync(){
         Backendless.UserService.logout(new AsyncCallback<Void>() {
             @Override
             public void handleResponse(Void aVoid) {
@@ -145,17 +161,114 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         });
     }
 
-
-
-
-
-    public void dbmanagerClick(View view) {
-
-        Intent dbmanager = new Intent(this, AndroidDatabaseManager.class);
-        startActivity(dbmanager);
+    private void deleteAllItems(){
+        List<LBAction> actions = dbHelper.getAllActions();
+        List<String> IDs = new ArrayList<String>();
+        for (LBAction act : actions) {
+            IDs.add(act.getID() + "");
+        }
+        unregisterGeofences(IDs);
+        dbHelper.deleteAllActions();
+        mActionList.clear();
+        adapter.notifyDataSetChanged();
     }
 
-    /* open Action Creation activity */
+    private void setupDrawer(){
+        // Header
+        AccountHeader header = new AccountHeaderBuilder()
+                .withActivity(this)
+                .withHeaderBackground(R.color.md_amber_800)// todo change for picture
+                .build();
+
+        // Menu items
+        PrimaryDrawerItem itemLocateFriends = new PrimaryDrawerItem()
+                .withIdentifier(0)
+                .withSelectable(false)
+                .withIcon(R.drawable.people)
+                .withName("Locate Friends");
+        PrimaryDrawerItem itemSettings = new PrimaryDrawerItem()
+                .withIdentifier(1)
+                .withSelectable(false)
+                .withIcon(R.drawable.gear)
+                .withName("Settings");
+        PrimaryDrawerItem itemChangePassword = new PrimaryDrawerItem()
+                .withIdentifier(2)
+                .withSelectable(false)
+                .withIcon(R.drawable.key)
+                .withName("Change password");
+        PrimaryDrawerItem itemLogOut = new PrimaryDrawerItem()
+                .withIdentifier(3)
+                .withSelectable(false)
+                .withIcon(R.drawable.logout)
+                .withName("Logout");
+        SecondaryDrawerItem itemDBManager = new SecondaryDrawerItem()
+                .withIdentifier(4)
+                .withSelectable(false)
+                .withName("DBmanager");
+        SecondaryDrawerItem itemDeleteAllActions = new SecondaryDrawerItem()
+                .withIdentifier(5)
+                .withSelectable(false)
+                .withName("Delete all actions");
+
+        // Nav Drawer building
+        mDrawer = new DrawerBuilder()
+                .withActivity(this)
+                .withToolbar(mToolbar)
+                .withDisplayBelowStatusBar(true)
+                .withTranslucentStatusBar(true)
+                .withAccountHeader(header)
+                .withSelectedItem(-1)
+                .addDrawerItems(
+                        itemLocateFriends,
+                        new DividerDrawerItem(),
+                        itemSettings,
+                        new DividerDrawerItem(),
+                        itemChangePassword,
+                        new DividerDrawerItem(),
+                        itemLogOut,
+                        new DividerDrawerItem(),
+                        itemDBManager,
+                        new DividerDrawerItem(),
+                        itemDeleteAllActions
+                        )
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        mDrawer.closeDrawer();
+
+                        switch((int)drawerItem.getIdentifier()){
+                            case 0: //Locate friends
+
+                                break;
+                            case 1: //Settings
+
+                                break;
+                            case 2: //Change password
+
+                                break;
+                            case 3: // Logout
+                                logOutAsync();
+                                break;
+                            case 4: // DB manager
+                                Intent dbmanager = new Intent(getApplicationContext(), AndroidDatabaseManager.class);
+                                startActivity(dbmanager);
+                                break;
+
+                            case 5: //Delete al items
+                                deleteAllItems();
+                                break;
+                        }
+                        return true;
+                    }
+                })
+                .build();
+
+    }
+
+
+
+
+    /* Fab pressed - open Action Creation activity */
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
