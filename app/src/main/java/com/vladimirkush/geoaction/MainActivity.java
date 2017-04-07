@@ -359,6 +359,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     @Override
     public void deleteItem(int adapterPosition, LBAction action) {
         Long id = action.getID();
+        // workaround to fetch externalID from DB
         LBAction actionTemp = dbHelper.getAction(id);
 
         //remove from Backendless cloud
