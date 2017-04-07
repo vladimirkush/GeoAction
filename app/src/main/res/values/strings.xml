@@ -4,6 +4,7 @@
     <!--    API Keys   -->
     <string name="backendless_key">E7EF3DA5-FE66-15DC-FF2D-32B0EFA9C800</string>
     <string name="backendless_app_id">C337AADB-C5FF-6F79-FF35-1C8CCE400600</string>
+    <string name="backendless_REST_key">9E849FA5-A3A3-2F52-FFEB-EA3529F11400</string>
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCHDz4zO9JeG6JIiNhY9d3IQYiKHYpduDk</string>
 
     <!--    UI strings   -->

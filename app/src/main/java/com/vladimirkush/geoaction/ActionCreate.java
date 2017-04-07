@@ -22,6 +22,9 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.backendless.Backendless;
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Result;
@@ -36,12 +39,15 @@ import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
 import com.vladimirkush.geoaction.Models.LBSms;
 import com.vladimirkush.geoaction.Services.GeofenceTransitionsIntentService;
+import com.vladimirkush.geoaction.Utils.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.Constants;
 import com.vladimirkush.geoaction.Utils.DBHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class ActionCreate extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback {
@@ -76,6 +82,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     private EditText mEmailMessage;
     private PendingIntent mGeofencePendingIntent;
     private Toolbar mToolbar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -273,7 +280,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         }
 
         if (mRadioReminder.isChecked()) { // create LBRemainder TODO check input
-            LBReminder reminder = new LBReminder();
+            final LBReminder reminder = new LBReminder();
             reminder.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
             reminder.setTitle(mReminderTitle.getText().toString());
             reminder.setMessage(mReminderText.getText().toString());
@@ -288,13 +295,30 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                 long id = dbHelper.insertAction(reminder);  // insert in the db and get ID
                 reminder.setID(id);                         // assign ID
                 Log.d(LOG_TAG, "REMINDER Assigned id: " + id);
+                // saving to cloud
+                HashMap map = (HashMap) BackendlessHelper.getMapForSingleAction(reminder);
+                Backendless.Data.of(BackendlessHelper.ACTIONS_TABLE_NAME).save(map, new AsyncCallback<Map>() {
+                    @Override
+                    public void handleResponse(Map map) {
+                        String objID = (String)map.get(BackendlessHelper.ACTIONS_OBJECT_ID);
+                        Log.d(LOG_TAG, "Assigned id from BCKNDLS: "+objID);
+                        reminder.setExternalID(objID);
+                        dbHelper.updateAction(reminder);
+
+                    }
+
+                    @Override
+                    public void handleFault(BackendlessFault backendlessFault) {
+                        Log.d(LOG_TAG, "Backendless async save failed");
+                    }
+                });
             }
 
 
             registerGeofence(reminder);
 
         } else if (mRadioSMS.isChecked()) {// create LBSms TODO check input
-            LBSms lbSMS = new LBSms();
+            final LBSms lbSMS = new LBSms();
             lbSMS.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
             String toNumbers = mSmsTo.getText().toString();
             String[] numbers = TextUtils.split(toNumbers, ",");
@@ -313,12 +337,29 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                 long id = dbHelper.insertAction(lbSMS);  // insert in the db and get ID
                 lbSMS.setID(id);                         // assign ID
                 Log.d(LOG_TAG, "SMS Assigned id: " + id);
+                // saving to cloud
+                HashMap map = (HashMap) BackendlessHelper.getMapForSingleAction(lbSMS);
+                Backendless.Data.of(BackendlessHelper.ACTIONS_TABLE_NAME).save(map, new AsyncCallback<Map>() {
+                    @Override
+                    public void handleResponse(Map map) {
+                        String objID = (String)map.get(BackendlessHelper.ACTIONS_OBJECT_ID);
+                        Log.d(LOG_TAG, "Assigned id from BCKNDLS: "+objID);
+                        lbSMS.setExternalID(objID);
+                        dbHelper.updateAction(lbSMS);
+
+                    }
+
+                    @Override
+                    public void handleFault(BackendlessFault backendlessFault) {
+                        Log.d(LOG_TAG, "Backendless async save failed");
+                    }
+                });
             }
             registerGeofence(lbSMS);
 
 
         } else {                         // create LBEmail, TODO check input
-            LBEmail lbEmail = new LBEmail();
+            final LBEmail lbEmail = new LBEmail();
             lbEmail.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
             String toAddresses = mEmailTo.getText().toString();
             String[] addressesArr = TextUtils.split(toAddresses, ",");
@@ -337,6 +378,23 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                 long id = dbHelper.insertAction(lbEmail);  // insert in the db and get ID
                 lbEmail.setID(id);                         // assign ID
                 Log.d(LOG_TAG, "EMAIL Assigned id: " + id);
+                // saving to cloud
+                HashMap map = (HashMap) BackendlessHelper.getMapForSingleAction(lbEmail);
+                Backendless.Data.of(BackendlessHelper.ACTIONS_TABLE_NAME).save(map, new AsyncCallback<Map>() {
+                    @Override
+                    public void handleResponse(Map map) {
+                        String objID = (String)map.get(BackendlessHelper.ACTIONS_OBJECT_ID);
+                        Log.d(LOG_TAG, "Assigned id from BCKNDLS: "+objID);
+                        lbEmail.setExternalID(objID);
+                        dbHelper.updateAction(lbEmail);
+
+                    }
+
+                    @Override
+                    public void handleFault(BackendlessFault backendlessFault) {
+                        Log.d(LOG_TAG, "Backendless async save failed");
+                    }
+                });
             }
             registerGeofence(lbEmail);
         }

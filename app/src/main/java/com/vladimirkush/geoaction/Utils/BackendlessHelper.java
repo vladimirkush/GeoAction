@@ -5,9 +5,9 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.vladimirkush.geoaction.Models.LBAction;
-import com.vladimirkush.geoaction.Models.LBAction.Status;
-import com.vladimirkush.geoaction.Models.LBAction.DirectionTrigger;
 import com.vladimirkush.geoaction.Models.LBAction.ActionType;
+import com.vladimirkush.geoaction.Models.LBAction.DirectionTrigger;
+import com.vladimirkush.geoaction.Models.LBAction.Status;
 import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
 import com.vladimirkush.geoaction.Models.LBSms;
@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.vladimirkush.geoaction.Utils.DBHelper.ActionsEntry.ACTIONS_COLUMN_EXTERNAL_ID;
 
 /**
  * Holds several converter methods for manipulating Backendless data objects
@@ -28,6 +27,7 @@ public class BackendlessHelper {
     public static final String LOG_TAG = "LOGTAG";
 
     public static final String ACTIONS_TABLE_NAME = "Actions";
+
     public static final String ACTIONS_OBJECT_ID = "objectId";
     public static final String ACTIONS_lOCAL_ID = "localId";
     public static final String ACTIONS_COLUMN_ACTION_TYPE = "actionType";
@@ -45,7 +45,7 @@ public class BackendlessHelper {
 
 
 
-    public static Map getMapForSavingSingleAction(LBAction action){
+    public static Map getMapForSingleAction(LBAction action){
         HashMap map = new HashMap();
 
         map.put(ACTIONS_COLUMN_ACTION_TYPE, action.getActionType().toString());
@@ -124,7 +124,7 @@ public class BackendlessHelper {
 
         // assign shared values
         lbAction.setActionType(actionType);
-        lbAction.setExternalID((String)map.get(ACTIONS_COLUMN_EXTERNAL_ID));
+        lbAction.setExternalID((String)map.get(ACTIONS_OBJECT_ID));
         lbAction.setID((long)map.get(ACTIONS_lOCAL_ID));
         lbAction.setRadius((int)map.get(ACTIONS_COLUMN_RADIUS));
         lbAction.setTriggerCenter(ll);

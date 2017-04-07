@@ -34,13 +34,16 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.vladimirkush.geoaction.Adapters.ActionsListAdapter;
+import com.vladimirkush.geoaction.Asynctasks.DeleteBulkFromCloud;
 import com.vladimirkush.geoaction.Interfaces.DeleteItemHandler;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Utils.AndroidDatabaseManager;
+import com.vladimirkush.geoaction.Utils.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.Constants;
 import com.vladimirkush.geoaction.Utils.DBHelper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -63,9 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //debug
-        //DBHelper dbHelper = new DBHelper(getApplicationContext());
-        //dbHelper.deleteDB();
+
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -80,9 +81,12 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
         setupDrawer();
 
-       // mDrawer.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
-
         dbHelper = new DBHelper(getApplicationContext());
+
+        //debug
+        //deleteAllItems();
+        //dbHelper.deleteDB();
+
         fab = (FloatingActionButton) findViewById(R.id.fab) ;
         fab.setOnTouchListener(this);
         mIsLoginPersistent = (boolean)getIntent().getExtras().get(Constants.LOGIN_IS_PERSISTENT_KEY);
@@ -163,14 +167,29 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     private void deleteAllItems(){
         List<LBAction> actions = dbHelper.getAllActions();
-        List<String> IDs = new ArrayList<String>();
-        for (LBAction act : actions) {
-            IDs.add(act.getID() + "");
+        if (actions.size() >0) {
+            List<String> IDs = new ArrayList<String>();
+            for (LBAction act : actions) {
+                IDs.add(act.getID() + "");
+            }
+            unregisterGeofences(IDs);
+            dbHelper.deleteAllActions();
+            mActionList.clear();
+            adapter.notifyDataSetChanged();
+        }else{
+            Toast.makeText(this,"The list is empty already", Toast.LENGTH_LONG).show();
         }
-        unregisterGeofences(IDs);
-        dbHelper.deleteAllActions();
-        mActionList.clear();
-        adapter.notifyDataSetChanged();
+    }
+
+    private void deleteAllItemsFromCloud(){
+        String userID = user.getObjectId();
+        String apiURL = "https://api.backendless.com/v1/data/bulk/Actions?where=ownerId%20%3D%20%27"
+       +userID+"%27";
+
+
+        DeleteBulkFromCloud bulkDelete = new DeleteBulkFromCloud(apiURL,getApplicationContext());
+        bulkDelete.execute();
+
     }
 
     private void setupDrawer(){
@@ -256,6 +275,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
                             case 5: //Delete al items
                                 deleteAllItems();
+                                deleteAllItemsFromCloud();
                                 break;
                         }
                         return true;
@@ -338,6 +358,27 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     @Override
     public void deleteItem(int adapterPosition, LBAction action) {
+        Long id = action.getID();
+        LBAction actionTemp = dbHelper.getAction(id);
+
+        //remove from Backendless cloud
+        HashMap map = (HashMap) BackendlessHelper.getMapForSingleAction(actionTemp);
+        final String objID = (String)map.get(BackendlessHelper.ACTIONS_OBJECT_ID);
+        // remove from cloud
+        Backendless.Persistence.of( BackendlessHelper.ACTIONS_TABLE_NAME ).remove(map, new AsyncCallback<Long>() {
+            @Override
+            public void handleResponse(Long aLong) {
+                Log.d(LOG_TAG, "Action deleted from Backendless: "+objID);
+            }
+
+            @Override
+            public void handleFault(BackendlessFault backendlessFault) {
+                Log.d(LOG_TAG, "Error deleting from Backendless: "+objID);
+                Log.d(LOG_TAG, backendlessFault.getMessage());
+            }
+        });
+
+        // remove from local DB
         long actionID = action.getID();
         int res =  dbHelper.deleteAction(actionID);
         if (res == 1){
