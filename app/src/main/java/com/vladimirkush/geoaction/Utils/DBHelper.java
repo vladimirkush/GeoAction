@@ -34,6 +34,7 @@ public class DBHelper extends SQLiteOpenHelper {
     // inner class - Contract for table columns
     public static class ActionsEntry implements BaseColumns {
         public static final String ACTIONS_TABLE_NAME = "actions";
+        public static final String ACTIONS_COLUMN_EXTERNAL_ID = "externalId";
         public static final String ACTIONS_COLUMN_ACTION_TYPE = "actionType";
         public static final String ACTIONS_COLUMN_RADIUS = "radius";
         public static final String ACTIONS_COLUMN_DIRECTION_TRIGGER = "directionTrigger";
@@ -57,6 +58,7 @@ public class DBHelper extends SQLiteOpenHelper {
                                                             " (" +
                     ActionsEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     ActionsEntry.ACTIONS_COLUMN_ACTION_TYPE + " TEXT, " +
+                    ActionsEntry.ACTIONS_COLUMN_EXTERNAL_ID + " TEXT, " +
                     ActionsEntry.ACTIONS_COLUMN_RADIUS + " INTEGER, " +
                     ActionsEntry.ACTIONS_COLUMN_DIRECTION_TRIGGER + " TEXT, " +
                     ActionsEntry.ACTIONS_COLUMN_LAT + " REAL, " +
@@ -128,6 +130,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String[] projection = {                         // colunmns to retrieve
                 ActionsEntry._ID,
                 ActionsEntry.ACTIONS_COLUMN_ACTION_TYPE,
+                ActionsEntry.ACTIONS_COLUMN_EXTERNAL_ID,
                 ActionsEntry.ACTIONS_COLUMN_RADIUS,
                 ActionsEntry.ACTIONS_COLUMN_DIRECTION_TRIGGER,
                 ActionsEntry.ACTIONS_COLUMN_LAT,
@@ -220,6 +223,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         // shared params
         contentValues.put(ActionsEntry.ACTIONS_COLUMN_ACTION_TYPE, lbAction.getActionType().toString());
+        contentValues.put(ActionsEntry.ACTIONS_COLUMN_EXTERNAL_ID, lbAction.getExternalID());
         contentValues.put(ActionsEntry.ACTIONS_COLUMN_RADIUS, lbAction.getRadius());
         contentValues.put(ActionsEntry.ACTIONS_COLUMN_DIRECTION_TRIGGER, lbAction.getDirectionTrigger().toString());
         contentValues.put(ActionsEntry.ACTIONS_COLUMN_LAT, lbAction.getTriggerCenter().latitude);
@@ -294,6 +298,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         // assign shared values
         lbAction.setActionType(actionType);
+        lbAction.setExternalID(cursor.getString(cursor.getColumnIndexOrThrow(ActionsEntry.ACTIONS_COLUMN_EXTERNAL_ID)));
         lbAction.setID(cursor.getLong(cursor.getColumnIndexOrThrow(ActionsEntry._ID)));
         lbAction.setRadius(cursor.getInt(cursor.getColumnIndexOrThrow(ActionsEntry.ACTIONS_COLUMN_RADIUS)));
         lbAction.setTriggerCenter(ll);

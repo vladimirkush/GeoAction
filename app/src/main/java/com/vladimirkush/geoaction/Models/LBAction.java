@@ -10,6 +10,10 @@ public abstract class LBAction {
 
     private ActionType actionType;
     private long ID;
+
+
+
+    private String externalID;
     private int radius;
     private DirectionTrigger directionTrigger;
     private LatLng triggerCenter;
@@ -60,6 +64,14 @@ public abstract class LBAction {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public String getExternalID() {
+        return externalID;
+    }
+
+    public void setExternalID(String externalID) {
+        this.externalID = externalID;
     }
 
     public void setDirectionTrigger(DirectionTrigger directionTrigger) {
