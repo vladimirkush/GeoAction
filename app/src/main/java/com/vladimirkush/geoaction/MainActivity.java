@@ -36,6 +36,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.vladimirkush.geoaction.Adapters.ActionsListAdapter;
 import com.vladimirkush.geoaction.Asynctasks.DeleteBulkFromCloud;
 import com.vladimirkush.geoaction.Interfaces.DeleteItemHandler;
+import com.vladimirkush.geoaction.Interfaces.SendItemHandler;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Utils.AndroidDatabaseManager;
 import com.vladimirkush.geoaction.Utils.BackendlessHelper;
@@ -47,8 +48,9 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity implements View.OnTouchListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback, DeleteItemHandler {
+public class MainActivity extends AppCompatActivity implements View.OnTouchListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback, DeleteItemHandler, SendItemHandler {
     private final String LOG_TAG = "LOGTAG";
+    private final String SEND_URL_PREFIX = "http://geoaction.service/?id=";
 
     private GoogleApiClient mGoogleApiClient;
     private ArrayList<LBAction> mActionList;
@@ -103,7 +105,9 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         rvActionList.addItemDecoration(itemDecoration);
 
+        // set handlers for delete and send
         adapter.setDeleteItemHandler(this);
+        adapter.setSendItemHandler(this);
 
         // init Backendless API
         String backendlessKey = getString(R.string.backendless_key);
@@ -388,6 +392,27 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             ids.add(actionID+"");
             unregisterGeofences(ids);
             adapter.notifyItemRemoved(adapterPosition);
+        }
+    }
+
+    @Override
+    public void sendItem(int adapterPosition, LBAction action) {
+        // workaround to fetch externalID from DB
+        Long id = action.getID();
+
+        LBAction actionTemp = dbHelper.getAction(id);
+        String externalId = actionTemp.getExternalID();
+        Log.d(LOG_TAG, "Sending action with id: "+id +" and external: "+externalId);
+
+        if(externalId != null && externalId != "") {
+            String request = SEND_URL_PREFIX + externalId;
+            Intent sendIntent = new Intent(android.content.Intent.ACTION_SEND);
+            sendIntent.setType("text/plain");
+            sendIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "geo action");
+            sendIntent.putExtra(android.content.Intent.EXTRA_TEXT, request);
+            startActivity(Intent.createChooser(sendIntent, "Send via"));
+        }else{
+            Toast.makeText(this,"Something went wrong, please try again",Toast.LENGTH_LONG).show();
         }
     }
 }

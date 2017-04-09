@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.vladimirkush.geoaction.ActionCreate;
 import com.vladimirkush.geoaction.Interfaces.DeleteItemHandler;
+import com.vladimirkush.geoaction.Interfaces.SendItemHandler;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
@@ -37,6 +38,10 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
     private Context mContext;
     private DBHelper dbHelper;
     private DeleteItemHandler mDeleteItemHandler;
+
+
+
+    private SendItemHandler mSendItemHandler;
 
 
     // ctor
@@ -155,7 +160,11 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
 
                         switch (menuItemID){
                             case R.id.ctx_send_action:
-                                handleSend(position, action);
+                                if(mSendItemHandler != null) {
+                                    mSendItemHandler.sendItem(position, action);
+                                }else{
+                                    handleSend(position, action);
+                                }
                                 break;
 
                             case R.id.ctx_delete_action:
@@ -236,8 +245,17 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
         return mDeleteItemHandler;
     }
 
-    public void setDeleteItemHandler(DeleteItemHandler mDeleteItemHandler) {
-        this.mDeleteItemHandler = mDeleteItemHandler;
+    public SendItemHandler getmSendItemHandler() {
+        return mSendItemHandler;
     }
+
+    public void setDeleteItemHandler(DeleteItemHandler deleteItemHandler) {
+        this.mDeleteItemHandler = deleteItemHandler;
+    }
+
+    public void setSendItemHandler(SendItemHandler sendItemHandler) {
+        this.mSendItemHandler = sendItemHandler;
+    }
+
 
 }
