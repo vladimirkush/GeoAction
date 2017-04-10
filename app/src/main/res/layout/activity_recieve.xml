@@ -5,11 +5,160 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.vladimirkush.geoaction.RecieveActivity">
+    tools:context="com.vladimirkush.geoaction.RecieveActivity"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:weightSum="15">
 
     <TextView
-        android:id="@+id/receive_test"
+        android:id="@+id/receive_title_type"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="received:"/>
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:text="Incoming Geo Action: SMS"
+        android:textSize="22sp"
+        android:textColor="@color/primary_dark"
+        android:paddingTop="8dp"
+        android:paddingBottom="20dp"/>
+
+    <LinearLayout
+        android:id="@+id/receive_to_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="4dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/receive_to_lbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="To: "
+            android:textSize="20sp"
+            android:textColor="@color/primary_dark"/>
+        <TextView
+            android:id="@+id/receive_to_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0542118389, aba@aba.aba"
+            android:textSize="20sp"
+            android:maxLines="3"
+            android:gravity="start"
+            android:scrollbars="vertical"
+            android:textColor="@color/primary_dark"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/receive_subject_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="4dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/receive_subject_lbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Subject: "
+            android:textSize="20sp"
+            android:textColor="@color/primary_dark"/>
+        <TextView
+            android:id="@+id/receive_subject_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Shoplist"
+            android:textSize="20sp"
+            android:textColor="@color/primary_dark"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/receive_message_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/receive_message_lbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Message: "
+            android:textSize="20sp"
+            android:textColor="@color/primary_dark"/>
+
+        <TextView
+            android:id="@+id/receive_message_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="3"
+            android:scrollbars="vertical"
+            android:text="buy milk and suff "
+            android:textColor="@color/primary_dark"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
+
+
+    <fragment
+        android:id="@+id/rcv_map"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:name="com.google.android.gms.maps.MapFragment"
+        android:paddingBottom="8dp"
+        android:layout_weight="8"/>
+
+    <LinearLayout
+        android:id="@+id/receive_radius_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/receive_radius_lbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Radius: "
+            android:textSize="20sp"
+            android:textColor="@color/primary_dark"/>
+
+        <TextView
+            android:id="@+id/receive_radius_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="200m"
+            android:textColor="@color/primary_dark"
+            android:textSize="20sp" />
+        <TextView
+            android:id="@+id/receive_direction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=", on Entering area"
+            android:textColor="#000000"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+    <TextView
+        android:id="@+id/receive_address_content"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_height="wrap_content"
+        android:text="Aba hilel 70, Ramat gan"
+        android:textColor="@color/primary_dark"
+        android:textSize="20sp" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:text="Accept"
+        android:onClick="onAcceptClick"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:text="Cancell"
+        android:onClick="onCancellClick"/>
 </LinearLayout>

@@ -125,7 +125,7 @@ public class BackendlessHelper {
         // assign shared values
         lbAction.setActionType(actionType);
         lbAction.setExternalID((String)map.get(ACTIONS_OBJECT_ID));
-        lbAction.setID((long)map.get(ACTIONS_lOCAL_ID));
+        //lbAction.setID((long)map.get(ACTIONS_lOCAL_ID));
         lbAction.setRadius((int)map.get(ACTIONS_COLUMN_RADIUS));
         lbAction.setTriggerCenter(ll);
         lbAction.setDirectionTrigger(dir);
