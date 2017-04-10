@@ -145,9 +145,11 @@
         android:layout_width="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:textStyle="italic"
         android:text="Aba hilel 70, Ramat gan"
-        android:textColor="@color/primary_dark"
-        android:textSize="20sp" />
+        android:textColor="#7b7777"
+        android:textSize="15sp" />
 
     <Button
         android:id="@+id/recieve_accept_btn"

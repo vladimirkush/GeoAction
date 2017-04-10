@@ -4,6 +4,9 @@ import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -48,7 +52,10 @@ import com.vladimirkush.geoaction.Utils.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.Constants;
 import com.vladimirkush.geoaction.Utils.DBHelper;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RecieveActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
@@ -124,7 +131,7 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
                    Log.d(LOG_TAG, "Fetching action from cloud - success: "+ externalId );
                    setLayoutAndFields(lbAction);
                    if(mMap != null){
-                       mMap.getUiSettings().setScrollGesturesEnabled(false);
+                       mMap.getUiSettings().setMapToolbarEnabled(false);
                        mMarker = mMap.addMarker(new MarkerOptions()
                                .position(markerLocation)
                                .title("center of area")
@@ -137,6 +144,8 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
 
                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                                mCircle.getCenter(), getZoomLevel(mCircle)));
+
+                       mAddress.setText(getAddress(lbAction.getTriggerCenter())); // set address
                    }
 
                }
@@ -421,5 +430,50 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     public void onResult(@NonNull Result result) {
         Log.d(LOG_TAG, "in onResult");
+    }
+
+    private String getAddress (LatLng location){
+        List<Address> addresses = null;
+        Geocoder geocoder = new Geocoder(this);
+        Location loc = new Location("");
+        loc.setLatitude(location.latitude);
+        loc.setLongitude(location.longitude);
+        try {
+            addresses = geocoder.getFromLocation(
+                    loc.getLatitude(),
+                    loc.getLongitude(),
+                    // In this sample, get just a single address.
+                    1);
+        } catch (IOException ioException) {
+            // Catch network or other I/O problems.
+
+            Log.e(LOG_TAG, "IO exeption:"+ioException.getMessage());
+        } catch (IllegalArgumentException illegalArgumentException) {
+
+            // Catch invalid latitude or longitude values.
+            Log.e(LOG_TAG, "Illegal arg exeption:"+illegalArgumentException.getMessage());
+        }
+
+        // Handle case where no address was found.
+        if (addresses == null || addresses.size()  == 0) {
+
+            Log.e(LOG_TAG, "No addresses returned");
+
+        } else {
+            Address address = addresses.get(0);
+            ArrayList<String> addressFragments = new ArrayList<String>();
+
+            // Fetch the address lines using getAddressLine,
+            // join them, and send them to the thread.
+            for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
+                addressFragments.add(address.getAddressLine(i));
+            }
+            String addressStr = TextUtils.join(", ",
+                    addressFragments);
+            Log.d(LOG_TAG, "ADDRESS :" + addressStr);
+            return addressStr;
+
+        }
+        return "";
     }
 }
