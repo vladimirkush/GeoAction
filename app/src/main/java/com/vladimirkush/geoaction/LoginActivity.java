@@ -36,7 +36,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        //TODO input checks
+
 
         // init widgets
         mEmailEt = (EditText) findViewById(R.id.email_et);
@@ -70,7 +70,6 @@ public class LoginActivity extends AppCompatActivity {
                                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                 intent.putExtra(Constants.LOGIN_IS_PERSISTENT_KEY, mPersistantLogin);
                                 startActivity(intent);
-                                //setUIEnabled(true);
                                 finish();
                             }
 
@@ -89,8 +88,6 @@ public class LoginActivity extends AppCompatActivity {
                     public void handleFault(BackendlessFault backendlessFault) {
                         Log.d(LOG_TAG, "User not logged in");
                         setUIEnabled(true);
-
-                        // logOutAsync();
                     }
                 });
 
@@ -103,8 +100,8 @@ public class LoginActivity extends AppCompatActivity {
     public void registerOnClick(View view) {
         if (mLoginMode) {
 
-            mLoginMode = !mLoginMode;
-            setUI(mLoginMode);
+            mLoginMode = false;
+            setUI(false);
         }else{
             // check input and register
             if(checkInput()) {
@@ -114,7 +111,6 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-
     public void loginOnClick(View view) {
         if(mLoginMode){
             // check input and login
@@ -122,8 +118,8 @@ public class LoginActivity extends AppCompatActivity {
                 attemptLogin();
             }
         }else{  // "back to login" clicked
-            mLoginMode = !mLoginMode;
-            setUI(mLoginMode);
+            mLoginMode = true;
+            setUI(true);
 
         }
     }
@@ -174,8 +170,6 @@ public class LoginActivity extends AppCompatActivity {
                 inputValidated = false;
             }
         }
-
-
 
 
         if(inputValidated) {    // clear all errors
