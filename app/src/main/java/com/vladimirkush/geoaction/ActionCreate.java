@@ -33,6 +33,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.vladimirkush.geoaction.Asynctasks.GetAddressAsyncTask;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Models.LBAction.ActionType;
 import com.vladimirkush.geoaction.Models.LBEmail;
@@ -71,6 +72,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     private LinearLayout mSMSLayout;
     private LinearLayout mEmailLayout;
     private TextView mRadiusLabel;
+    private TextView mAddressLabel;
 
     private EditText mSmsTo;
     private EditText mSmsMessage;
@@ -118,7 +120,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         mEmailTo = (EditText) findViewById(R.id.et_email_to);
         mEmailSubject = (EditText) findViewById(R.id.et_email_subj);
         mEmailMessage = (EditText) findViewById(R.id.et_email_text);
-
+        mAddressLabel = (TextView) findViewById(R.id.label_address);
         mToolbar= (Toolbar) findViewById(R.id.action_create_toolbar);
         mToolbar.setTitle("Create new action");
         setSupportActionBar(mToolbar);
@@ -151,6 +153,8 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         mAreaCenter = action.getTriggerCenter();
         mRadius = action.getRadius();
         mRadiusLabel.setText("Radius: " + mRadius + "m");
+        //mAddressLabel.setText(AddressHelper.getAddress(this,mAreaCenter));
+        new GetAddressAsyncTask().execute(this, mAddressLabel,mAreaCenter);
         LBAction.DirectionTrigger dir = action.getDirectionTrigger();
         if(dir == LBAction.DirectionTrigger.ENTER){
             mRadioEnterArea.setChecked(true);
@@ -250,8 +254,6 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
 
     // SMS mode - clicked "To:"
     public void btnSMSToOnclick(View view) {
-        // TODO request phonebook, get numberts of selected, put to numbers box
-
         Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
         intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
         startActivityForResult(intent, Constants.CONTACT_PICK_REQUEST_CODE);
@@ -438,6 +440,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                 Log.d(LOG_TAG, "Center lat: " + mAreaCenter.latitude + " lon: " + mAreaCenter.longitude + " radius: " + mRadius + "m");
 
                 mRadiusLabel.setText("Radius: " + mRadius + "m");
+                new GetAddressAsyncTask().execute(this, mAddressLabel,mAreaCenter);
             }
             if (resultCode == Constants.MAP_DATA_RESULT_CANCEL) {
                 Log.d(LOG_TAG, "area trigger chosing cancelled");
@@ -544,7 +547,6 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
             return mGeofencePendingIntent;
         }
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
-        // TODO set id for further searching in DB
         intent.putExtra(Constants.LBACTION_ID_KEY, lbAction.getID());
 
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when

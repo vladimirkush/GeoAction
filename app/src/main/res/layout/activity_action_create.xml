@@ -98,12 +98,19 @@
             android:padding="5dp"
             android:onClick="onLocationChooserClick"
             android:layout_gravity="center_horizontal"/>
-
+        <TextView
+            android:id="@+id/label_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#aeacac"
+            android:textStyle="italic"
+            android:textSize="15sp"
+            android:gravity="center_horizontal"
+            android:padding="2dp"/>
         <TextView
             android:id="@+id/label_radius"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Radius:"
             android:textSize="20sp"
             android:gravity="center_horizontal"
             android:padding="2dp"/>

@@ -28,7 +28,6 @@ public class AddressHelper {
                     1);
         } catch (IOException ioException) {
             // Catch network or other I/O problems.
-
             Log.e(LOG_TAG, "IO exeption:"+ioException.getMessage());
         } catch (IllegalArgumentException illegalArgumentException) {
 
