@@ -19,7 +19,6 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
-import com.backendless.persistence.local.UserIdStorageFactory;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Result;
@@ -290,6 +289,12 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         Toast.makeText(this, "Geofence id's unregistered: " + geofenceIDs.size(), Toast.LENGTH_LONG).show();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        adapter.notifyDataSetChanged();
+    }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
