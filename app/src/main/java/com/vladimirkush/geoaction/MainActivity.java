@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
         fab = (FloatingActionButton) findViewById(R.id.fab) ;
         fab.setOnTouchListener(this);
-        mIsLoginPersistent = (boolean)getIntent().getExtras().get(Constants.LOGIN_IS_PERSISTENT_KEY);
+        //mIsLoginPersistent = (boolean)getIntent().getExtras().get(Constants.LOGIN_IS_PERSISTENT_KEY);
 
         rvActionList = (RecyclerView) findViewById(R.id.rvActionsList);
         mActionList = dbHelper.getAllActions();

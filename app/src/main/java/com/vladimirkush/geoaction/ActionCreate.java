@@ -143,6 +143,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
             mRadioReminder.setChecked(true);    // default checked radio
             mRadioEnterArea.setChecked(true);
             setViewByActionType(ActionType.REMINDER);
+            mRadiusLabel.setText("No location choosen");
         }
 
 

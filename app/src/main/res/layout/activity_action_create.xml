@@ -93,10 +93,13 @@
 
         <ImageButton
             android:id="@+id/map_image_button"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:padding="5dp"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             android:onClick="onLocationChooserClick"
+            android:src="@drawable/google_map_500_ic"
+            android:scaleType="fitXY"
+            android:background="@null"
+            android:adjustViewBounds="true"
             android:layout_gravity="center_horizontal"/>
         <TextView
             android:id="@+id/label_address"

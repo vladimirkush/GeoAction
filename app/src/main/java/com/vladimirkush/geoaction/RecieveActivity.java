@@ -194,6 +194,8 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
                                 }
                             });
                             registerGeofence(lbAction);
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                            startActivity(intent);
                             finish();
 
                         }
