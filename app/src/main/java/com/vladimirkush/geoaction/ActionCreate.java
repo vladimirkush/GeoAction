@@ -269,6 +269,10 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     // clicked map button
     public void onLocationChooserClick(View view) {
         Intent intent = new Intent(this, LocationChooserActivity.class);
+        if(mIsEditMode) {   // in case we are editing an existing action, send the params to mapchooser
+            intent.putExtra(Constants.AREA_CENTER_KEY, mAreaCenter);
+            intent.putExtra(Constants.AREA_RADIUS_KEY, mRadius);
+        }
         startActivityForResult(intent, Constants.MAP_DATA_REQUEST_CODE);
     }
 

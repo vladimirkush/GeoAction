@@ -4,12 +4,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -50,9 +50,11 @@ public class LocationChooserActivity extends AppCompatActivity
     private Marker          mMarker;
     private Circle          mCircle;
     private int          mRadius = 200;
+    private LatLng          mAreaCenter;
 
     private TextView        mRadiusTextView;
 
+    private boolean         mIsEditMode =  false;
     private boolean         mZoomOnceFlag;
     private boolean         mIsLocationUpdateStarted = false;
 
@@ -62,6 +64,12 @@ public class LocationChooserActivity extends AppCompatActivity
         setContentView(R.layout.activity_location_chooser);
 
         mRadiusTextView = (TextView) findViewById(R.id.tv_radius);
+        Intent intent = getIntent();
+        if(intent.getParcelableExtra(Constants.AREA_CENTER_KEY)!= null){
+            mIsEditMode = true;
+            mAreaCenter = intent.getParcelableExtra(Constants.AREA_CENTER_KEY);
+            mRadius  = intent.getIntExtra(Constants.AREA_RADIUS_KEY, -1);
+        }
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -94,7 +102,9 @@ public class LocationChooserActivity extends AppCompatActivity
 
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
-            showLastKnownLocationOnMap();
+            if(!mIsEditMode) {
+                showLastKnownLocationOnMap();
+            }
             if(!mIsLocationUpdateStarted) {
                 startLocationUpdates();
                 mIsLocationUpdateStarted = true;
@@ -117,7 +127,9 @@ public class LocationChooserActivity extends AppCompatActivity
     @Override
     public void onLocationChanged(Location location) {
         mLastLocation = location;
-        showLastKnownLocationOnMap();
+        if(!mIsEditMode) {
+            showLastKnownLocationOnMap();
+        }
         Log.d(LOG_TAG, "Lat: " + mLastLocation.getLatitude() + ", Lon: " + mLastLocation.getLongitude());
 
 
@@ -168,8 +180,25 @@ public class LocationChooserActivity extends AppCompatActivity
             }
         });
 
-        showLastKnownLocationOnMap();
+        if(mIsEditMode){    // we are in edit mode
 
+
+            mMarker = mMap.addMarker(new MarkerOptions()
+                    .position(mAreaCenter)
+                    .title("center of area")
+                    .draggable(false));
+
+            mCircle = mMap.addCircle(new CircleOptions()
+                    .center(mAreaCenter)
+                    .radius(mRadius)
+                    .clickable(false));
+            mRadiusTextView.setText("Radius: "+ (int)mCircle.getRadius() + "m");
+            CameraUpdate upd = CameraUpdateFactory.newLatLngZoom(mAreaCenter, ZOOM_RATE);
+            mMap.animateCamera(upd);
+
+        }else {
+            showLastKnownLocationOnMap();
+        }
     }
 
     @Override
@@ -203,7 +232,9 @@ public class LocationChooserActivity extends AppCompatActivity
                         startLocationUpdates();
                         mIsLocationUpdateStarted = true;
                     }
-                    showLastKnownLocationOnMap();
+                    if(!mIsEditMode) {
+                        showLastKnownLocationOnMap();
+                    }
 
                 } else {
                     alertNoLocationPermissions();
