@@ -148,6 +148,7 @@ public class LocationChooserActivity extends AppCompatActivity
             }
         });
 
+        showMyLocation(true);
         mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng latLng) {
@@ -318,13 +319,7 @@ public class LocationChooserActivity extends AppCompatActivity
     private void showLastKnownLocationOnMap() {
         if (mLastLocation != null && mMap != null) {
             // check if permissions granted
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-                // show device on the map - blue dot
-                mMap.setMyLocationEnabled(true);
-
-            }
+            showMyLocation(true);
 
             // center camera on device's location only for the first time
             if(!mZoomOnceFlag) {
@@ -364,5 +359,13 @@ public class LocationChooserActivity extends AppCompatActivity
         }
 
         finish();
+    }
+
+    private void showMyLocation(boolean show){
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            mMap.setMyLocationEnabled(show);
+        }
     }
 }

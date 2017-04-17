@@ -7,16 +7,21 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
-
-import com.backendless.persistence.local.UserIdStorageFactory;
-import com.vladimirkush.geoaction.Utils.Constants;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
+import com.backendless.persistence.local.UserIdStorageFactory;
 import com.backendless.persistence.local.UserTokenStorageFactory;
+import com.facebook.CallbackManager;
+import com.vladimirkush.geoaction.Utils.Constants;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -27,10 +32,11 @@ public class LoginActivity extends AppCompatActivity {
     private EditText mReenterPasswordEt;
     private Button mLoginBtn;
     private Button mRegisterBtn;
+    private ImageButton mFBLoginBtn;
 
     private boolean mLoginMode = true;
     private boolean mPersistantLogin = true;
-
+    private CallbackManager callbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +50,7 @@ public class LoginActivity extends AppCompatActivity {
         mReenterPasswordEt = (EditText) findViewById(R.id.passw_reenter_et);
         mLoginBtn = (Button) findViewById(R.id.login_button);
         mRegisterBtn = (Button) findViewById(R.id.register_button);
-
+        mFBLoginBtn = (ImageButton)findViewById(R.id.fb_login_btn);
 
         // init Backendless API
         String backendlessKey = getString(R.string.backendless_key);
@@ -52,6 +58,8 @@ public class LoginActivity extends AppCompatActivity {
         String version = "v1";
         Backendless.initApp( this, backendlessAppId, backendlessKey, version );
 
+        // init FB callback manager
+        callbackManager = CallbackManager.Factory.create();
 
         // check if logged in using StayLoggedIn
         if(mPersistantLogin) {
@@ -96,6 +104,11 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onActivityResult( int requestCode, int resultCode, Intent data ) {
+        super.onActivityResult( requestCode, resultCode, data );
+        callbackManager.onActivityResult( requestCode, resultCode, data );
+    }
 
     public void registerOnClick(View view) {
         if (mLoginMode) {
@@ -142,6 +155,7 @@ public class LoginActivity extends AppCompatActivity {
         mReenterPasswordEt.setEnabled(enabled);
         mLoginBtn.setEnabled(enabled);
         mRegisterBtn.setEnabled(enabled);
+        mFBLoginBtn.setEnabled(enabled);
     }
 
     private boolean checkInput(){
@@ -248,4 +262,33 @@ public class LoginActivity extends AppCompatActivity {
         mReenterPasswordEt.setText("");
     }
 
+    public void facebookLoginOnClick(View view) {
+        setUIEnabled(false); // disable UI
+        ArrayList<String> fbPermissions = new ArrayList<String>();
+        fbPermissions.add("email");
+        fbPermissions.add("user_friends");
+
+        Map<String, String> fbFieldMappings = new HashMap<String, String>();
+        fbFieldMappings.put( "email", "fb_email" );
+
+        Backendless.UserService.loginWithFacebookSdk(this, fbFieldMappings, fbPermissions, callbackManager, new AsyncCallback<BackendlessUser>() {
+            @Override
+            public void handleResponse(BackendlessUser backendlessUser) {
+                Log.d( LOG_TAG, backendlessUser.getEmail() + " successfully logged in with facebook" );
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent.putExtra(Constants.LOGIN_IS_PERSISTENT_KEY, mPersistantLogin);
+                startActivity(intent);
+                //setUIEnabled(true); // enable UI
+                clearUI();
+                finish();
+            }
+
+            @Override
+            public void handleFault(BackendlessFault backendlessFault) {
+                Log.d( LOG_TAG,"Error while logging in with facebook" );
+                Log.d( LOG_TAG, backendlessFault.getMessage() );
+                setUIEnabled(true);
+            }
+        }, mPersistantLogin);
+    }
 }

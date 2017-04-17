@@ -25,6 +25,9 @@ android {
     }
 }
 
+repositories {
+    mavenCentral()
+}
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
@@ -47,6 +50,7 @@ dependencies {
     compile 'com.google.android.gms:play-services:9.8.0'
     compile 'com.android.support:recyclerview-v7:25.2.0'
     compile 'com.google.maps.android:android-maps-utils:0.4.+'
+    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
     testCompile 'junit:junit:4.12'
 }
 
