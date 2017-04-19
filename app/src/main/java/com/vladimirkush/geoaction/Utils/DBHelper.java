@@ -3,16 +3,18 @@ package com.vladimirkush.geoaction.Utils;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.MatrixCursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.vladimirkush.geoaction.Models.Friend;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Models.LBAction.ActionType;
 import com.vladimirkush.geoaction.Models.LBAction.DirectionTrigger;
@@ -21,6 +23,7 @@ import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
 import com.vladimirkush.geoaction.Models.LBSms;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +34,7 @@ import java.util.List;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    // inner class - Contract for table columns
+    // inner classes - Contract for table columns
     public static class ActionsEntry implements BaseColumns {
         public static final String ACTIONS_TABLE_NAME = "actions";
         public static final String ACTIONS_COLUMN_EXTERNAL_ID = "externalId";
@@ -46,14 +49,24 @@ public class DBHelper extends SQLiteOpenHelper {
         public static final String ACTIONS_COLUMN_SUBJECT = "subject";  // for reminder used for title
     }
 
+    public static class FriendsEntry implements BaseColumns{
+        public static final String FRIENDS_TABLE_NAME = "friends";
+        public static final String FRIENDS_COLUMN_FBID = "fbid";
+        public static final String FRIENDS_COLUMN_NAME = "name";
+        public static final String FRIENDS_COLUMN_STATUS = "status";
+        public static final String FRIENDS_COLUMN_USERICON = "usericon";
+        public static final String FRIENDS_COLUMN_LAT = "lat";
+        public static final String FRIENDS_COLUMN_LON = "lon";
+    }
+
     // ----constants----
     public static final String LOG_TAG = "LOGTAG";
     public static final String DATABASE_NAME = "GeoActionsCache.db";
 
     private Context context;
     // ----prebuilt queries----
-    // CREATE TABLE
-    private static final String SQL_CREATE_ENTRIES =
+    // CREATE TABLE for actions
+    private static final String SQL_CREATE_TABLE_ACTIONS =
             "CREATE TABLE IF NOT EXISTS " + ActionsEntry.ACTIONS_TABLE_NAME +
                                                             " (" +
                     ActionsEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -69,22 +82,41 @@ public class DBHelper extends SQLiteOpenHelper {
                     ActionsEntry.ACTIONS_COLUMN_SUBJECT + " TEXT " +
                                                             ")";
 
-    // DROP TABLE
-    private static final String SQL_DELETE_ENTRIES =
+    // CREATE TABLE for friends
+    private static final String SQL_CREATE_TABLE_FRIENDS =
+            "CREATE TABLE IF NOT EXISTS " + FriendsEntry.FRIENDS_TABLE_NAME +
+                    " (" +
+                    FriendsEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    FriendsEntry.FRIENDS_COLUMN_FBID + " TEXT, " +
+                    FriendsEntry.FRIENDS_COLUMN_NAME + " TEXT, " +
+                    FriendsEntry.FRIENDS_COLUMN_STATUS + " TEXT, " +
+                    FriendsEntry.FRIENDS_COLUMN_USERICON + " BLOB, " +
+                    FriendsEntry.FRIENDS_COLUMN_LAT + " REAL, " +
+                    FriendsEntry.FRIENDS_COLUMN_LON + " REAL " +
+
+                    ")";
+
+    // DROP TABLE actions
+    private static final String SQL_DELETE_ENTRIES_ACTIONS =
             "DELETE FROM  " + ActionsEntry.ACTIONS_TABLE_NAME;
 
-
+    // DROP TABLE friends
+    private static final String SQL_DELETE_ENTRIES_FRIENDS =
+            "DELETE FROM  " + FriendsEntry.FRIENDS_TABLE_NAME;
 
     // ----methods----
     //ctor
     public DBHelper(Context context) {
         super(context, DATABASE_NAME , null, 1);
         this.context=context;
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL(SQL_CREATE_TABLE_FRIENDS);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_ENTRIES);
+        db.execSQL(SQL_CREATE_TABLE_ACTIONS);
+        db.execSQL(SQL_CREATE_TABLE_FRIENDS);
         Log.d(LOG_TAG, "DB: " + DATABASE_NAME + "created");
     }
 
@@ -108,21 +140,48 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
+    // INSERT new friend to DB, return Pk _ID
+    public long insertFriend(Friend friend){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = getContentValuesForInsertUpdateFriend(friend);
+        return db.insert(FriendsEntry.FRIENDS_TABLE_NAME, null, contentValues);
+
+    }
+
+    // UPDATE one friend of the same id as in incoming object, with all the values contained in it
+    public int updateFriend(Friend friend){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = getContentValuesForInsertUpdateFriend(friend);
+        long id = friend.getID();
+
+        String selection = FriendsEntry._ID + " = ?";
+        String[] selectionArgs = { id + "" };
+
+        return db.update(FriendsEntry.FRIENDS_TABLE_NAME,
+                contentValues,
+                selection,
+                selectionArgs);
+
+
+    }
+
+
+
     public void deleteAllActions(){
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL(SQL_DELETE_ENTRIES);
+        db.execSQL(SQL_DELETE_ENTRIES_ACTIONS);
+    }
+
+    public void deleteAllFriends(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL(SQL_DELETE_ENTRIES_FRIENDS);
     }
 
     public void createTableForActions(){
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL(SQL_CREATE_ENTRIES);
+        db.execSQL(SQL_CREATE_TABLE_ACTIONS);
     }
 
-    public int numberOfRows(){
-        SQLiteDatabase db = this.getReadableDatabase();
-        int numRows = (int) DatabaseUtils.queryNumEntries(db, ActionsEntry.ACTIONS_TABLE_NAME);
-        return numRows;
-    }
 
     public LBAction getAction(long id){
         SQLiteDatabase db = this.getReadableDatabase();
@@ -166,6 +225,64 @@ public class DBHelper extends SQLiteOpenHelper {
         return  lbAction;
     }
 
+    public Friend getFriend (long id){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+
+        String[] projection = {                         // colunmns to retrieve
+                FriendsEntry._ID,
+                FriendsEntry.FRIENDS_COLUMN_FBID,
+                FriendsEntry.FRIENDS_COLUMN_NAME,
+                FriendsEntry.FRIENDS_COLUMN_STATUS,
+                FriendsEntry.FRIENDS_COLUMN_USERICON,
+                FriendsEntry.FRIENDS_COLUMN_LAT,
+                FriendsEntry.FRIENDS_COLUMN_LON
+        };
+        String selection = FriendsEntry._ID + " = ?";
+        String[] selectionArgs = { id + "" };
+        String sortOrder =
+                FriendsEntry._ID + " DESC";
+
+        Cursor cursor = db.query(
+               FriendsEntry.FRIENDS_TABLE_NAME,          // The table to query
+                projection,                               // The columns to return
+                selection,                                // The columns for the WHERE clause
+                selectionArgs,                            // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                sortOrder                                 // The sort order
+        );
+
+        cursor.moveToFirst();
+        Friend friend = getFriendFromCursorRow(cursor);
+        if(friend==null){
+            Log.e(LOG_TAG, "DB: error retrieving friend with id: "+id);
+        }
+        cursor.close();
+
+
+        return friend;
+    }
+
+    private Friend getFriendFromCursorRow(Cursor cursor){
+        Friend friend = new Friend();
+        try {
+            friend.setID(cursor.getLong(cursor.getColumnIndexOrThrow(FriendsEntry._ID)));
+            friend.setFbID(cursor.getString(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_FBID)));
+            friend.setName(cursor.getString(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_NAME)));
+            Friend.Status status = Friend.Status.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_STATUS)));
+            friend.setStatus(status);
+            byte[] img = cursor.getBlob(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_USERICON));
+            friend.setUserIcon(getBitmapImageFromBytes(img));
+            friend.setLat(cursor.getDouble(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_LAT)));
+            friend.setLon(cursor.getDouble(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_LON)));
+        }catch ( Exception e){
+            e.printStackTrace();
+            return null;
+        }
+        return friend;
+    }
+
     // DELETE action by id
     public int deleteAction(long id){
         SQLiteDatabase db = this.getWritableDatabase();
@@ -193,7 +310,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    // GET all data from database as list
+    // GET all data from "actions" table as list
     public ArrayList<LBAction> getAllActions(){
         SQLiteDatabase db = this.getReadableDatabase();
         ArrayList<LBAction> actionsList = new ArrayList<LBAction>();
@@ -215,8 +332,29 @@ public class DBHelper extends SQLiteOpenHelper {
         return actionsList;
     }
 
-    //return all actions as actions
-    //TODO
+    // GET all data from "friends" table as list
+    public ArrayList<Friend> getAllFriends(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<Friend> friendList = new ArrayList<Friend>();
+        Cursor  cursor = db.rawQuery("select * from " + FriendsEntry.FRIENDS_TABLE_NAME, null);
+
+        if (cursor.moveToFirst()) {
+            while (cursor.isAfterLast() == false) {
+
+                Friend friend = getFriendFromCursorRow(cursor);
+                if(friend==null){
+                    Log.e(LOG_TAG, "DB: error retrieving action in getAllActions");
+                }
+
+                friendList.add(friend);
+                cursor.moveToNext();
+            }// while
+        }
+
+        return friendList;
+    }
+
+
 
     private ContentValues getContentValuesForInsertUpdate(LBAction lbAction){
         ContentValues contentValues = new ContentValues();
@@ -249,6 +387,18 @@ public class DBHelper extends SQLiteOpenHelper {
             return null;
         }
 
+        return contentValues;
+    }
+
+    private ContentValues getContentValuesForInsertUpdateFriend(Friend friend){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(FriendsEntry.FRIENDS_COLUMN_FBID, friend.getFbID());
+        contentValues.put(FriendsEntry.FRIENDS_COLUMN_NAME, friend.getName());
+        contentValues.put(FriendsEntry.FRIENDS_COLUMN_STATUS, friend.getStatus().toString());
+        contentValues.put(FriendsEntry.FRIENDS_COLUMN_LAT, friend.getLat());
+        contentValues.put(FriendsEntry.FRIENDS_COLUMN_LON, friend.getLon());
+        byte[] imgBytes = getBytesFromBitmap(friend.getUserIcon());
+        contentValues.put(FriendsEntry.FRIENDS_COLUMN_USERICON, imgBytes);
         return contentValues;
     }
 
@@ -308,6 +458,17 @@ public class DBHelper extends SQLiteOpenHelper {
         return lbAction;
     }
 
+    // convert from bitmap to byte array
+    private byte[] getBytesFromBitmap(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 50, stream);
+        return stream.toByteArray();
+    }
+
+    // convert from byte array to bitmap
+    private Bitmap getBitmapImageFromBytes(byte[] image) {
+        return BitmapFactory.decodeByteArray(image, 50, image.length);
+    }
 
 
     public ArrayList<Cursor> getData(String Query){

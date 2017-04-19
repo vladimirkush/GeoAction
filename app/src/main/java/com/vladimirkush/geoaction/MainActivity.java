@@ -95,8 +95,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                         JSONObject object = response.getJSONObject();
                         try {
                             JSONArray arrayOfUsersInFriendList= object.getJSONArray("data");
-                                /* Do something with the user list */
-                                /* ex: get first user in list, "name" */
                             Log.d(LOG_TAG, "received friends number: "+ arrayOfUsersInFriendList.length());
                             JSONObject user = arrayOfUsersInFriendList.getJSONObject(0);
                             String usersName = user.getString("name");
