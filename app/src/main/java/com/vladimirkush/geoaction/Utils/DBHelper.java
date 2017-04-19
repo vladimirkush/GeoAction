@@ -109,8 +109,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public DBHelper(Context context) {
         super(context, DATABASE_NAME , null, 1);
         this.context=context;
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL(SQL_CREATE_TABLE_FRIENDS);
+       // SQLiteDatabase db = this.getWritableDatabase();
+        //db.execSQL(SQL_CREATE_TABLE_FRIENDS);// TODO delete?
     }
 
     @Override
