@@ -61,6 +61,22 @@ public class LoginActivity extends AppCompatActivity {
         // init FB callback manager
         callbackManager = CallbackManager.Factory.create();
 
+        /*// test block - only for showing hash in logs
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(
+                    "com.vladimirkush.geoaction",
+                    PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.d(LOG_TAG,"KeyHash: "+ Base64.encodeToString(md.digest(), Base64.DEFAULT));
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }   // end test block*/
+
         // check if logged in using StayLoggedIn
         if(mPersistantLogin) {
             String userToken = UserTokenStorageFactory.instance().getStorage().get();

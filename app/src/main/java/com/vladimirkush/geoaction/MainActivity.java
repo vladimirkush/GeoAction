@@ -19,6 +19,12 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
+import com.facebook.Profile;
+import com.facebook.appevents.AppEventsLogger;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Result;
@@ -42,10 +48,13 @@ import com.vladimirkush.geoaction.Utils.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.Constants;
 import com.vladimirkush.geoaction.Utils.DBHelper;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 
 public class MainActivity extends AppCompatActivity implements View.OnTouchListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback, DeleteItemHandler, SendItemHandler {
     private final String LOG_TAG = "LOGTAG";
@@ -61,13 +70,44 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private RecyclerView rvActionList;
     private Drawer mDrawer;
     private Toolbar mToolbar;
+    private  AppEventsLogger mFBLogger;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mFBLogger= AppEventsLogger.newLogger(this);
+        mFBLogger.logEvent("new logger");
 
+        //test
+        AccessToken token = AccessToken.getCurrentAccessToken();
+        Log.d(LOG_TAG, "FB Access token: "+token.toString());
+        String fbid = Profile.getCurrentProfile().getId();
+        new GraphRequest(
+                token,
+                "/me/friends",
+                null,
+                HttpMethod.GET,
+                new GraphRequest.Callback() {
+                    public void onCompleted(GraphResponse response) {
+                        Log.d(LOG_TAG, "fb graph response: \n"+response.toString());
+                        JSONObject object = response.getJSONObject();
+                        try {
+                            JSONArray arrayOfUsersInFriendList= object.getJSONArray("data");
+                                /* Do something with the user list */
+                                /* ex: get first user in list, "name" */
+                            Log.d(LOG_TAG, "received friends number: "+ arrayOfUsersInFriendList.length());
+                            JSONObject user = arrayOfUsersInFriendList.getJSONObject(0);
+                            String usersName = user.getString("name");
+                            Log.d(LOG_TAG, "fb freind name: "+ usersName);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+        ).executeAsync();
+        // -- test
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -294,6 +334,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         super.onResume();
 
         adapter.notifyDataSetChanged();
+
+
     }
 
     @Override
