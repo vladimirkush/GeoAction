@@ -1,6 +1,8 @@
 package com.vladimirkush.geoaction;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -18,6 +20,7 @@ import com.backendless.persistence.local.UserIdStorageFactory;
 import com.backendless.persistence.local.UserTokenStorageFactory;
 import com.facebook.CallbackManager;
 import com.vladimirkush.geoaction.Utils.Constants;
+import com.vladimirkush.geoaction.Utils.SharedPreferencesHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -291,10 +294,13 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void handleResponse(BackendlessUser backendlessUser) {
                 Log.d( LOG_TAG, backendlessUser.getEmail() + " successfully logged in with facebook" );
+
+                // set the SP to know user is fb logged
+                SharedPreferencesHelper.setIsFacebookLoggedIn(getApplicationContext(), true);
+
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.putExtra(Constants.LOGIN_IS_PERSISTENT_KEY, mPersistantLogin);
                 startActivity(intent);
-                //setUIEnabled(true); // enable UI
                 clearUI();
                 finish();
             }
@@ -307,4 +313,5 @@ public class LoginActivity extends AppCompatActivity {
             }
         }, mPersistantLogin);
     }
+
 }

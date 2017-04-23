@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -17,6 +18,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -34,6 +36,7 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.vladimirkush.geoaction.Asynctasks.GetAddressAsyncTask;
+import com.vladimirkush.geoaction.Models.Friend;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Models.LBAction.ActionType;
 import com.vladimirkush.geoaction.Models.LBEmail;
@@ -68,6 +71,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     private RadioButton mRadioEmail;
     private RadioButton mRadioEnterArea;
     private RadioButton mRadioExitArea;
+    private ImageButton mMapChoserButton;
     private LinearLayout mReminderLayout;
     private LinearLayout mSMSLayout;
     private LinearLayout mEmailLayout;
@@ -122,6 +126,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         mEmailMessage = (EditText) findViewById(R.id.et_email_text);
         mAddressLabel = (TextView) findViewById(R.id.label_address);
         mToolbar= (Toolbar) findViewById(R.id.action_create_toolbar);
+        mMapChoserButton = (ImageButton) findViewById(R.id.map_image_button) ;
         mToolbar.setTitle("Create new action");
         setSupportActionBar(mToolbar);
 
@@ -146,7 +151,8 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
             mRadiusLabel.setText("No location choosen");
         }
 
-
+        //Friend friend = dbHelper.getAllFriends().get(0);
+        //mMapChoserButton.setImageBitmap(friend.getUserIcon());
     }
 
     // If opened in edit mode, assign all fields per given lbAction

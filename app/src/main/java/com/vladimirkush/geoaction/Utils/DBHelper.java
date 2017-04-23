@@ -244,7 +244,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 FriendsEntry._ID + " DESC";
 
         Cursor cursor = db.query(
-               FriendsEntry.FRIENDS_TABLE_NAME,          // The table to query
+                FriendsEntry.FRIENDS_TABLE_NAME,          // The table to query
                 projection,                               // The columns to return
                 selection,                                // The columns for the WHERE clause
                 selectionArgs,                            // The values for the WHERE clause
@@ -262,6 +262,49 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
         return friend;
+    }
+
+    public Friend getFriendByFBId (String fbId){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+
+        String[] projection = {                         // colunmns to retrieve
+                FriendsEntry._ID,
+                FriendsEntry.FRIENDS_COLUMN_FBID,
+                FriendsEntry.FRIENDS_COLUMN_NAME,
+                FriendsEntry.FRIENDS_COLUMN_STATUS,
+                FriendsEntry.FRIENDS_COLUMN_USERICON,
+                FriendsEntry.FRIENDS_COLUMN_LAT,
+                FriendsEntry.FRIENDS_COLUMN_LON
+        };
+        String selection = FriendsEntry.FRIENDS_COLUMN_FBID + " = ?";
+        String[] selectionArgs = { fbId + "" };
+        String sortOrder =
+                FriendsEntry.FRIENDS_COLUMN_FBID + " DESC";
+
+        Cursor cursor = db.query(
+                FriendsEntry.FRIENDS_TABLE_NAME,          // The table to query
+                projection,                               // The columns to return
+                selection,                                // The columns for the WHERE clause
+                selectionArgs,                            // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                sortOrder                                 // The sort order
+        );
+
+        if(cursor.moveToFirst()) {  // if we found any
+            Friend friend = getFriendFromCursorRow(cursor);
+            if (friend == null) {
+                Log.e(LOG_TAG, "DB: error retrieving friend with fbid: " + fbId);
+            }
+            cursor.close();
+            return friend;
+        }else{
+            return null;
+        }
+
+
+
     }
 
     private Friend getFriendFromCursorRow(Cursor cursor){
@@ -343,7 +386,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
                 Friend friend = getFriendFromCursorRow(cursor);
                 if(friend==null){
-                    Log.e(LOG_TAG, "DB: error retrieving action in getAllActions");
+                    Log.e(LOG_TAG, "DB: error retrieving friend in getAllFriends");
                 }
 
                 friendList.add(friend);
@@ -461,13 +504,13 @@ public class DBHelper extends SQLiteOpenHelper {
     // convert from bitmap to byte array
     private byte[] getBytesFromBitmap(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 50, stream);
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
         return stream.toByteArray();
     }
 
     // convert from byte array to bitmap
     private Bitmap getBitmapImageFromBytes(byte[] image) {
-        return BitmapFactory.decodeByteArray(image, 50, image.length);
+        return BitmapFactory.decodeByteArray(image, 0, image.length);
     }
 
 

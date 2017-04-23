@@ -11,6 +11,7 @@ public class Constants {
 
 
 
+
     public static final int PERMISSION_LOCATION_REQUEST = 100;
     public static final int MAP_DATA_REQUEST_CODE = 101;
     public static final int MAP_DATA_RESULT_OK = 102;

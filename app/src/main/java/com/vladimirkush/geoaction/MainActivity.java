@@ -1,6 +1,8 @@
 package com.vladimirkush.geoaction;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -40,6 +42,7 @@ import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.vladimirkush.geoaction.Adapters.ActionsListAdapter;
 import com.vladimirkush.geoaction.Asynctasks.DeleteBulkFromCloud;
+import com.vladimirkush.geoaction.Asynctasks.FBfriendsDownloader;
 import com.vladimirkush.geoaction.Interfaces.DeleteItemHandler;
 import com.vladimirkush.geoaction.Interfaces.SendItemHandler;
 import com.vladimirkush.geoaction.Models.LBAction;
@@ -47,11 +50,15 @@ import com.vladimirkush.geoaction.Utils.AndroidDatabaseManager;
 import com.vladimirkush.geoaction.Utils.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.Constants;
 import com.vladimirkush.geoaction.Utils.DBHelper;
+import com.vladimirkush.geoaction.Utils.SharedPreferencesHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,32 +87,9 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         mFBLogger= AppEventsLogger.newLogger(this);
         mFBLogger.logEvent("new logger");
 
-        //test
-        AccessToken token = AccessToken.getCurrentAccessToken();
-        Log.d(LOG_TAG, "FB Access token: "+token.toString());
-        String fbid = Profile.getCurrentProfile().getId();
-        new GraphRequest(
-                token,
-                "/me/friends",
-                null,
-                HttpMethod.GET,
-                new GraphRequest.Callback() {
-                    public void onCompleted(GraphResponse response) {
-                        Log.d(LOG_TAG, "fb graph response: \n"+response.toString());
-                        JSONObject object = response.getJSONObject();
-                        try {
-                            JSONArray arrayOfUsersInFriendList= object.getJSONArray("data");
-                            Log.d(LOG_TAG, "received friends number: "+ arrayOfUsersInFriendList.length());
-                            JSONObject user = arrayOfUsersInFriendList.getJSONObject(0);
-                            String usersName = user.getString("name");
-                            Log.d(LOG_TAG, "fb freind name: "+ usersName);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-        ).executeAsync();
-        // -- test
+        new FBfriendsDownloader().execute();
+
+
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -122,9 +106,11 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
         dbHelper = new DBHelper(getApplicationContext());
 
+
         //debug
         //deleteAllItems();
         //dbHelper.deleteDB();
+        //dbHelper.deleteAllFriends();
 
         fab = (FloatingActionButton) findViewById(R.id.fab) ;
         fab.setOnTouchListener(this);

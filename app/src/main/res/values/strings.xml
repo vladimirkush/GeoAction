@@ -7,7 +7,7 @@
     <string name="backendless_REST_key">9E849FA5-A3A3-2F52-FFEB-EA3529F11400</string>
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCHDz4zO9JeG6JIiNhY9d3IQYiKHYpduDk</string>
     <string name="facebook_app_id">356515418047036</string>
-
+    <string name="shared_preferences_file_key"> com.vladimirkush.geoaction.PREFERENCE_FILE_KEY</string>
     <!--    UI strings   -->
     <string name="login_btn_text">Login</string>
     <string name="login_btn_text2">Back to login</string>
