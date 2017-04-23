@@ -8,7 +8,7 @@
     android:weightSum="100">
 
 
-    <ImageView
+   <ImageView
         android:id="@+id/image_profile_fb"
         android:layout_width="0dp"
         android:paddingLeft="16dp"
@@ -17,6 +17,17 @@
         android:layout_weight="20"
         android:paddingRight="16dp"
         android:src="@mipmap/ic_default" />
+
+    <!--<com.facebook.login.widget.ProfilePictureView
+        android:id="@+id/profpic_fb"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:paddingLeft="16dp"
+        android:layout_weight="20"
+        android:paddingRight="16dp"
+        android:layout_gravity="center">
+
+    </com.facebook.login.widget.ProfilePictureView>-->
 
     <TextView
         android:id="@+id/tv_friend_name"
@@ -37,5 +48,6 @@
         android:textOff="off"
         android:layout_height="wrap_content"
         android:layout_weight="18" />
+
 
 </LinearLayout>

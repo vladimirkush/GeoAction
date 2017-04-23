@@ -59,7 +59,7 @@ public class FBfriendsDownloader extends AsyncTask {
                                     final String friendId = user.getString("id");
                                     friend.setFbID(friendId);
                                     friend.setName(userName);
-                                    if(dbHelper.getFriendByFBId(friendId) == null) {
+                                    if(dbHelper.getFriendByFBId(friendId) == null) {    // do not download anything if the friend is already in DB
                                         Log.d(LOG_TAG, "fb freind name: " + userName + " id: " + friendId);
                                         if (user.has("picture")) {
 

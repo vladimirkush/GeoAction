@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
 
 
+
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)

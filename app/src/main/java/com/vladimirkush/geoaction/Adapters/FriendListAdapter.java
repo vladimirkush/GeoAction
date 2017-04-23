@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.facebook.login.widget.ProfilePictureView;
 import com.vladimirkush.geoaction.Models.Friend;
 import com.vladimirkush.geoaction.R;
 import com.vladimirkush.geoaction.Utils.DBHelper;
@@ -32,21 +33,24 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         dbHelper = new DBHelper(mContext);
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder   {
-        public ImageView fbIconView;
-        public TextView tvName;
-        public ToggleButton toggleTracingBtn;
+    static class ViewHolder extends RecyclerView.ViewHolder   {
+        ImageView fbIconView;
+        TextView tvName;
+        ToggleButton toggleTracingBtn;
+        ProfilePictureView mProfPic;
 
-        public View v;
+
+         View v;
 
         // We also create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
-        public ViewHolder(View itemView) {
-            super(itemView);
-            v=itemView;
-            fbIconView = (ImageView) itemView.findViewById(R.id.image_profile_fb);
-            tvName = (TextView) itemView.findViewById(R.id.tv_friend_name);
-            toggleTracingBtn = (ToggleButton) itemView.findViewById(R.id.toggle_btn_tracing);
+         ViewHolder(View itemView) {
+             super(itemView);
+             v=itemView;
+             fbIconView = (ImageView) itemView.findViewById(R.id.image_profile_fb);
+             tvName = (TextView) itemView.findViewById(R.id.tv_friend_name);
+             toggleTracingBtn = (ToggleButton) itemView.findViewById(R.id.toggle_btn_tracing);
+            // mProfPic = (ProfilePictureView) itemView.findViewById(R.id.profpic_fb);
 
         }
 
@@ -75,6 +79,7 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         final Friend friend = mFriendList.get(position);
 
         holder.fbIconView.setImageBitmap(friend.getUserIcon());
+        //holder.mProfPic.setProfileId(friend.getFbID());
         holder.tvName.setText(friend.getName());
         boolean traced = (friend.getStatus() == Friend.Status.TRACED);
         holder.toggleTracingBtn.setChecked(traced);
@@ -92,7 +97,7 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
                     fr.setStatus(Friend.Status.UNTRACED);
                 }
                 dbHelper.updateFriend(fr);
-                notifyItemChanged(position);
+               // notifyItemChanged(position);
             }
         });
     }
