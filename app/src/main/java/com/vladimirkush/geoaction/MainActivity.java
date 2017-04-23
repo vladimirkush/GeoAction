@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         mFBLogger= AppEventsLogger.newLogger(this);
         mFBLogger.logEvent("new logger");
 
+        // download all FB data
         new FBfriendsDownloader().execute();
 
 
@@ -245,7 +246,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
                         switch((int)drawerItem.getIdentifier()){
                             case 0: //Locate friends
-
+                                Intent friendsIntent  = new Intent(getApplicationContext(), FriendsActivity.class);
+                                startActivity(friendsIntent);
                                 break;
                             case 1: //Settings
 

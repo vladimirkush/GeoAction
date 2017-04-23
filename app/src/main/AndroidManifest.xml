@@ -24,8 +24,9 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-        <meta-data android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
 
         <activity
             android:name=".LoginActivity"
@@ -54,14 +55,17 @@
             android:name=".RecieveActivity"
             android:screenOrientation="portrait">
             <intent-filter android:label="Geo Action">
-                <data android:scheme="geoaction"
-                    android:host="actionid" />
-                <data android:scheme="http"
-                    android:host="geoaction.service"/>
+                <data
+                    android:host="actionid"
+                    android:scheme="geoaction" />
+                <data
+                    android:host="geoaction.service"
+                    android:scheme="http" />
+
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
             </intent-filter>
         </activity>
 
@@ -69,7 +73,7 @@
             android:name=".Services.GeofenceTransitionsIntentService"
             android:exported="false" />
 
-
+        <activity android:name=".FriendsActivity"></activity>
     </application>
 
 </manifest>
