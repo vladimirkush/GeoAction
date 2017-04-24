@@ -39,25 +39,16 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         ToggleButton toggleTracingBtn;
         ProfilePictureView mProfPic;
 
-
-         View v;
-
         // We also create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
          ViewHolder(View itemView) {
              super(itemView);
-             v=itemView;
              fbIconView = (ImageView) itemView.findViewById(R.id.image_profile_fb);
              tvName = (TextView) itemView.findViewById(R.id.tv_friend_name);
              toggleTracingBtn = (ToggleButton) itemView.findViewById(R.id.toggle_btn_tracing);
             // mProfPic = (ProfilePictureView) itemView.findViewById(R.id.profpic_fb);
-
         }
-
-
     }
-
-
 
 
     @Override
@@ -97,7 +88,6 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
                     fr.setStatus(Friend.Status.UNTRACED);
                 }
                 dbHelper.updateFriend(fr);
-               // notifyItemChanged(position);
             }
         });
     }
