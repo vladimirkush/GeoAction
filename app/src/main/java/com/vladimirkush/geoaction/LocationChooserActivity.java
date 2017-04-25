@@ -14,8 +14,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -38,9 +36,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.vladimirkush.geoaction.Utils.Constants;
-import com.vladimirkush.services.FriendsTrackerService;
-
-import java.util.ArrayList;
 
 public class LocationChooserActivity extends AppCompatActivity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -67,7 +62,7 @@ public class LocationChooserActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location_chooser);
-        FriendsTrackerService.initApplication(this);
+        //FriendsTrackerService.initApplication(this);
         mRadiusTextView = (TextView) findViewById(R.id.tv_radius);
         Intent intent = getIntent();
         if(intent.getParcelableExtra(Constants.AREA_CENTER_KEY)!= null){
@@ -136,30 +131,7 @@ public class LocationChooserActivity extends AppCompatActivity
             showLastKnownLocationOnMap();
         }
         Log.d(LOG_TAG, "Lat: " + mLastLocation.getLatitude() + ", Lon: " + mLastLocation.getLongitude());
-        //TODO starttest
 
-        FriendsTrackerService friendsTrackerService = FriendsTrackerService.getInstance();
-        ArrayList<String> fr = new ArrayList<String>();
-        fr.add("10208941452520304");
-        fr.add("111512256074129");
-        friendsTrackerService.getFriendsNearMeAsync(fr, location.getLatitude(), location.getLongitude(), new AsyncCallback<ArrayList<String>>() {
-            @Override
-            public void handleResponse(ArrayList<String> strings) {
-                if(strings.size() > 0) {
-                    for (String foundFriend : strings) {
-                        Log.d(LOG_TAG, "found " + foundFriend);
-                    }
-                }else{
-                    Log.d(LOG_TAG, "No friends found");
-                }
-            }
-
-            @Override
-            public void handleFault(BackendlessFault backendlessFault) {
-                Log.d(LOG_TAG, "Error while retrieving friends near me");
-            }
-        });
-        //TODO endtest
     }
 
     @Override

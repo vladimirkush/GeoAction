@@ -69,11 +69,17 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".FriendsActivity"
+            android:screenOrientation="portrait"></activity>
+
         <service
             android:name=".Services.GeofenceTransitionsIntentService"
             android:exported="false" />
+        <service
+            android:name=".Services.TrackService"
+            android:exported="false" />
 
-        <activity android:name=".FriendsActivity"></activity>
+
     </application>
 
 </manifest>

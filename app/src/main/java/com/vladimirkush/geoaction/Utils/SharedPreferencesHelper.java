@@ -8,6 +8,7 @@ import com.vladimirkush.geoaction.R;
 
 public class SharedPreferencesHelper {
     public static final String PREFS_FBLOGGED_IN = "fb_logged_in";
+    public static final String PREFS_ALARM_FLAG_KEY = "alarm_activated";
 
 
     public static void setIsFacebookLoggedIn(Context ctx, boolean flag){
@@ -22,6 +23,24 @@ public class SharedPreferencesHelper {
         SharedPreferences sharedPref = ctx.getSharedPreferences(
                 ctx.getString(R.string.shared_preferences_file_key), ctx.MODE_PRIVATE);
         if(!sharedPref.getBoolean(PREFS_FBLOGGED_IN, false)){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    public static void setIsAlarmActive(Context ctx, boolean flag){
+        SharedPreferences sharedPref = ctx.getSharedPreferences(
+                ctx.getString(R.string.shared_preferences_file_key), ctx.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean(PREFS_ALARM_FLAG_KEY, flag);
+        editor.commit();
+    }
+
+    public static boolean isAlarmActive(Context ctx){
+        SharedPreferences sharedPref = ctx.getSharedPreferences(
+                ctx.getString(R.string.shared_preferences_file_key), ctx.MODE_PRIVATE);
+        if(!sharedPref.getBoolean(PREFS_ALARM_FLAG_KEY, false)){
             return false;
         }else{
             return true;

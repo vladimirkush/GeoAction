@@ -1,12 +1,18 @@
 package com.vladimirkush.geoaction;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,11 +27,6 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
-import com.facebook.AccessToken;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.HttpMethod;
-import com.facebook.Profile;
 import com.facebook.appevents.AppEventsLogger;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -46,19 +47,13 @@ import com.vladimirkush.geoaction.Asynctasks.FBfriendsDownloader;
 import com.vladimirkush.geoaction.Interfaces.DeleteItemHandler;
 import com.vladimirkush.geoaction.Interfaces.SendItemHandler;
 import com.vladimirkush.geoaction.Models.LBAction;
+import com.vladimirkush.geoaction.Services.TrackService;
 import com.vladimirkush.geoaction.Utils.AndroidDatabaseManager;
 import com.vladimirkush.geoaction.Utils.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.Constants;
 import com.vladimirkush.geoaction.Utils.DBHelper;
 import com.vladimirkush.geoaction.Utils.SharedPreferencesHelper;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,15 +69,28 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private FloatingActionButton fab;
     private BackendlessUser user;
     private boolean mIsLoginPersistent;
+    private boolean mIsAlarmActivated;
     private RecyclerView rvActionList;
     private Drawer mDrawer;
     private Toolbar mToolbar;
     private  AppEventsLogger mFBLogger;
 
+    private AlarmManager mAlarmMgr;
+    private PendingIntent mAlarmIntent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // check permissions for location
+        if (!(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION}, Constants.PERMISSION_LOCATION_REQUEST);
+        }else{
+            Log.d(LOG_TAG, "Location permissions are already granted");
+        }
 
         mFBLogger= AppEventsLogger.newLogger(this);
         mFBLogger.logEvent("new logger");
@@ -134,8 +142,25 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         adapter.setDeleteItemHandler(this);
         adapter.setSendItemHandler(this);
         user = Backendless.UserService.CurrentUser();
-    }
 
+        //SharedPreferencesHelper.setIsAlarmActive(this, false);
+        if (!SharedPreferencesHelper.isAlarmActive(this)) {
+            Log.d(LOG_TAG, "activating alarm for tracking service");
+            SharedPreferencesHelper.setIsAlarmActive(this, true);
+            mAlarmMgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(this, TrackService.class);
+            mAlarmIntent = PendingIntent.getService(this, 0, intent, 0);
+
+            mAlarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + 1000, 60 * 1000, mAlarmIntent);
+            //mAlarmMgr.cancel(mAlarmIntent);
+        }else{
+            Log.d(LOG_TAG, "alarm already activated");
+
+
+        }
+
+    }
 
     private void logOutAsync(){
         Backendless.UserService.logout(new AsyncCallback<Void>() {
@@ -409,5 +434,38 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         }else{
             Toast.makeText(this,"Something went wrong, please try again",Toast.LENGTH_LONG).show();
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case Constants.PERMISSION_LOCATION_REQUEST: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(LOG_TAG, "Location permission granted");
+
+                } else {
+                    alertNoLocationPermissions();
+
+                }
+
+            }
+
+        }
+    }
+
+    private void alertNoLocationPermissions() {
+        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(this);
+        dlgAlert.setMessage(getResources().getString(R.string.locatioNnotGrantedMsg));
+        dlgAlert.setTitle(getResources().getString(R.string.locatioNnotGrantedTitle));
+        dlgAlert.setPositiveButton(getResources().getString(R.string.locatioNnotGrantedButtonText), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+        dlgAlert.setCancelable(true);
+        dlgAlert.create().show();
     }
 }
