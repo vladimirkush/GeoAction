@@ -307,6 +307,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
+
+
     private Friend getFriendFromCursorRow(Cursor cursor){
         Friend friend = new Friend();
         try {
@@ -395,6 +397,48 @@ public class DBHelper extends SQLiteOpenHelper {
         }
 
         return friendList;
+    }
+
+    public ArrayList<String> getAllTrackedFriiendsFBIDs(){
+        ArrayList<String> ids = new ArrayList<String>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection = {                         // colunmns to retrieve
+                FriendsEntry.FRIENDS_COLUMN_FBID,
+                FriendsEntry.FRIENDS_COLUMN_STATUS,
+        };
+        String selection = FriendsEntry.FRIENDS_COLUMN_STATUS + " = ?";
+        String[] selectionArgs = { Friend.Status.TRACED.toString() };
+        //String sortOrder =
+         //       FriendsEntry.FRIENDS_COLUMN_FBID + " DESC";
+
+        Cursor cursor = db.query(
+                FriendsEntry.FRIENDS_TABLE_NAME,          // The table to query
+                projection,                               // The columns to return
+                selection,                                // The columns for the WHERE clause
+                selectionArgs,                            // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                 // The sort order
+        );
+
+
+        if (cursor.moveToFirst()) {
+            while (cursor.isAfterLast() == false) {
+
+                String fbid = cursor.getString(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_FBID));
+                if (fbid == null) {
+                    Log.e(LOG_TAG, "DB: error retrieving tracked friend  fbid: " + fbid);
+                }
+
+                ids.add(fbid);
+                cursor.moveToNext();
+            }// while
+        }
+
+
+
+        return ids;
     }
 
 

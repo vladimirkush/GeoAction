@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             Log.d(LOG_TAG, "Location permissions are already granted");
         }
 
+        // facebook logger
         mFBLogger= AppEventsLogger.newLogger(this);
         mFBLogger.logEvent("new logger");
 
@@ -143,13 +144,18 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         adapter.setSendItemHandler(this);
         user = Backendless.UserService.CurrentUser();
 
-        //SharedPreferencesHelper.setIsAlarmActive(this, false);
-        if (!SharedPreferencesHelper.isAlarmActive(this)) {
+        //configure alarm
+        mAlarmMgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, TrackService.class);
+        mAlarmIntent = PendingIntent.getService(this, Constants.ALARM_MANAGER_REQUEST_CODE, intent, 0);
+
+        SharedPreferencesHelper.setIsAlarmActive(this, false);
+        SharedPreferencesHelper.setIsAlarmPermitted(this, true);
+        if (!SharedPreferencesHelper.isAlarmActive(this) &&
+                SharedPreferencesHelper.isFacebookLoggedIn(this)&&
+                SharedPreferencesHelper.isAlarmPermitted(this)) {
             Log.d(LOG_TAG, "activating alarm for tracking service");
             SharedPreferencesHelper.setIsAlarmActive(this, true);
-            mAlarmMgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-            Intent intent = new Intent(this, TrackService.class);
-            mAlarmIntent = PendingIntent.getService(this, 0, intent, 0);
 
             mAlarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     SystemClock.elapsedRealtime() + 1000, 60 * 1000, mAlarmIntent);
@@ -243,6 +249,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 .withIdentifier(5)
                 .withSelectable(false)
                 .withName("Delete all actions");
+        SecondaryDrawerItem itemStopTrackingService = new SecondaryDrawerItem()
+                .withIdentifier(6)
+                .withSelectable(false)
+                .withName("Stop tracking service");
 
         // Nav Drawer building
         mDrawer = new DrawerBuilder()
@@ -263,7 +273,9 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                         new DividerDrawerItem(),
                         itemDBManager,
                         new DividerDrawerItem(),
-                        itemDeleteAllActions
+                        itemDeleteAllActions,
+                        new DividerDrawerItem(),
+                        itemStopTrackingService
                         )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
@@ -292,6 +304,12 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                             case 5: //Delete al items
                                 deleteAllItems();
                                 deleteAllItemsFromCloud();
+                                break;
+                            case 6: //stop tracking service
+                                mAlarmMgr.cancel(mAlarmIntent);
+                                SharedPreferencesHelper.setIsAlarmPermitted(getApplicationContext(), false);
+                                SharedPreferencesHelper.setIsAlarmActive(getApplicationContext(), false);
+                                Log.d(LOG_TAG, "Tracking service alarmmanager stopped");
                                 break;
                         }
                         return true;

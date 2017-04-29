@@ -28,6 +28,8 @@ public class Constants {
     public static final int CREATE_NEW_LBACTION_REQUEST = 500;
     public static final int EDIT_EXISTING_LBACTION_REQUEST = 501;
 
+    public static final int ALARM_MANAGER_REQUEST_CODE = 600;
+
 
 
 
