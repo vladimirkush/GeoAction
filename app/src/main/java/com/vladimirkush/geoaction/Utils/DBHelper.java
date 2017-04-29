@@ -57,6 +57,8 @@ public class DBHelper extends SQLiteOpenHelper {
         public static final String FRIENDS_COLUMN_USERICON = "usericon";
         public static final String FRIENDS_COLUMN_LAT = "lat";
         public static final String FRIENDS_COLUMN_LON = "lon";
+        public static final String FRIENDS_COLUMN_ISNEAR = "isNear";
+
     }
 
     // ----constants----
@@ -92,7 +94,8 @@ public class DBHelper extends SQLiteOpenHelper {
                     FriendsEntry.FRIENDS_COLUMN_STATUS + " TEXT, " +
                     FriendsEntry.FRIENDS_COLUMN_USERICON + " BLOB, " +
                     FriendsEntry.FRIENDS_COLUMN_LAT + " REAL, " +
-                    FriendsEntry.FRIENDS_COLUMN_LON + " REAL " +
+                    FriendsEntry.FRIENDS_COLUMN_LON + " REAL, " +
+                    FriendsEntry.FRIENDS_COLUMN_ISNEAR + " INTEGER " +
 
                     ")";
 
@@ -236,7 +239,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 FriendsEntry.FRIENDS_COLUMN_STATUS,
                 FriendsEntry.FRIENDS_COLUMN_USERICON,
                 FriendsEntry.FRIENDS_COLUMN_LAT,
-                FriendsEntry.FRIENDS_COLUMN_LON
+                FriendsEntry.FRIENDS_COLUMN_LON,
+                FriendsEntry.FRIENDS_COLUMN_ISNEAR
         };
         String selection = FriendsEntry._ID + " = ?";
         String[] selectionArgs = { id + "" };
@@ -275,7 +279,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 FriendsEntry.FRIENDS_COLUMN_STATUS,
                 FriendsEntry.FRIENDS_COLUMN_USERICON,
                 FriendsEntry.FRIENDS_COLUMN_LAT,
-                FriendsEntry.FRIENDS_COLUMN_LON
+                FriendsEntry.FRIENDS_COLUMN_LON,
+                FriendsEntry.FRIENDS_COLUMN_ISNEAR
         };
         String selection = FriendsEntry.FRIENDS_COLUMN_FBID + " = ?";
         String[] selectionArgs = { fbId + "" };
@@ -321,6 +326,7 @@ public class DBHelper extends SQLiteOpenHelper {
             friend.setUserIcon(getBitmapImageFromBytes(img));
             friend.setLat(cursor.getDouble(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_LAT)));
             friend.setLon(cursor.getDouble(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_LON)));
+            friend.setNear(cursor.getInt(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_ISNEAR)) != 0);
         }catch ( Exception e){
             e.printStackTrace();
             return null;
@@ -381,7 +387,10 @@ public class DBHelper extends SQLiteOpenHelper {
     public ArrayList<Friend> getAllFriends(){
         SQLiteDatabase db = this.getReadableDatabase();
         ArrayList<Friend> friendList = new ArrayList<Friend>();
-        Cursor  cursor = db.rawQuery("select * from " + FriendsEntry.FRIENDS_TABLE_NAME, null);
+        Cursor  cursor = db.rawQuery("select * from " + FriendsEntry.FRIENDS_TABLE_NAME +
+                                        " ORDER BY "+FriendsEntry.FRIENDS_COLUMN_ISNEAR + " DESC, " +
+                                        FriendsEntry._ID + " DESC"
+                                        , null);
 
         if (cursor.moveToFirst()) {
             while (cursor.isAfterLast() == false) {
@@ -484,6 +493,7 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(FriendsEntry.FRIENDS_COLUMN_STATUS, friend.getStatus().toString());
         contentValues.put(FriendsEntry.FRIENDS_COLUMN_LAT, friend.getLat());
         contentValues.put(FriendsEntry.FRIENDS_COLUMN_LON, friend.getLon());
+        contentValues.put(FriendsEntry.FRIENDS_COLUMN_ISNEAR, friend.isNear()? 1 : 0);
         byte[] imgBytes = getBytesFromBitmap(friend.getUserIcon());
         contentValues.put(FriendsEntry.FRIENDS_COLUMN_USERICON, imgBytes);
         return contentValues;

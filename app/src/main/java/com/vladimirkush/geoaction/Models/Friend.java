@@ -12,9 +12,19 @@ public class Friend {
     private Bitmap userIcon;
     private double lat;
     private double lon;
+    private boolean isNear;
 
     public Friend() {
         this.status = Status.TRACED;    //default status
+        isNear = false;
+    }
+
+    public boolean isNear() {
+        return isNear;
+    }
+
+    public void setNear(boolean near) {
+        isNear = near;
     }
 
     public long getID() {

@@ -71,20 +71,28 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
                 //ArrayList<String> fr = new ArrayList<String>();
                 //fr.add("10208941452520304");
                 //fr.add("111512256074129");
+
                 mFriendsTrackerService.getFriendsNearMeAsync(fr, mLastLocation.getLatitude(), mLastLocation.getLongitude(), new AsyncCallback<ArrayList<String>>() {
                     @Override
                     public void handleResponse(ArrayList<String> strings) {
-                        if (strings.size() > 1) {
-                            for (String foundFriend : strings) {
-                                Log.d(LOG_TAG, "found " + foundFriend);
+                        if (strings.size() > 0) {
+                            for(String fbid : strings){ // update friends near me in db
+                                Friend friend = dbHelper.getFriendByFBId(fbid);
+                                friend.setNear(true);
+                                dbHelper.updateFriend(friend);
                             }
-                            sendNotification("Friends near you", "You have several friends around!");
+                            if (strings.size() > 1) {
+                                for (String foundFriend : strings) {
+                                    Log.d(LOG_TAG, "found " + foundFriend);
+                                }
+                                sendNotification("Friends near you", "You have several friends around!");
+                            } else if (strings.size() == 1) {
+                                Friend f = dbHelper.getFriendByFBId(strings.get(0));
+                                sendNotification("Friend near you", f.getName() + " is around you!");
+                            }
 
-                        }else if(strings.size() == 1) {
-                            Friend f = dbHelper.getFriendByFBId(strings.get(0));
-                            sendNotification("Friend near you", f.getName() + " is around you!");
 
-                        } else {
+                        }else {
                             Log.d(LOG_TAG, "No friends found");
                         }
                         Log.d(LOG_TAG, "Handle response ended. Stopping service..");

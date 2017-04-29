@@ -72,6 +72,14 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         holder.fbIconView.setImageBitmap(friend.getUserIcon());
         //holder.mProfPic.setProfileId(friend.getFbID());
         holder.tvName.setText(friend.getName());
+       /* if(friend.isNear()) {
+            holder.tvName.setTextColor(Color.parseColor("green"));
+            holder.tvName.setText(friend.getName() + " is near!");
+            Log.d(LOG_TAG, "green");
+        }else{
+            holder.tvName.setTextColor(Color.parseColor("black"));
+            Log.d(LOG_TAG, "black");
+        }*/
         boolean traced = (friend.getStatus() == Friend.Status.TRACED);
         holder.toggleTracingBtn.setChecked(traced);
 
