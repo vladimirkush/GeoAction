@@ -14,6 +14,10 @@ public class Friend {
     private double lon;
     private boolean isNear;
 
+
+
+    private long lastNearTimeMillis;
+
     public Friend() {
         this.status = Status.TRACED;    //default status
         isNear = false;
@@ -81,5 +85,13 @@ public class Friend {
 
     public void setLon(double lon) {
         this.lon = lon;
+    }
+
+    public long getLastNearTimeMillis() {
+        return lastNearTimeMillis;
+    }
+
+    public void setLastNearTimeMillis(long lastNearTimeMillis) {
+        this.lastNearTimeMillis = lastNearTimeMillis;
     }
 }

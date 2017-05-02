@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         Intent intent = new Intent(this, TrackService.class);
         mAlarmIntent = PendingIntent.getService(this, Constants.ALARM_MANAGER_REQUEST_CODE, intent, 0);
 
-        SharedPreferencesHelper.setIsAlarmActive(this, false);
+        //SharedPreferencesHelper.setIsAlarmActive(this, false);
         SharedPreferencesHelper.setIsAlarmPermitted(this, true);
         if (!SharedPreferencesHelper.isAlarmActive(this) &&
                 SharedPreferencesHelper.isFacebookLoggedIn(this)&&
@@ -158,10 +158,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             SharedPreferencesHelper.setIsAlarmActive(this, true);
 
             mAlarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + 1000, 60 * 1000, mAlarmIntent);
+                    SystemClock.elapsedRealtime() + 1000, 60 * 1000, mAlarmIntent); // fire each minute
             //mAlarmMgr.cancel(mAlarmIntent);
         }else{
-            Log.d(LOG_TAG, "alarm already activated");
+            Log.d(LOG_TAG, "alarm not activated");
 
 
         }

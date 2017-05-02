@@ -28,18 +28,38 @@
         android:layout_gravity="center">
 
     </com.facebook.login.widget.ProfilePictureView>-->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical"
+        android:gravity="center_vertical"
+        android:layout_weight="60">
 
     <TextView
         android:id="@+id/tv_friend_name"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Vladimir Kushnirsky"
         android:layout_gravity="center_vertical"
         android:textSize="22sp"
         android:textColor="#000000"
-        android:layout_weight="60"
+        android:paddingTop="10dp"
         android:ellipsize="end"
         android:lines="1"/>
+
+        <TextView
+        android:id="@+id/tv_isnear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="*is near you right now"
+        android:paddingLeft="10dp"
+        android:textStyle="italic"
+        android:textSize="10sp"
+        android:textColor="#a4a4a4"
+        android:ellipsize="end"
+        android:lines="1"/>
+    </LinearLayout>
 
     <ToggleButton
         android:id="@+id/toggle_btn_tracing"

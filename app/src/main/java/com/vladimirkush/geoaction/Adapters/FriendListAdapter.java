@@ -2,6 +2,7 @@ package com.vladimirkush.geoaction.Adapters;
 
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,6 +37,7 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
     static class ViewHolder extends RecyclerView.ViewHolder   {
         ImageView fbIconView;
         TextView tvName;
+        TextView tvIsNear;
         ToggleButton toggleTracingBtn;
         ProfilePictureView mProfPic;
 
@@ -45,6 +47,7 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
              super(itemView);
              fbIconView = (ImageView) itemView.findViewById(R.id.image_profile_fb);
              tvName = (TextView) itemView.findViewById(R.id.tv_friend_name);
+             tvIsNear = (TextView) itemView.findViewById(R.id.tv_isnear);
              toggleTracingBtn = (ToggleButton) itemView.findViewById(R.id.toggle_btn_tracing);
             // mProfPic = (ProfilePictureView) itemView.findViewById(R.id.profpic_fb);
         }
@@ -72,14 +75,15 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         holder.fbIconView.setImageBitmap(friend.getUserIcon());
         //holder.mProfPic.setProfileId(friend.getFbID());
         holder.tvName.setText(friend.getName());
-       /* if(friend.isNear()) {
+        if(friend.isNear()) {
             holder.tvName.setTextColor(Color.parseColor("green"));
-            holder.tvName.setText(friend.getName() + " is near!");
+            holder.tvIsNear.setVisibility(View.VISIBLE);
             Log.d(LOG_TAG, "green");
         }else{
             holder.tvName.setTextColor(Color.parseColor("black"));
+            holder.tvIsNear.setVisibility(View.INVISIBLE);
             Log.d(LOG_TAG, "black");
-        }*/
+        }
         boolean traced = (friend.getStatus() == Friend.Status.TRACED);
         holder.toggleTracingBtn.setChecked(traced);
 

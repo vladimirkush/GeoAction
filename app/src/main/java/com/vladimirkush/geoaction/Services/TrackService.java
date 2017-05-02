@@ -18,6 +18,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.backendless.Backendless;
+import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.google.android.gms.common.ConnectionResult;
@@ -37,6 +39,7 @@ import java.util.ArrayList;
 
 public class TrackService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private final String LOG_TAG = "LOGTAG";
+    private final long MILLIS_NOSPAM_DIFF = 1000 * 60 * 2;  // 30m
     private DBHelper dbHelper;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
@@ -66,35 +69,61 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
         } else {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if(mLastLocation != null) {
-                Log.d(LOG_TAG, "My location- Lat:" + mLastLocation.getLatitude() + " Lon: " + mLastLocation.getLongitude());
+                // updating current location in cloud
+                updateMyLocationInCloud();
+                Log.d(LOG_TAG, "My location Lat:" + mLastLocation.getLatitude() + " Lon: " + mLastLocation.getLongitude());
                 ArrayList<String> fr = dbHelper.getAllTrackedFriiendsFBIDs();
                 //ArrayList<String> fr = new ArrayList<String>();
                 //fr.add("10208941452520304");
                 //fr.add("111512256074129");
-
+                // web service call
                 mFriendsTrackerService.getFriendsNearMeAsync(fr, mLastLocation.getLatitude(), mLastLocation.getLongitude(), new AsyncCallback<ArrayList<String>>() {
                     @Override
                     public void handleResponse(ArrayList<String> strings) {
+                        long currentTimeMillis = System.currentTimeMillis();
                         if (strings.size() > 0) {
-                            for(String fbid : strings){ // update friends near me in db
-                                Friend friend = dbHelper.getFriendByFBId(fbid);
-                                friend.setNear(true);
-                                dbHelper.updateFriend(friend);
-                            }
                             if (strings.size() > 1) {
-                                for (String foundFriend : strings) {
-                                    Log.d(LOG_TAG, "found " + foundFriend);
+
+                                boolean wasAtLeastOneNotNotifiedYet =true;
+
+                                for (String fbid : strings) {
+                                    Log.d(LOG_TAG, "found " + fbid);
+                                    Friend f = dbHelper.getFriendByFBId(fbid);
+                                    f.setNear(true);
+
+                                    // if happened longer then MILLIS_NOSPAM_DIFF, update timestamp
+                                    if(checkIfTimeLongerThan(f.getLastNearTimeMillis(), currentTimeMillis, MILLIS_NOSPAM_DIFF)){
+                                        f.setLastNearTimeMillis(currentTimeMillis);
+                                    }else{
+                                        wasAtLeastOneNotNotifiedYet = false;
+                                    }
+                                    dbHelper.updateFriend(f);
                                 }
-                                sendNotification("Friends near you", "You have several friends around!");
+                                if(wasAtLeastOneNotNotifiedYet) {
+                                    sendNotification("Friends near you", "You have several friends around!");
+                                }
                             } else if (strings.size() == 1) {
                                 Friend f = dbHelper.getFriendByFBId(strings.get(0));
-                                sendNotification("Friend near you", f.getName() + " is around you!");
+                                f.setNear(true);
+
+                                if(checkIfTimeLongerThan(f.getLastNearTimeMillis(), currentTimeMillis, MILLIS_NOSPAM_DIFF)){
+                                    sendNotification("Friend near you", f.getName() + " is around you!");
+                                    // if happened longer then MILLIS_NOSPAM_DIFF, update timestamp
+                                    f.setLastNearTimeMillis(currentTimeMillis);
+                                    dbHelper.updateFriend(f);
+
+                                }else{
+                                    Log.d(LOG_TAG, "friends timstamp does not exceed the difference, no notification");
+
+                                }
+
                             }
 
 
                         }else {
                             Log.d(LOG_TAG, "No friends found");
                         }
+                        setNotNearFriendsStatus(strings);
                         Log.d(LOG_TAG, "Handle response ended. Stopping service..");
                         stopSelf();
                     }
@@ -138,6 +167,44 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
 
 
 
+
+    }
+    private boolean checkIfTimeLongerThan(long pastTimeMills, long currentTimeMills, long diffParamMills){
+        long diffMillis = currentTimeMills - pastTimeMills ;
+        return diffMillis >= diffParamMills;
+    }
+
+    private void updateMyLocationInCloud(){
+        BackendlessUser user = Backendless.UserService.CurrentUser();
+        if(user == null) return;
+        Log.d(LOG_TAG, "Current fb user: "+ user.getEmail() );
+        user.setProperty("latitude", mLastLocation.getLatitude());
+        user.setProperty("longitude", mLastLocation.getLongitude());
+        Backendless.UserService.update(user, new AsyncCallback<BackendlessUser>() {
+            @Override
+            public void handleResponse(BackendlessUser backendlessUser) {
+                Log.d(LOG_TAG, "Fb user updated in cloud: "+ backendlessUser.getEmail() );
+
+            }
+
+            @Override
+            public void handleFault(BackendlessFault backendlessFault) {
+                Log.d(LOG_TAG, "Fb user update in cloud failed: "+ backendlessFault.getMessage() );
+            }
+        });
+    }
+
+    private void setNotNearFriendsStatus(ArrayList<String> foundFriends){
+        ArrayList<Friend> friends = dbHelper.getAllFriends();
+        int count= 0;
+        for(Friend f:friends){
+            if(!foundFriends.contains(f.getFbID())){  //  if a friend in db is not near, set it up
+                f.setNear(false);
+                dbHelper.updateFriend(f);
+                count++;
+            }
+        }
+        Log.d(LOG_TAG, "Friends in db updated: " + count);
 
     }
 

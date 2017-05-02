@@ -58,6 +58,7 @@ public class DBHelper extends SQLiteOpenHelper {
         public static final String FRIENDS_COLUMN_LAT = "lat";
         public static final String FRIENDS_COLUMN_LON = "lon";
         public static final String FRIENDS_COLUMN_ISNEAR = "isNear";
+        public static final String FRIENDS_COLUMN_LAST_NEAR_TIME = "lastNearTimeMillis";
 
     }
 
@@ -95,7 +96,8 @@ public class DBHelper extends SQLiteOpenHelper {
                     FriendsEntry.FRIENDS_COLUMN_USERICON + " BLOB, " +
                     FriendsEntry.FRIENDS_COLUMN_LAT + " REAL, " +
                     FriendsEntry.FRIENDS_COLUMN_LON + " REAL, " +
-                    FriendsEntry.FRIENDS_COLUMN_ISNEAR + " INTEGER " +
+                    FriendsEntry.FRIENDS_COLUMN_ISNEAR + " INTEGER, " +
+                    FriendsEntry.FRIENDS_COLUMN_LAST_NEAR_TIME + " INTEGER " +
 
                     ")";
 
@@ -240,7 +242,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 FriendsEntry.FRIENDS_COLUMN_USERICON,
                 FriendsEntry.FRIENDS_COLUMN_LAT,
                 FriendsEntry.FRIENDS_COLUMN_LON,
-                FriendsEntry.FRIENDS_COLUMN_ISNEAR
+                FriendsEntry.FRIENDS_COLUMN_ISNEAR,
+                FriendsEntry.FRIENDS_COLUMN_LAST_NEAR_TIME
         };
         String selection = FriendsEntry._ID + " = ?";
         String[] selectionArgs = { id + "" };
@@ -280,7 +283,9 @@ public class DBHelper extends SQLiteOpenHelper {
                 FriendsEntry.FRIENDS_COLUMN_USERICON,
                 FriendsEntry.FRIENDS_COLUMN_LAT,
                 FriendsEntry.FRIENDS_COLUMN_LON,
-                FriendsEntry.FRIENDS_COLUMN_ISNEAR
+                FriendsEntry.FRIENDS_COLUMN_ISNEAR,
+                FriendsEntry.FRIENDS_COLUMN_LAST_NEAR_TIME
+
         };
         String selection = FriendsEntry.FRIENDS_COLUMN_FBID + " = ?";
         String[] selectionArgs = { fbId + "" };
@@ -327,6 +332,7 @@ public class DBHelper extends SQLiteOpenHelper {
             friend.setLat(cursor.getDouble(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_LAT)));
             friend.setLon(cursor.getDouble(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_LON)));
             friend.setNear(cursor.getInt(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_ISNEAR)) != 0);
+            friend.setLastNearTimeMillis(cursor.getLong(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_LAST_NEAR_TIME)));
         }catch ( Exception e){
             e.printStackTrace();
             return null;
@@ -494,6 +500,8 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(FriendsEntry.FRIENDS_COLUMN_LAT, friend.getLat());
         contentValues.put(FriendsEntry.FRIENDS_COLUMN_LON, friend.getLon());
         contentValues.put(FriendsEntry.FRIENDS_COLUMN_ISNEAR, friend.isNear()? 1 : 0);
+        contentValues.put(FriendsEntry.FRIENDS_COLUMN_LAST_NEAR_TIME, friend.getLastNearTimeMillis());
+
         byte[] imgBytes = getBytesFromBitmap(friend.getUserIcon());
         contentValues.put(FriendsEntry.FRIENDS_COLUMN_USERICON, imgBytes);
         return contentValues;
