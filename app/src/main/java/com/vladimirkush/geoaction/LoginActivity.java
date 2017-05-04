@@ -71,39 +71,16 @@ public class LoginActivity extends AppCompatActivity {
             String userToken = UserTokenStorageFactory.instance().getStorage().get();
             if (userToken != null && !userToken.equals("")) {
                 setUIEnabled(false);
-                Backendless.UserService.isValidLogin(new AsyncCallback<Boolean>() {
-                    @Override
-                    public void handleResponse(Boolean aBoolean) {
-                        String currentUserObjectId = UserIdStorageFactory.instance().getStorage().get();
-                        Backendless.Data.of( BackendlessUser.class ).findById( currentUserObjectId, new AsyncCallback<BackendlessUser>(){
 
-                            @Override
-                            public void handleResponse(BackendlessUser backendlessUser) {
-                                Log.d(LOG_TAG, "login validation success");
-                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                intent.putExtra(Constants.LOGIN_IS_PERSISTENT_KEY, mPersistantLogin);
-                                intent.putExtra(Constants.IS_INITIAL_LOGIN_KEY, false);
-                                startActivity(intent);
-                                finish();
-                            }
-
-                            @Override
-                            public void handleFault(BackendlessFault backendlessFault) {
-                                Toast.makeText(getApplicationContext(), "login validation failed", Toast.LENGTH_SHORT).show();
-                                Log.d(LOG_TAG, "login validation failed: "+ backendlessFault.getMessage());
-                                setUIEnabled(true);
-
-                            }
-                        } );
-
-                    }
-
-                    @Override
-                    public void handleFault(BackendlessFault backendlessFault) {
-                        Log.d(LOG_TAG, "User not logged in");
-                        setUIEnabled(true);
-                    }
-                });
+                Log.d(LOG_TAG, "login validation success");
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent.putExtra(Constants.LOGIN_IS_PERSISTENT_KEY, mPersistantLogin);
+                intent.putExtra(Constants.IS_INITIAL_LOGIN_KEY, false);
+                startActivity(intent);
+                finish();
+            }else{
+                Log.d(LOG_TAG, "user not logged in");
+                setUIEnabled(true);
 
             }
         }
@@ -306,7 +283,47 @@ public class LoginActivity extends AppCompatActivity {
 }
 
 
+/* validation of log in
+if(mPersistantLogin) {
+            String userToken = UserTokenStorageFactory.instance().getStorage().get();
+            if (userToken != null && !userToken.equals("")) {
+                setUIEnabled(false);
+                Backendless.UserService.isValidLogin(new AsyncCallback<Boolean>() {
+                    @Override
+                    public void handleResponse(Boolean aBoolean) {
+                        String currentUserObjectId = UserIdStorageFactory.instance().getStorage().get();
+                        Backendless.Data.of( BackendlessUser.class ).findById( currentUserObjectId, new AsyncCallback<BackendlessUser>(){
 
+                            @Override
+                            public void handleResponse(BackendlessUser backendlessUser) {
+                                Log.d(LOG_TAG, "login validation success");
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                intent.putExtra(Constants.LOGIN_IS_PERSISTENT_KEY, mPersistantLogin);
+                                intent.putExtra(Constants.IS_INITIAL_LOGIN_KEY, false);
+                                startActivity(intent);
+                                finish();
+                            }
+
+                            @Override
+                            public void handleFault(BackendlessFault backendlessFault) {
+                                Toast.makeText(getApplicationContext(), "login validation failed", Toast.LENGTH_SHORT).show();
+                                Log.d(LOG_TAG, "login validation failed: "+ backendlessFault.getMessage());
+                                setUIEnabled(true);
+
+                            }
+                        } );
+
+                    }
+
+                    @Override
+                    public void handleFault(BackendlessFault backendlessFault) {
+                        Log.d(LOG_TAG, "User not logged in");
+                        setUIEnabled(true);
+                    }
+                });
+
+            }
+        }*/
 
  /*// test block - only for showing hash in logs
         try {
