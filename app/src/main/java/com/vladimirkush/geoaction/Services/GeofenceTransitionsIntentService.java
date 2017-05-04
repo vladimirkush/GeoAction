@@ -156,7 +156,6 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
 
     private void handleSMSAction(LBSms sms){
-        // TODO rewrite in a nicer way with pending intents and number preediting
         SmsManager smsManager =  SmsManager.getDefault();
         for(String num : sms.getTo()) {
             smsManager.sendTextMessage(num, null, sms.getMessage(), null, null);

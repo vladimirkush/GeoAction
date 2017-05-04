@@ -49,7 +49,6 @@ public class SharedPreferencesHelper {
         }
     }
 
-
     public static void setIsAlarmPermitted(Context ctx, boolean flag){
         SharedPreferences sharedPref = ctx.getSharedPreferences(
                 ctx.getString(R.string.shared_preferences_file_key), ctx.MODE_PRIVATE);

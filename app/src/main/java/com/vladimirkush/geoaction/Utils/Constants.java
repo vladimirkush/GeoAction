@@ -2,7 +2,8 @@ package com.vladimirkush.geoaction.Utils;
 
 
 public class Constants {
-    public static final String LOGIN_IS_PERSISTENT_KEY = "Is login persistent";
+    public static final String LOGIN_IS_PERSISTENT_KEY = "is login persistent";
+    public static final String IS_INITIAL_LOGIN_KEY = "initial login";
     public static final String AREA_CENTER_KEY = "area_center";
     public static final String AREA_RADIUS_KEY = "area_radius";
     public static final String EDIT_MODE_KEY = "edit_mode";

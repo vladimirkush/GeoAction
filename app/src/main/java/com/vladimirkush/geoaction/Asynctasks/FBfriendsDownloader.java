@@ -25,12 +25,12 @@ import java.net.URL;
 import static com.facebook.FacebookSdk.getApplicationContext;
 
 
-public class FBfriendsDownloader extends AsyncTask {
+public class FBfriendsDownloader extends AsyncTask<Void, Void, Void> {
     private final String LOG_TAG = "LOGTAG";
     DBHelper dbHelper;
 
     @Override
-    protected Object doInBackground(Object[] params) {
+    protected Void doInBackground(Void... params) {
          dbHelper = new DBHelper(getApplicationContext());
         //test
         if(SharedPreferencesHelper.isFacebookLoggedIn(getApplicationContext())) {
@@ -110,8 +110,5 @@ public class FBfriendsDownloader extends AsyncTask {
         return null;
     }
 
-    @Override
-    protected void onPostExecute(Object o) {
-       //dbHelper.deleteAllFriends();
-    }
+
 }

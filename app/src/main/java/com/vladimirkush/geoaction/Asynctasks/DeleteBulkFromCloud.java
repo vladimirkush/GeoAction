@@ -15,8 +15,8 @@ import java.net.URL;
 public class DeleteBulkFromCloud extends AsyncTask<Void,Void,String> {
     private final String LOG_TAG = "LOGTAG";
 
-    String apiURL;
-    Context ctx;
+    private String apiURL;
+    private Context ctx;
 
     public DeleteBulkFromCloud(String apiURL, Context ctx) {
         this.apiURL = apiURL;

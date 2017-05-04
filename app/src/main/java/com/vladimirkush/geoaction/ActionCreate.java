@@ -46,6 +46,7 @@ import com.vladimirkush.geoaction.Services.GeofenceTransitionsIntentService;
 import com.vladimirkush.geoaction.Utils.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.Constants;
 import com.vladimirkush.geoaction.Utils.DBHelper;
+import com.vladimirkush.geoaction.Utils.GeofenceHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,12 +59,12 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     private final String LOG_TAG = "LOGTAG";
 
     //fields
-    private GoogleApiClient mGoogleApiClient;
     private LatLng mAreaCenter;
     private int mRadius;
     private boolean mIsEditMode;
     private LBAction mEditedLBAction;
     private DBHelper dbHelper;
+    private GeofenceHelper geofenceHelper;
 
     // views
     private RadioButton mRadioReminder;
@@ -86,7 +87,6 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     private EditText mEmailTo;
     private EditText mEmailSubject;
     private EditText mEmailMessage;
-    private PendingIntent mGeofencePendingIntent;
     private Toolbar mToolbar;
 
 
@@ -96,16 +96,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         setContentView(R.layout.activity_action_create);
 
         dbHelper = new DBHelper(getApplicationContext());
-
-        // Create an instance of GoogleAPIClient.
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
-
+        geofenceHelper = new GeofenceHelper(this);
 
         // assign views
         mRadioReminder = (RadioButton) findViewById(R.id.radio_reminder);
@@ -276,7 +267,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     // clicked map button
     public void onLocationChooserClick(View view) {
         Intent intent = new Intent(this, LocationChooserActivity.class);
-        if(mIsEditMode) {   // in case we are editing an existing action, send the params to mapchooser
+        if(mIsEditMode || mAreaCenter != null) {   // in case we are editing an existing action or clicking for second time, send the params to mapchooser
             intent.putExtra(Constants.AREA_CENTER_KEY, mAreaCenter);
             intent.putExtra(Constants.AREA_RADIUS_KEY, mRadius);
         }
@@ -289,7 +280,8 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         if(mIsEditMode){
             List<String> listIds = new ArrayList<String>();
             listIds.add(mEditedLBAction.getID()+"");
-            unregisterGeofences(listIds);
+            //unregisterGeofences(listIds);
+            geofenceHelper.unregisterGeofences(listIds);
         }
 
         if (mRadioReminder.isChecked()) { // create LBRemainder TODO check input
@@ -328,7 +320,8 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
             }
 
 
-            registerGeofence(reminder);
+            //registerGeofence(reminder);
+            geofenceHelper.registerGeofence(reminder);
 
         } else if (mRadioSMS.isChecked()) {// create LBSms TODO check input
             final LBSms lbSMS = new LBSms();
@@ -368,8 +361,8 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                     }
                 });
             }
-            registerGeofence(lbSMS);
-
+            //registerGeofence(lbSMS);
+            geofenceHelper.registerGeofence(lbSMS);
 
         } else {                         // create LBEmail, TODO check input
             final LBEmail lbEmail = new LBEmail();
@@ -409,7 +402,8 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                     }
                 });
             }
-            registerGeofence(lbEmail);
+            //registerGeofence(lbEmail);
+            geofenceHelper.registerGeofence(lbEmail);
         }
         Intent returnIntent = new Intent();
         setResult(RESULT_OK,returnIntent);
@@ -516,85 +510,19 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     }
 
     protected void onStart() {
-        mGoogleApiClient.connect();
+        //mGoogleApiClient.connect();
+        geofenceHelper.connectGoogleApi();
         super.onStart();
     }
 
     protected void onStop() {
-        mGoogleApiClient.disconnect();
+        //mGoogleApiClient.disconnect();
+        geofenceHelper.disconnectGoogleApi();
         super.onStop();
     }
 
-    //Creates request for registering a Geofence in the system for tracking
-    private GeofencingRequest getGeofencingRequest(LBAction lbAction) {
-        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);// change upon params
-        builder.addGeofence(createGeofenceForAction(lbAction));
-        return builder.build();
-    }
-
-    private Geofence createGeofenceForAction(LBAction lbAction) {
-        Geofence geofence = new Geofence.Builder()
-                // Set the request ID of the geofence. This is a string to identify this
-                // geofence.
-                .setRequestId(lbAction.getID() + "")
-                .setCircularRegion(
-                        lbAction.getTriggerCenter().latitude,
-                        lbAction.getTriggerCenter().longitude,
-                        lbAction.getRadius()
-                )
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                //.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-                .setTransitionTypes(lbAction.getDirectionTrigger() == LBAction.DirectionTrigger.ENTER ? Geofence.GEOFENCE_TRANSITION_ENTER : Geofence.GEOFENCE_TRANSITION_EXIT)
-                .build();
-
-        return geofence;
-    }
-
-    // request Pending Intent from the system for geofences
-    private PendingIntent getGeofencePendingIntent(LBAction lbAction) {
-        // Reuse the PendingIntent if we already have it.
-        if (mGeofencePendingIntent != null) {
-            return mGeofencePendingIntent;
-        }
-        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
-        intent.putExtra(Constants.LBACTION_ID_KEY, lbAction.getID());
-
-        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
-        // calling addGeofences() and removeGeofences().
-        return PendingIntent.getService(this, 0, intent, PendingIntent.
-                FLAG_UPDATE_CURRENT);
-    }
 
 
-    private void registerGeofence(LBAction lbAction) {
-        if (!(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION}, Constants.PERMISSION_LOCATION_REQUEST);
-            // TODO no permissions granted
-        } else {
-            //pIntent = getGeofencePendingIntent(lbAction);
-            LocationServices.GeofencingApi.addGeofences(
-                    mGoogleApiClient,
-                    getGeofencingRequest(lbAction),
-                    getGeofencePendingIntent(lbAction)
-            ).setResultCallback(this);
-            Toast.makeText(this, "Geofence registered", Toast.LENGTH_LONG).show();
-        }
-
-    }
-
-    private void unregisterGeofences(List<String> geofenceIDs) {
-
-        LocationServices.GeofencingApi.removeGeofences(
-                mGoogleApiClient,
-                // This is the same pending intent that was used in addGeofences().
-                geofenceIDs
-        )
-                .setResultCallback(this); // Result processed in onResult().
-        Toast.makeText(this, "Geofence id's unregistered: " + geofenceIDs.size(), Toast.LENGTH_LONG).show();
-    }
 
     // handles result of a pending intent
     @Override

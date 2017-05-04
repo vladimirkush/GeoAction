@@ -64,21 +64,7 @@ public class LoginActivity extends AppCompatActivity {
         // init FB callback manager
         callbackManager = CallbackManager.Factory.create();
 
-        /*// test block - only for showing hash in logs
-        try {
-            PackageInfo info = getPackageManager().getPackageInfo(
-                    "com.vladimirkush.geoaction",
-                    PackageManager.GET_SIGNATURES);
-            for (Signature signature : info.signatures) {
-                MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(signature.toByteArray());
-                Log.d(LOG_TAG,"KeyHash: "+ Base64.encodeToString(md.digest(), Base64.DEFAULT));
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }   // end test block*/
+
 
         // check if logged in using StayLoggedIn
         if(mPersistantLogin) {
@@ -96,6 +82,7 @@ public class LoginActivity extends AppCompatActivity {
                                 Log.d(LOG_TAG, "login validation success");
                                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                 intent.putExtra(Constants.LOGIN_IS_PERSISTENT_KEY, mPersistantLogin);
+                                intent.putExtra(Constants.IS_INITIAL_LOGIN_KEY, false);
                                 startActivity(intent);
                                 finish();
                             }
@@ -224,6 +211,7 @@ public class LoginActivity extends AppCompatActivity {
                 Log.d(LOG_TAG, user.getEmail() + " has logged in");
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.putExtra(Constants.LOGIN_IS_PERSISTENT_KEY, mPersistantLogin);
+                intent.putExtra(Constants.IS_INITIAL_LOGIN_KEY, true);
                 startActivity(intent);
                 //setUIEnabled(true); // enable UI
                 clearUI();
@@ -300,6 +288,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.putExtra(Constants.LOGIN_IS_PERSISTENT_KEY, mPersistantLogin);
+                intent.putExtra(Constants.IS_INITIAL_LOGIN_KEY, true);
                 startActivity(intent);
                 clearUI();
                 finish();
@@ -315,3 +304,22 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 }
+
+
+
+
+ /*// test block - only for showing hash in logs
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(
+                    "com.vladimirkush.geoaction",
+                    PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.d(LOG_TAG,"KeyHash: "+ Base64.encodeToString(md.digest(), Base64.DEFAULT));
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }   // end test block*/

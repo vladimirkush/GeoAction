@@ -24,7 +24,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.backendless.Backendless;
-import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.facebook.appevents.AppEventsLogger;
@@ -42,6 +41,7 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.vladimirkush.geoaction.Adapters.ActionsListAdapter;
+import com.vladimirkush.geoaction.Asynctasks.CloudSyncronizer;
 import com.vladimirkush.geoaction.Asynctasks.DeleteBulkFromCloud;
 import com.vladimirkush.geoaction.Asynctasks.FBfriendsDownloader;
 import com.vladimirkush.geoaction.Interfaces.DeleteItemHandler;
@@ -52,24 +52,24 @@ import com.vladimirkush.geoaction.Utils.AndroidDatabaseManager;
 import com.vladimirkush.geoaction.Utils.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.Constants;
 import com.vladimirkush.geoaction.Utils.DBHelper;
+import com.vladimirkush.geoaction.Utils.GeofenceHelper;
 import com.vladimirkush.geoaction.Utils.SharedPreferencesHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnTouchListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback, DeleteItemHandler, SendItemHandler {
+public class MainActivity extends AppCompatActivity implements View.OnTouchListener, DeleteItemHandler, SendItemHandler {
     private final String LOG_TAG = "LOGTAG";
     private final String SEND_URL_PREFIX = "http://geoaction.service/?id=";
 
     private GoogleApiClient mGoogleApiClient;
     private ArrayList<LBAction> mActionList;
     private DBHelper dbHelper;
-    private ActionsListAdapter adapter;
+    private GeofenceHelper geofenceHelper;
+    private ActionsListAdapter mAdapter;
     private FloatingActionButton fab;
-    private BackendlessUser user;
-    private boolean mIsLoginPersistent;
-    private boolean mIsAlarmActivated;
+    private String mUserId;
     private RecyclerView rvActionList;
     private Drawer mDrawer;
     private Toolbar mToolbar;
@@ -96,27 +96,14 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         mFBLogger= AppEventsLogger.newLogger(this);
         mFBLogger.logEvent("new logger");
 
-        // download all FB data
-        new FBfriendsDownloader().execute();
 
-
-
-
-        // Create an instance of GoogleAPIClient.
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
         mToolbar= (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(mToolbar);
 
         setupDrawer();
 
         dbHelper = new DBHelper(getApplicationContext());
-
+        geofenceHelper = new GeofenceHelper(this);
 
         //debug
         //deleteAllItems();
@@ -129,8 +116,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
         rvActionList = (RecyclerView) findViewById(R.id.rvActionsList);
         mActionList = dbHelper.getAllActions();
-        adapter = new ActionsListAdapter(this, mActionList);
-        rvActionList.setAdapter(adapter);
+        mAdapter = new ActionsListAdapter(this, mActionList);
+        rvActionList.setAdapter(mAdapter);
         rvActionList.setLayoutManager(new LinearLayoutManager(this));
         registerForContextMenu(rvActionList);
 
@@ -140,9 +127,21 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         rvActionList.addItemDecoration(itemDecoration);
 
         // set handlers for delete and send
-        adapter.setDeleteItemHandler(this);
-        adapter.setSendItemHandler(this);
-        user = Backendless.UserService.CurrentUser();
+        mAdapter.setDeleteItemHandler(this);
+        mAdapter.setSendItemHandler(this);
+
+        mUserId = Backendless.UserService.loggedInUser();
+
+        Intent in = getIntent();
+        // download all FB data
+        if (SharedPreferencesHelper.isFacebookLoggedIn(this)) {
+            new FBfriendsDownloader().execute();
+        }
+        // download actions data from cloud if it is the first log-in
+        if(in.getExtras().getBoolean(Constants.IS_INITIAL_LOGIN_KEY)) {
+            new CloudSyncronizer(this, mAdapter, mActionList).execute();
+        }
+
 
         //configure alarm
         mAlarmMgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
@@ -150,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         mAlarmIntent = PendingIntent.getService(this, Constants.ALARM_MANAGER_REQUEST_CODE, intent, 0);
 
         //SharedPreferencesHelper.setIsAlarmActive(this, false);
-        SharedPreferencesHelper.setIsAlarmPermitted(this, true);
+        SharedPreferencesHelper.setIsAlarmPermitted(this, false); // TODO test switch)
         if (!SharedPreferencesHelper.isAlarmActive(this) &&
                 SharedPreferencesHelper.isFacebookLoggedIn(this)&&
                 SharedPreferencesHelper.isAlarmPermitted(this)) {
@@ -172,9 +171,29 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         Backendless.UserService.logout(new AsyncCallback<Void>() {
             @Override
             public void handleResponse(Void aVoid) {
-                Toast.makeText(getApplicationContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+
+                // TODO unregister all geofences, setup flags
+                // delete add saved data - actions, friends
+                deleteAllItems();
+                dbHelper.deleteAllFriends();
+
+                //stop friends tracking feature if activated
+                if(SharedPreferencesHelper.isAlarmActive(getApplicationContext())) {
+                    mAlarmMgr.cancel(mAlarmIntent);
+                    SharedPreferencesHelper.setIsAlarmPermitted(getApplicationContext(), true);
+                    SharedPreferencesHelper.setIsAlarmActive(getApplicationContext(), false);
+                    Log.d(LOG_TAG, "Tracking service alarmmanager stopped");
+                }
+
+                //set global flags
+                SharedPreferencesHelper.setIsFacebookLoggedIn(getApplicationContext(), false);
+
+                // lget back to login activity
                 Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+                // notify user on sucessfull logout
+                Toast.makeText(getApplicationContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
                 startActivity(intent);
                 finish();
             }
@@ -193,19 +212,19 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             for (LBAction act : actions) {
                 IDs.add(act.getID() + "");
             }
-            unregisterGeofences(IDs);
+            geofenceHelper.unregisterGeofences(IDs);
             dbHelper.deleteAllActions();
             mActionList.clear();
-            adapter.notifyDataSetChanged();
+            mAdapter.notifyDataSetChanged();
         }else{
             Toast.makeText(this,"The list is empty already", Toast.LENGTH_LONG).show();
         }
     }
 
     private void deleteAllItemsFromCloud(){
-        String userID = user.getObjectId();
+
         String apiURL = "https://api.backendless.com/v1/data/bulk/Actions?where=ownerId%20%3D%20%27"
-       +userID+"%27";
+       + mUserId +"%27";
 
 
         DeleteBulkFromCloud bulkDelete = new DeleteBulkFromCloud(apiURL,getApplicationContext());
@@ -303,7 +322,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
                             case 5: //Delete al items
                                 deleteAllItems();
-                                deleteAllItemsFromCloud();
+                                //deleteAllItemsFromCloud();
                                 break;
                             case 6: //stop tracking service
                                 mAlarmMgr.cancel(mAlarmIntent);
@@ -340,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 ArrayList<LBAction> actions = dbHelper.getAllActions();
                 mActionList.clear();
                 mActionList.addAll(actions);
-                adapter.notifyDataSetChanged();
+                mAdapter.notifyDataSetChanged();
 
             }
         }
@@ -348,53 +367,25 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     }
 
-    private void unregisterGeofences(List<String> geofenceIDs) {
 
-        LocationServices.GeofencingApi.removeGeofences(
-                mGoogleApiClient,
-                // This is the same pending intent that was used in addGeofences().
-                geofenceIDs
-        )
-                .setResultCallback(this); // Result processed in onResult().
-        Toast.makeText(this, "Geofence id's unregistered: " + geofenceIDs.size(), Toast.LENGTH_LONG).show();
-    }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        adapter.notifyDataSetChanged();
+        mAdapter.notifyDataSetChanged();
 
 
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-    @Override
-    public void onResult(@NonNull Result result) {
-
-    }
 
     protected void onStart() {
-        mGoogleApiClient.connect();
+        geofenceHelper.connectGoogleApi();
         super.onStart();
     }
 
     protected void onStop() {
-        mGoogleApiClient.disconnect();
+        geofenceHelper.disconnectGoogleApi();
         super.onStop();
     }
 
@@ -428,8 +419,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             mActionList.remove(action);
             List <String> ids = new ArrayList<String>();
             ids.add(actionID+"");
-            unregisterGeofences(ids);
-            adapter.notifyItemRemoved(adapterPosition);
+            geofenceHelper.unregisterGeofences(ids);
+            mAdapter.notifyItemRemoved(adapterPosition);
         }
     }
 

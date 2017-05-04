@@ -8,11 +8,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.vladimirkush.geoaction.Utils.AddressHelper;
 
 
-public class GetAddressAsyncTask extends AsyncTask {
-    TextView mAddressLabel;
-    String mAddress;
+public class GetAddressAsyncTask extends AsyncTask<Object, Void, Void> {
+    private TextView mAddressLabel;
+    private String mAddress;
     @Override
-    protected Object doInBackground(Object[] params) {
+    protected Void doInBackground(Object[] params) {
 
         Context ctx = (Context) params[0];
         mAddressLabel= (TextView) params[1];
@@ -24,7 +24,7 @@ public class GetAddressAsyncTask extends AsyncTask {
     }
 
     @Override
-    protected void onPostExecute(Object o) {
+    protected void onPostExecute(Void aVoid) {
         mAddressLabel.setText(mAddress);
     }
 }
