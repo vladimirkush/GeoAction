@@ -19,7 +19,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
@@ -54,7 +53,7 @@ public class FBfriendsDownloader extends AsyncTask<Void, Void, Void> {
                                 Log.d(LOG_TAG, "received friends number: " + numOfFriends);
                                 for (int i = 0; i < numOfFriends; i++) {
                                     final Friend friend = new Friend();
-                                    JSONObject user = arrayOfUsersInFriendList.getJSONObject(0);
+                                    JSONObject user = arrayOfUsersInFriendList.getJSONObject(i);
                                     String userName = user.getString("name");
                                     final String friendId = user.getString("id");
                                     friend.setFbID(friendId);

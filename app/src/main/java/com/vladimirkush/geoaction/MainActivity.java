@@ -8,8 +8,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
@@ -27,11 +25,7 @@ import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.facebook.appevents.AppEventsLogger;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Result;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.LocationServices;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -132,14 +126,16 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
         mUserId = Backendless.UserService.loggedInUser();
 
-        Intent in = getIntent();
+        Intent incomingIntent = getIntent();
         // download all FB data
         if (SharedPreferencesHelper.isFacebookLoggedIn(this)) {
             new FBfriendsDownloader().execute();
         }
         // download actions data from cloud if it is the first log-in
-        if(in.getExtras().getBoolean(Constants.IS_INITIAL_LOGIN_KEY)) {
-            new CloudSyncronizer(this, mAdapter, mActionList).execute();
+        if(incomingIntent.getExtras() != null) {
+            if (incomingIntent.getExtras().getBoolean(Constants.IS_INITIAL_LOGIN_KEY, false)) {
+                new CloudSyncronizer(this, mAdapter, mActionList).execute();
+            }
         }
 
 
@@ -149,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         mAlarmIntent = PendingIntent.getService(this, Constants.ALARM_MANAGER_REQUEST_CODE, intent, 0);
 
         //SharedPreferencesHelper.setIsAlarmActive(this, false);
-        SharedPreferencesHelper.setIsAlarmPermitted(this, false); // TODO test switch)
+        SharedPreferencesHelper.setIsAlarmPermitted(this, true); // TODO test switch)
         if (!SharedPreferencesHelper.isAlarmActive(this) &&
                 SharedPreferencesHelper.isFacebookLoggedIn(this)&&
                 SharedPreferencesHelper.isAlarmPermitted(this)) {
