@@ -48,12 +48,12 @@ import com.vladimirkush.geoaction.Utils.AddressHelper;
 import com.vladimirkush.geoaction.Utils.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.Constants;
 import com.vladimirkush.geoaction.Utils.DBHelper;
+import com.vladimirkush.geoaction.Utils.GeofenceHelper;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class RecieveActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, ResultCallback {
+public class RecieveActivity extends AppCompatActivity implements OnMapReadyCallback,  ResultCallback {
     private final String LOG_TAG = "LOGTAG";
     private final String MAIN_TITLE = "New Geo Action Incoming: ";
 
@@ -73,7 +73,6 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
     private LinearLayout mToLayout;
     private LinearLayout mSubjectLayout;
 
-    private Marker mMarker;
     private Circle mCircle;
     private int mRadius;
     private LatLng markerLocation;
@@ -81,8 +80,7 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
     private String externalId;
     private LBAction lbAction;
     private GoogleMap mMap;
-    private GoogleApiClient mGoogleApiClient;
-    private PendingIntent mGeofencePendingIntent;
+    private GeofenceHelper mGeofenceHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,14 +96,8 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
         String msg = "Received id: " + externalId;
         Log.d(LOG_TAG,msg );
 
-        // Create an instance of GoogleAPIClient.
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
+        mGeofenceHelper = new GeofenceHelper(this);
+
         // init mapFragment and map object
         MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.rcv_map);
@@ -126,7 +118,7 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
                    setLayoutAndFields(lbAction);
                    if(mMap != null){
                        mMap.getUiSettings().setMapToolbarEnabled(false);
-                       mMarker = mMap.addMarker(new MarkerOptions()
+                        mMap.addMarker(new MarkerOptions()
                                .position(markerLocation)
                                .title("center of area")
                                .draggable(false));
@@ -149,7 +141,7 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
                    Log.d(LOG_TAG, "Fetching action from cloud failed" );
                    Log.d(LOG_TAG, backendlessFault.getMessage() );
                    if (backendlessFault.getCode().equals("1000")){
-                       showErrorDialog("We cannot get the Geo Action as it doesn't exist anymore (:");
+                       showErrorDialog("We cannot get the Geo Action as it doesn't exist anymore :(");
 
                    }else {
                        showErrorDialog("Network error occured, you can try one more time when the network is available");
@@ -193,7 +185,7 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
                                     Log.d(LOG_TAG, "Backendless async save failed");
                                 }
                             });
-                            registerGeofence(lbAction);
+                            mGeofenceHelper.registerGeofence(lbAction);
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(intent);
                             finish();
@@ -223,65 +215,6 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
 
         }
 
-    }
-    private void registerGeofence(LBAction lbAction) {
-        if (!(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION}, Constants.PERMISSION_LOCATION_REQUEST);
-            // TODO no permissions granted
-        } else {
-            //pIntent = getGeofencePendingIntent(lbAction);
-            LocationServices.GeofencingApi.addGeofences(
-                    mGoogleApiClient,
-                    getGeofencingRequest(lbAction),
-                    getGeofencePendingIntent(lbAction)
-            ).setResultCallback(this);
-            Toast.makeText(this, "Geo Action added", Toast.LENGTH_LONG).show();
-        }
-
-    }
-
-    //Creates request for registering a Geofence in the system for tracking
-    private GeofencingRequest getGeofencingRequest(LBAction lbAction) {
-        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);// change upon params
-        builder.addGeofence(createGeofenceForAction(lbAction));
-        return builder.build();
-    }
-
-    private Geofence createGeofenceForAction(LBAction lbAction) {
-        Geofence geofence = new Geofence.Builder()
-                // Set the request ID of the geofence. This is a string to identify this
-                // geofence.
-                .setRequestId(lbAction.getID() + "")
-                .setCircularRegion(
-                        lbAction.getTriggerCenter().latitude,
-                        lbAction.getTriggerCenter().longitude,
-                        lbAction.getRadius()
-                )
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                //.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-                .setTransitionTypes(lbAction.getDirectionTrigger() == LBAction.DirectionTrigger.ENTER ? Geofence.GEOFENCE_TRANSITION_ENTER : Geofence.GEOFENCE_TRANSITION_EXIT)
-                .build();
-
-        return geofence;
-    }
-
-    // request Pending Intent from the system for geofences
-    private PendingIntent getGeofencePendingIntent(LBAction lbAction) {
-        // Reuse the PendingIntent if we already have it.
-        if (mGeofencePendingIntent != null) {
-            return mGeofencePendingIntent;
-        }
-        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
-        // TODO set id for further searching in DB
-        intent.putExtra(Constants.LBACTION_ID_KEY, lbAction.getID());
-
-        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
-        // calling addGeofences() and removeGeofences().
-        return PendingIntent.getService(this, 0, intent, PendingIntent.
-                FLAG_UPDATE_CURRENT);
     }
 
 
@@ -393,33 +326,18 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
         mMap = googleMap;
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Log.d(LOG_TAG, "Google API client connected" );
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(LOG_TAG, "Google API client suspended" );
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.d(LOG_TAG, "Google API client failed" );
-    }
 
 
 
     @Override
     protected void onStart() {
-        mGoogleApiClient.connect();
+       mGeofenceHelper.connectGoogleApi();
         super.onStart();
     }
 
     @Override
     protected void onStop() {
-        mGoogleApiClient.disconnect();
+        mGeofenceHelper.disconnectGoogleApi();
         super.onStop();
     }
 
