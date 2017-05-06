@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -38,7 +39,7 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         ImageView fbIconView;
         TextView tvName;
         TextView tvIsNear;
-        ToggleButton toggleTracingBtn;
+        Switch swichTracing;
         ProfilePictureView mProfPic;
 
         // We also create a constructor that accepts the entire item row
@@ -48,7 +49,7 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
              fbIconView = (ImageView) itemView.findViewById(R.id.image_profile_fb);
              tvName = (TextView) itemView.findViewById(R.id.tv_friend_name);
              tvIsNear = (TextView) itemView.findViewById(R.id.tv_isnear);
-             toggleTracingBtn = (ToggleButton) itemView.findViewById(R.id.toggle_btn_tracing);
+             swichTracing = (Switch) itemView.findViewById(R.id.switch_tracing);
             // mProfPic = (ProfilePictureView) itemView.findViewById(R.id.profpic_fb);
         }
     }
@@ -85,10 +86,10 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
             Log.d(LOG_TAG, "black");
         }
         boolean traced = (friend.getStatus() == Friend.Status.TRACED);
-        holder.toggleTracingBtn.setChecked(traced);
+        holder.swichTracing.setChecked(traced);
 
 
-        holder.toggleTracingBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        holder.swichTracing.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 int position = holder.getAdapterPosition();

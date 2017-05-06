@@ -1,29 +1,22 @@
 package com.vladimirkush.geoaction;
 
 import android.Manifest;
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,30 +29,21 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Result;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
-import com.vladimirkush.geoaction.Adapters.ActionsListAdapter;
 import com.vladimirkush.geoaction.Adapters.SuggestionsAdapter;
 import com.vladimirkush.geoaction.Asynctasks.GetAddressAsyncTask;
-import com.vladimirkush.geoaction.Interfaces.SuggestionHandler;
-import com.vladimirkush.geoaction.Models.Friend;
+import com.vladimirkush.geoaction.Interfaces.SuggestionListener;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Models.LBAction.ActionType;
 import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
 import com.vladimirkush.geoaction.Models.LBSms;
-import com.vladimirkush.geoaction.Services.GeofenceTransitionsIntentService;
 import com.vladimirkush.geoaction.Utils.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.Constants;
 import com.vladimirkush.geoaction.Utils.DBHelper;
@@ -72,7 +56,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class ActionCreate extends AppCompatActivity implements ResultCallback, SuggestionHandler {
+public class ActionCreate extends AppCompatActivity implements SuggestionListener {
     private final String LOG_TAG = "LOGTAG";
 
     //fields
@@ -166,23 +150,11 @@ public class ActionCreate extends AppCompatActivity implements ResultCallback, S
         }
 
         mPopupWindow = createPopupWindow();
-        mRecyclerView = (RecyclerView) mPopupWindow.getContentView().findViewById(R.id.rv_suggestions);
-        mSuggestionsList = dbHelper.getAllActions();
-        mAdapter = new SuggestionsAdapter(this, mSuggestionsList);
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter.setSuggestionHandler(this);
 
-        // decorate RecyclerView
-        RecyclerView.ItemDecoration itemDecoration = new
-                DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
-        mRecyclerView.addItemDecoration(itemDecoration);
 
-        //Friend friend = dbHelper.getAllFriends().get(0);
-        //mMapChoserButton.setImageBitmap(friend.getUserIcon());
     }
 
-    // If opened in edit mode, assign all fields per given lbAction
+    // If opened in edit mode or a suggestion chosen, assign all fields per given lbAction
     private void setFieldsByAction(LBAction action) {
         mAreaCenter = action.getTriggerCenter();
         mRadius = action.getRadius();
@@ -537,15 +509,22 @@ public class ActionCreate extends AppCompatActivity implements ResultCallback, S
         if (Build.VERSION.SDK_INT >= 21) {
             window.setElevation(5.0f);
         }
+        mRecyclerView = (RecyclerView) mPopupWindow.getContentView().findViewById(R.id.rv_suggestions);
+        mSuggestionsList = dbHelper.getAllActions();
+        mAdapter = new SuggestionsAdapter(this, mSuggestionsList);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mAdapter.setSuggestionListener(this);
+
+        // decorate RecyclerView
+        RecyclerView.ItemDecoration itemDecoration = new
+                DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        mRecyclerView.addItemDecoration(itemDecoration);
 
         return window;
     }
 
-    private void showSuggestionsPopup() {
-        if (mPopupWindow != null) {
-            mPopupWindow.showAsDropDown(findViewById(R.id.show_suggestions));
-        }
-    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -559,14 +538,17 @@ public class ActionCreate extends AppCompatActivity implements ResultCallback, S
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.show_suggestions:
-                // todo show popup
                 showSuggestionsPopup();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-
+    private void showSuggestionsPopup() {
+        if (mPopupWindow != null) {
+            mPopupWindow.showAsDropDown(findViewById(R.id.show_suggestions));
+        }
+    }
     @Override
     public void onSuggestionClicked(int adapterPosition, LBAction action) {
         mPopupWindow.dismiss();
@@ -591,11 +573,6 @@ public class ActionCreate extends AppCompatActivity implements ResultCallback, S
     }
 
 
-    // handles result of a pending intent
-    @Override
-    public void onResult(@NonNull Result result) {
-        Log.d(LOG_TAG, "in onResult");
-    }
 
 
     @Override

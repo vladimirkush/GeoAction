@@ -82,20 +82,14 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         // facebook logger
         mFBLogger= AppEventsLogger.newLogger(this);
         mFBLogger.logEvent("new logger");
-
+        // toolbar and drawer
 
         mToolbar= (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(mToolbar);
-
         setupDrawer();
-
         dbHelper = new DBHelper(getApplicationContext());
         geofenceHelper = new GeofenceHelper(this);
 
-        //debug
-        //deleteAllItems();
-        //dbHelper.deleteDB();
-        //dbHelper.deleteAllFriends();
 
         fab = (FloatingActionButton) findViewById(R.id.fab) ;
         fab.setOnTouchListener(this);
@@ -112,11 +106,9 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         RecyclerView.ItemDecoration itemDecoration = new
                 DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         rvActionList.addItemDecoration(itemDecoration);
-
         // set handlers for delete and send
         mAdapter.setDeleteItemHandler(this);
         mAdapter.setSendItemHandler(this);
-
         mUserId = Backendless.UserService.loggedInUser();
 
         Intent incomingIntent = getIntent();
@@ -160,9 +152,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         Backendless.UserService.logout(new AsyncCallback<Void>() {
             @Override
             public void handleResponse(Void aVoid) {
-
-                // TODO unregister all geofences, setup flags
-                // delete add saved data - actions, friends
                 deleteAllItems();
                 dbHelper.deleteAllFriends();
 

@@ -1,8 +1,6 @@
 package com.vladimirkush.geoaction.Adapters;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,15 +9,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.vladimirkush.geoaction.ActionCreate;
-import com.vladimirkush.geoaction.Interfaces.SuggestionHandler;
+import com.vladimirkush.geoaction.Interfaces.SuggestionListener;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
 import com.vladimirkush.geoaction.Models.LBSms;
 import com.vladimirkush.geoaction.R;
-import com.vladimirkush.geoaction.Utils.Constants;
-import com.vladimirkush.geoaction.Utils.DBHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,18 +24,12 @@ public class SuggestionsAdapter extends   RecyclerView.Adapter<SuggestionsAdapte
     private final String LOG_TAG = "LOGTAG";
 
     private List<LBAction> mActionList;
-    private Context mContext;
-    private DBHelper dbHelper;
-
-
-
-    private SuggestionHandler mSuggestionHandler;
+    private SuggestionListener mSuggestionListener;
 
     // ctor
     public SuggestionsAdapter(Context mContext, ArrayList<LBAction> mActionList) {
         this.mActionList = mActionList;
-        this.mContext = mContext;
-        dbHelper = new DBHelper(mContext);       // init dbHelper
+
     }
 
 
@@ -111,8 +100,8 @@ public class SuggestionsAdapter extends   RecyclerView.Adapter<SuggestionsAdapte
                 int position = holder.getAdapterPosition();
                 LBAction action = mActionList.get(position);
                 Log.d(LOG_TAG, "clicked suggestion id "+ action.getID());
-                if(mSuggestionHandler != null){
-                    mSuggestionHandler.onSuggestionClicked(position, action);
+                if(mSuggestionListener != null){
+                    mSuggestionListener.onSuggestionClicked(position, action);
                 }else{
                     Log.d(LOG_TAG, "no suggestion handler registered");
                 }
@@ -126,7 +115,7 @@ public class SuggestionsAdapter extends   RecyclerView.Adapter<SuggestionsAdapte
     }
 
 
-    public void setSuggestionHandler(SuggestionHandler mSuggestionHandler) {
-        this.mSuggestionHandler = mSuggestionHandler;
+    public void setSuggestionListener(SuggestionListener mSuggestionListener) {
+        this.mSuggestionListener = mSuggestionListener;
     }
 }
