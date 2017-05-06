@@ -10,14 +10,12 @@ public abstract class LBAction {
 
     private ActionType actionType;
     private long ID;
-
-
-
     private String externalID;
     private int radius;
     private DirectionTrigger directionTrigger;
     private LatLng triggerCenter;
     private Status status;
+    private double score;
 
 
 
@@ -76,5 +74,13 @@ public abstract class LBAction {
 
     public void setDirectionTrigger(DirectionTrigger directionTrigger) {
         this.directionTrigger = directionTrigger;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
     }
 }

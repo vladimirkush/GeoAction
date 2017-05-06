@@ -103,7 +103,34 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
 
         dbHelper = new DBHelper(getApplicationContext());
         geofenceHelper = new GeofenceHelper(this);
+        assignViews();
 
+
+
+        Intent intent = getIntent();
+        mIsEditMode = intent.getBooleanExtra(Constants.EDIT_MODE_KEY, false);
+        if (mIsEditMode) {
+            mToolbar.setTitle("Edit the action");
+            long id = intent.getLongExtra(Constants.LBACTION_ID_KEY, -1);
+            mEditedLBAction = dbHelper.getAction(id);
+            Log.d(LOG_TAG, "Editing id: " + id);
+            if (id >= 0 || mEditedLBAction != null) {
+                setFieldsByAction(mEditedLBAction);
+            }
+        } else {
+            mRadioReminder.setChecked(true);    // default checked radio
+            mRadioEnterArea.setChecked(true);
+            setViewByActionType(ActionType.REMINDER);
+            mRadiusLabel.setText("No location choosen");
+        }
+
+        mPopupWindow = createPopupWindow();
+        assignAdapter(mPopupWindow);
+
+
+    }
+
+    private void assignViews(){
         // assign views
         mRadioReminder = (RadioButton) findViewById(R.id.radio_reminder);
         mRadioSMS = (RadioButton) findViewById(R.id.radio_sms);
@@ -130,28 +157,6 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
         mActionBar = getSupportActionBar();
         mActionBar.setDisplayHomeAsUpEnabled(true);
         mActionBar.setDisplayShowHomeEnabled(true);
-
-
-        Intent intent = getIntent();
-        mIsEditMode = intent.getBooleanExtra(Constants.EDIT_MODE_KEY, false);
-        if (mIsEditMode) {
-            mToolbar.setTitle("Edit the action");
-            long id = intent.getLongExtra(Constants.LBACTION_ID_KEY, -1);
-            mEditedLBAction = dbHelper.getAction(id);
-            Log.d(LOG_TAG, "Editing id: " + id);
-            if (id >= 0 || mEditedLBAction != null) {
-                setFieldsByAction(mEditedLBAction);
-            }
-        } else {
-            mRadioReminder.setChecked(true);    // default checked radio
-            mRadioEnterArea.setChecked(true);
-            setViewByActionType(ActionType.REMINDER);
-            mRadiusLabel.setText("No location choosen");
-        }
-
-        mPopupWindow = createPopupWindow();
-
-
     }
 
     // If opened in edit mode or a suggestion chosen, assign all fields per given lbAction
@@ -288,134 +293,94 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
         if (mIsEditMode) {
             List<String> listIds = new ArrayList<String>();
             listIds.add(mEditedLBAction.getID() + "");
-            //unregisterGeofences(listIds);
             geofenceHelper.unregisterGeofences(listIds);
         }
 
+        LBAction action = null;
         if (mRadioReminder.isChecked()) { // create LBRemainder TODO check input
-            final LBReminder reminder = new LBReminder();
-            reminder.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
-            reminder.setTitle(mReminderTitle.getText().toString());
-            reminder.setMessage(mReminderText.getText().toString());
-            reminder.setRadius(mRadius);
-            reminder.setTriggerCenter(mAreaCenter);
-
-            if (mIsEditMode) {    // If edit mode no insertion  - only update
-                reminder.setID(mEditedLBAction.getID());
-                dbHelper.updateAction(reminder);
-                Log.d(LOG_TAG, "REMINDER updated id: " + reminder.getID());
-            } else {
-                long id = dbHelper.insertAction(reminder);  // insert in the db and get ID
-                reminder.setID(id);                         // assign ID
-                Log.d(LOG_TAG, "REMINDER Assigned id: " + id);
-                // saving to cloud
-                HashMap map = (HashMap) BackendlessHelper.getMapForSingleAction(reminder);
-                Backendless.Data.of(BackendlessHelper.ACTIONS_TABLE_NAME).save(map, new AsyncCallback<Map>() {
-                    @Override
-                    public void handleResponse(Map map) {
-                        String objID = (String) map.get(BackendlessHelper.ACTIONS_OBJECT_ID);
-                        Log.d(LOG_TAG, "Assigned id from BCKNDLS: " + objID);
-                        reminder.setExternalID(objID);
-                        dbHelper.updateAction(reminder);
-
-                    }
-
-                    @Override
-                    public void handleFault(BackendlessFault backendlessFault) {
-                        Log.d(LOG_TAG, "Backendless async save failed");
-                    }
-                });
-            }
-
-
-            //registerGeofence(reminder);
-            geofenceHelper.registerGeofence(reminder);
-
+            action =  constructActionfromFields(ActionType.REMINDER);
         } else if (mRadioSMS.isChecked()) {// create LBSms TODO check input
-            final LBSms lbSMS = new LBSms();
-            lbSMS.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
-            String toNumbers = mSmsTo.getText().toString();
-            String[] numbers = TextUtils.split(toNumbers, ",");
-            List<String> numsList = new ArrayList<String>(Arrays.asList(numbers));
-            lbSMS.setTo(numsList);
-            lbSMS.setMessage(mSmsMessage.getText().toString());
-            lbSMS.setRadius(mRadius);
-            lbSMS.setTriggerCenter(mAreaCenter);
-
-            if (mIsEditMode) {// If edit mode no insertion  - only update
-                lbSMS.setID(mEditedLBAction.getID());
-                dbHelper.updateAction(lbSMS);
-                Log.d(LOG_TAG, "SMS updated id: " + lbSMS.getID());
-
-            } else {
-                long id = dbHelper.insertAction(lbSMS);  // insert in the db and get ID
-                lbSMS.setID(id);                         // assign ID
-                Log.d(LOG_TAG, "SMS Assigned id: " + id);
-                // saving to cloud
-                HashMap map = (HashMap) BackendlessHelper.getMapForSingleAction(lbSMS);
-                Backendless.Data.of(BackendlessHelper.ACTIONS_TABLE_NAME).save(map, new AsyncCallback<Map>() {
-                    @Override
-                    public void handleResponse(Map map) {
-                        String objID = (String) map.get(BackendlessHelper.ACTIONS_OBJECT_ID);
-                        Log.d(LOG_TAG, "Assigned id from BCKNDLS: " + objID);
-                        lbSMS.setExternalID(objID);
-                        dbHelper.updateAction(lbSMS);
-
-                    }
-
-                    @Override
-                    public void handleFault(BackendlessFault backendlessFault) {
-                        Log.d(LOG_TAG, "Backendless async save failed");
-                    }
-                });
-            }
-            //registerGeofence(lbSMS);
-            geofenceHelper.registerGeofence(lbSMS);
-
+            action = constructActionfromFields(ActionType.SMS);
         } else {                         // create LBEmail, TODO check input
-            final LBEmail lbEmail = new LBEmail();
-            lbEmail.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
-            String toAddresses = mEmailTo.getText().toString();
-            String[] addressesArr = TextUtils.split(toAddresses, ",");
-            List<String> addressList = new ArrayList<String>(Arrays.asList(addressesArr));
-            lbEmail.setTo(addressList);
-            lbEmail.setSubject(mEmailSubject.getText().toString());
-            lbEmail.setMessage(mEmailMessage.getText().toString());
-            lbEmail.setRadius(mRadius);
-            lbEmail.setTriggerCenter(mAreaCenter);
-
-            if (mIsEditMode) {// If edit mode no insertion  - only update
-                lbEmail.setID(mEditedLBAction.getID());
-                dbHelper.updateAction(lbEmail);
-                Log.d(LOG_TAG, "EMAIL updated id: " + lbEmail.getID());
-            } else {
-                long id = dbHelper.insertAction(lbEmail);  // insert in the db and get ID
-                lbEmail.setID(id);                         // assign ID
-                Log.d(LOG_TAG, "EMAIL Assigned id: " + id);
-                // saving to cloud
-                HashMap map = (HashMap) BackendlessHelper.getMapForSingleAction(lbEmail);
-                Backendless.Data.of(BackendlessHelper.ACTIONS_TABLE_NAME).save(map, new AsyncCallback<Map>() {
-                    @Override
-                    public void handleResponse(Map map) {
-                        String objID = (String) map.get(BackendlessHelper.ACTIONS_OBJECT_ID);
-                        Log.d(LOG_TAG, "Assigned id from BCKNDLS: " + objID);
-                        lbEmail.setExternalID(objID);
-                        dbHelper.updateAction(lbEmail);
-
-                    }
-
-                    @Override
-                    public void handleFault(BackendlessFault backendlessFault) {
-                        Log.d(LOG_TAG, "Backendless async save failed");
-                    }
-                });
-            }
-            //registerGeofence(lbEmail);
-            geofenceHelper.registerGeofence(lbEmail);
+            action = constructActionfromFields(ActionType.EMAIL);
         }
+
+        final LBAction actionForSave = action;
+        if (mIsEditMode) {    // If edit mode no insertion  - only update
+            actionForSave.setID(mEditedLBAction.getID());
+            dbHelper.updateAction(actionForSave);
+            Log.d(LOG_TAG, actionForSave.getActionType() + " updated id: " + actionForSave.getID());
+        } else {
+            long id = dbHelper.insertAction(actionForSave);  // insert in the db and get ID
+            actionForSave.setID(id);                         // assign ID
+            Log.d(LOG_TAG, actionForSave.getActionType() + " Assigned id: " + id);
+            // saving to cloud
+            HashMap map = (HashMap) BackendlessHelper.getMapForSingleAction(action);
+            Backendless.Data.of(BackendlessHelper.ACTIONS_TABLE_NAME).save(map, new AsyncCallback<Map>() {
+                @Override
+                public void handleResponse(Map map) {
+                    String objID = (String) map.get(BackendlessHelper.ACTIONS_OBJECT_ID);
+                    Log.d(LOG_TAG, "Assigned id from BCKNDLS: " + objID);
+                    actionForSave.setExternalID(objID);
+                    dbHelper.updateAction(actionForSave);
+
+                }
+
+                @Override
+                public void handleFault(BackendlessFault backendlessFault) {
+                    Log.d(LOG_TAG, "Backendless async save failed");
+                }
+            });
+        }
+
+        //registerGeofence(reminder);
+        geofenceHelper.registerGeofence(actionForSave);
+
+
         Intent returnIntent = new Intent();
         setResult(RESULT_OK, returnIntent);
         finish();
+    }
+
+    private LBAction constructActionfromFields(ActionType type){
+        LBAction action =null; // will be reassigned based on type
+        switch (type){
+            case REMINDER:
+                LBReminder reminder = new LBReminder();
+                reminder.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
+                reminder.setTitle(mReminderTitle.getText().toString());
+                reminder.setMessage(mReminderText.getText().toString());
+                reminder.setRadius(mRadius);
+                reminder.setTriggerCenter(mAreaCenter);
+                action = reminder;
+                break;
+            case SMS:
+                LBSms lbSMS = new LBSms();
+                lbSMS.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
+                String toNumbers = mSmsTo.getText().toString();
+                String[] numbers = TextUtils.split(toNumbers, ",");
+                List<String> numsList = new ArrayList<String>(Arrays.asList(numbers));
+                lbSMS.setTo(numsList);
+                lbSMS.setMessage(mSmsMessage.getText().toString());
+                lbSMS.setRadius(mRadius);
+                lbSMS.setTriggerCenter(mAreaCenter);
+                action = lbSMS;
+                break;
+            case EMAIL:
+                LBEmail lbEmail = new LBEmail();
+                lbEmail.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
+                String toAddresses = mEmailTo.getText().toString();
+                String[] addressesArr = TextUtils.split(toAddresses, ",");
+                List<String> addressList = new ArrayList<String>(Arrays.asList(addressesArr));
+                lbEmail.setTo(addressList);
+                lbEmail.setSubject(mEmailSubject.getText().toString());
+                lbEmail.setMessage(mEmailMessage.getText().toString());
+                lbEmail.setRadius(mRadius);
+                lbEmail.setTriggerCenter(mAreaCenter);
+                action = lbEmail;
+                break;
+        }
+        return action;
     }
 
     // setup views according to chosen type of action
@@ -509,6 +474,11 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
         if (Build.VERSION.SDK_INT >= 21) {
             window.setElevation(5.0f);
         }
+
+        return window;
+    }
+
+    private void assignAdapter(PopupWindow mPopupWindow) {
         mRecyclerView = (RecyclerView) mPopupWindow.getContentView().findViewById(R.id.rv_suggestions);
         mSuggestionsList = dbHelper.getAllActions();
         mAdapter = new SuggestionsAdapter(this, mSuggestionsList);
@@ -520,8 +490,6 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
         RecyclerView.ItemDecoration itemDecoration = new
                 DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         mRecyclerView.addItemDecoration(itemDecoration);
-
-        return window;
     }
 
 

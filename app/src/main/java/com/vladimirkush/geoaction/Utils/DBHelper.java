@@ -37,6 +37,8 @@ public class DBHelper extends SQLiteOpenHelper {
     // inner classes - Contract for table columns
     public static class ActionsEntry implements BaseColumns {
         public static final String ACTIONS_TABLE_NAME = "actions";
+        public static final String ACTIONS_TABLE_SUGGESTIONS_NAME = "suggestions";
+
         public static final String ACTIONS_COLUMN_EXTERNAL_ID = "externalId";
         public static final String ACTIONS_COLUMN_ACTION_TYPE = "actionType";
         public static final String ACTIONS_COLUMN_RADIUS = "radius";
@@ -47,6 +49,7 @@ public class DBHelper extends SQLiteOpenHelper {
         public static final String ACTIONS_COLUMN_TO = "recipients";
         public static final String ACTIONS_COLUMN_MESSAGE = "message";
         public static final String ACTIONS_COLUMN_SUBJECT = "subject";  // for reminder used for title
+        public static final String ACTIONS_COLUMN_SCORE = "score";      // used in suggestions table
     }
 
     public static class FriendsEntry implements BaseColumns{
@@ -101,6 +104,23 @@ public class DBHelper extends SQLiteOpenHelper {
 
                     ")";
 
+    private static final String SQL_CREATE_TABLE_SUGGESTIONS =
+            "CREATE TABLE IF NOT EXISTS " + ActionsEntry.ACTIONS_TABLE_SUGGESTIONS_NAME +
+                    " (" +
+                    ActionsEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    ActionsEntry.ACTIONS_COLUMN_ACTION_TYPE + " TEXT, " +
+                    ActionsEntry.ACTIONS_COLUMN_EXTERNAL_ID + " TEXT, " +
+                    ActionsEntry.ACTIONS_COLUMN_RADIUS + " INTEGER, " +
+                    ActionsEntry.ACTIONS_COLUMN_DIRECTION_TRIGGER + " TEXT, " +
+                    ActionsEntry.ACTIONS_COLUMN_LAT + " REAL, " +
+                    ActionsEntry.ACTIONS_COLUMN_LON + " REAL, " +
+                    ActionsEntry.ACTIONS_COLUMN_STATUS + " TEXT, " +
+                    ActionsEntry.ACTIONS_COLUMN_TO + " TEXT, " +
+                    ActionsEntry.ACTIONS_COLUMN_MESSAGE + " TEXT, " +
+                    ActionsEntry.ACTIONS_COLUMN_SUBJECT + " TEXT, " +
+                    ActionsEntry.ACTIONS_COLUMN_SCORE + " REAL " +
+                    ")";
+
     // DROP TABLE actions
     private static final String SQL_DELETE_ENTRIES_ACTIONS =
             "DELETE FROM  " + ActionsEntry.ACTIONS_TABLE_NAME;
@@ -108,6 +128,10 @@ public class DBHelper extends SQLiteOpenHelper {
     // DROP TABLE friends
     private static final String SQL_DELETE_ENTRIES_FRIENDS =
             "DELETE FROM  " + FriendsEntry.FRIENDS_TABLE_NAME;
+
+    // DROP TABLE suggestions
+    private static final String SQL_DELETE_ENTRIES_SUGGESTIONS =
+            "DELETE FROM  " + ActionsEntry.ACTIONS_TABLE_SUGGESTIONS_NAME;
 
     // ----methods----
     //ctor
@@ -122,6 +146,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_TABLE_ACTIONS);
         db.execSQL(SQL_CREATE_TABLE_FRIENDS);
+        db.execSQL(SQL_CREATE_TABLE_SUGGESTIONS);
         Log.d(LOG_TAG, "DB: " + DATABASE_NAME + "created");
     }
 
@@ -139,7 +164,7 @@ public class DBHelper extends SQLiteOpenHelper {
     // INSERT new action to DB, return Pk _ID
     public long insertAction(LBAction lbAction) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = getContentValuesForInsertUpdate(lbAction);
+        ContentValues contentValues = getContentValuesForInsertUpdate(lbAction, false);
 
         return db.insert(ActionsEntry.ACTIONS_TABLE_NAME, null, contentValues);
 
@@ -150,6 +175,15 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = getContentValuesForInsertUpdateFriend(friend);
         return db.insert(FriendsEntry.FRIENDS_TABLE_NAME, null, contentValues);
+
+    }
+
+    // INSERT new suggestion to DB, return Pk _ID
+    public long insertSuggestion(LBAction lbAction) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = getContentValuesForInsertUpdate(lbAction, true);
+
+        return db.insert(ActionsEntry.ACTIONS_TABLE_SUGGESTIONS_NAME, null, contentValues);
 
     }
 
@@ -180,6 +214,11 @@ public class DBHelper extends SQLiteOpenHelper {
     public void deleteAllFriends(){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(SQL_DELETE_ENTRIES_FRIENDS);
+    }
+
+    public void deleteAllSuggestions(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL(SQL_DELETE_ENTRIES_SUGGESTIONS);
     }
 
     public void createTableForActions(){
@@ -222,7 +261,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
         cursor.moveToFirst();
-        LBAction lbAction = getActionFromCursorRow(cursor);
+        LBAction lbAction = getActionFromCursorRow(cursor, false);
         if(lbAction==null){
             Log.e(LOG_TAG, "DB: error retrieving action with id: "+id);
         }
@@ -317,6 +356,49 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
+    public LBAction getSuggestion(long id){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection = {                         // colunmns to retrieve
+                ActionsEntry._ID,
+                ActionsEntry.ACTIONS_COLUMN_ACTION_TYPE,
+                ActionsEntry.ACTIONS_COLUMN_EXTERNAL_ID,
+                ActionsEntry.ACTIONS_COLUMN_RADIUS,
+                ActionsEntry.ACTIONS_COLUMN_DIRECTION_TRIGGER,
+                ActionsEntry.ACTIONS_COLUMN_LAT,
+                ActionsEntry.ACTIONS_COLUMN_LON,
+                ActionsEntry.ACTIONS_COLUMN_STATUS,
+                ActionsEntry.ACTIONS_COLUMN_TO,
+                ActionsEntry.ACTIONS_COLUMN_MESSAGE,
+                ActionsEntry.ACTIONS_COLUMN_SUBJECT,
+                ActionsEntry.ACTIONS_COLUMN_SCORE
+        };
+
+        String selection = ActionsEntry._ID + " = ?";
+        String[] selectionArgs = { id + "" };
+        String sortOrder =
+                ActionsEntry._ID + " DESC";
+
+        Cursor cursor = db.query(
+                ActionsEntry.ACTIONS_TABLE_SUGGESTIONS_NAME,          // The table to query
+                projection,                               // The columns to return
+                selection,                                // The columns for the WHERE clause
+                selectionArgs,                            // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                sortOrder                                 // The sort order
+        );
+
+
+        cursor.moveToFirst();
+        LBAction lbAction = getActionFromCursorRow(cursor, true);
+        if(lbAction==null){
+            Log.e(LOG_TAG, "DB: error retrieving action with id: "+id);
+        }
+        cursor.close();
+        return  lbAction;
+    }
+
 
 
     private Friend getFriendFromCursorRow(Cursor cursor){
@@ -350,16 +432,43 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
+    // DELETE suggestion by id
+    public int deleteSuggestion(long id){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String selection = ActionsEntry._ID + " = ?";
+        String[] selectionArgs = { id + "" };
+        return db.delete(ActionsEntry.ACTIONS_TABLE_SUGGESTIONS_NAME, selection, selectionArgs);
+
+    }
+
+
     // UPDATE one action of the same id as in incoming object, with all the values contained in it
     public int updateAction(LBAction lbAction){
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = getContentValuesForInsertUpdate(lbAction);
+        ContentValues contentValues = getContentValuesForInsertUpdate(lbAction, false);
         long id = lbAction.getID();
 
         String selection = ActionsEntry._ID + " = ?";
         String[] selectionArgs = { id + "" };
 
         return db.update(ActionsEntry.ACTIONS_TABLE_NAME,
+                contentValues,
+                selection,
+                selectionArgs);
+
+
+    }
+    // UPDATE one suggestion of the same id as in incoming object, with all the values contained in it
+    public int updateSuggestion(LBAction lbAction){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = getContentValuesForInsertUpdate(lbAction, true);
+        long id = lbAction.getID();
+
+        String selection = ActionsEntry._ID + " = ?";
+        String[] selectionArgs = { id + "" };
+
+        return db.update(ActionsEntry.ACTIONS_TABLE_SUGGESTIONS_NAME,
                 contentValues,
                 selection,
                 selectionArgs);
@@ -376,9 +485,31 @@ public class DBHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             while (cursor.isAfterLast() == false) {
 
-                LBAction lbAction = getActionFromCursorRow(cursor);
+                LBAction lbAction = getActionFromCursorRow(cursor, false);
                 if(lbAction==null){
                     Log.e(LOG_TAG, "DB: error retrieving action in getAllActions");
+                }
+
+                actionsList.add(lbAction);
+                cursor.moveToNext();
+            }// while
+        }
+
+        return actionsList;
+    }
+
+    // GET all data from "suggestions" table as list
+    public ArrayList<LBAction> getAllSuggestions(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<LBAction> actionsList = new ArrayList<LBAction>();
+        Cursor  cursor = db.rawQuery("select * from " + ActionsEntry.ACTIONS_TABLE_SUGGESTIONS_NAME, null);
+
+        if (cursor.moveToFirst()) {
+            while (cursor.isAfterLast() == false) {
+
+                LBAction lbAction = getActionFromCursorRow(cursor, true);
+                if(lbAction==null){
+                    Log.e(LOG_TAG, "DB: error retrieving action in getAllSuggestions");
                 }
 
                 actionsList.add(lbAction);
@@ -458,7 +589,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
 
-    private ContentValues getContentValuesForInsertUpdate(LBAction lbAction){
+    private ContentValues getContentValuesForInsertUpdate(LBAction lbAction, boolean isSuggestion){
         ContentValues contentValues = new ContentValues();
 
         // shared params
@@ -469,6 +600,9 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(ActionsEntry.ACTIONS_COLUMN_LAT, lbAction.getTriggerCenter().latitude);
         contentValues.put(ActionsEntry.ACTIONS_COLUMN_LON, lbAction.getTriggerCenter().longitude);
         contentValues.put(ActionsEntry.ACTIONS_COLUMN_STATUS, lbAction.getStatus().toString());
+        if(isSuggestion) {
+            contentValues.put(ActionsEntry.ACTIONS_COLUMN_SCORE, lbAction.getScore());
+        }
         // type-specific params
         if (lbAction instanceof LBReminder){
             LBReminder remAct = (LBReminder) lbAction;
@@ -507,7 +641,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return contentValues;
     }
 
-    private LBAction getActionFromCursorRow (Cursor cursor){
+    private LBAction getActionFromCursorRow (Cursor cursor, boolean isSuggestion){
         LBAction lbAction = null; // this will be reassigned based on the type and returned
         //determine the type of an action
         ActionType actionType =  ActionType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(ActionsEntry.ACTIONS_COLUMN_ACTION_TYPE)));
@@ -559,6 +693,9 @@ public class DBHelper extends SQLiteOpenHelper {
         lbAction.setTriggerCenter(ll);
         lbAction.setDirectionTrigger(dir);
         lbAction.setStatus(st);
+        if(isSuggestion){
+            lbAction.setScore(cursor.getDouble(cursor.getColumnIndexOrThrow(ActionsEntry.ACTIONS_COLUMN_SCORE)));
+        }
 
         return lbAction;
     }
