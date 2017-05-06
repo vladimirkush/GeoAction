@@ -37,10 +37,8 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
     private List<LBAction> mActionList;
     private Context mContext;
     private DBHelper dbHelper;
+
     private DeleteItemHandler mDeleteItemHandler;
-
-
-
     private SendItemHandler mSendItemHandler;
 
 
@@ -62,7 +60,7 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
 
         public View v;
 
-        // We also create a constructor that accepts the entire item row
+        // Create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
         public ViewHolder(View itemView) {
             super(itemView);
@@ -89,8 +87,8 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
 
 
         // Return a new holder instance
-        ViewHolder viewHolder = new ViewHolder(actionView);
-        return viewHolder;
+        return new ViewHolder(actionView);
+
     }
 
     @Override

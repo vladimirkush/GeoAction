@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingBottom="16dp"
     android:animateLayoutChanges="true"
     tools:context="com.vladimirkush.geoaction.ActionCreate">
 
@@ -22,9 +21,8 @@
 <ScrollView
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingTop="@dimen/activity_vertical_margin">
+
+    >
 
 
 
@@ -33,16 +31,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:paddingBottom="10dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
         android:weightSum="10">
 
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:text="Suggestions"
-            android:layout_weight="1"/>
-
-        <View style="@style/Divider"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -53,8 +46,9 @@
         <RadioGroup
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:weightSum="3"
+
             android:orientation="horizontal"
+            android:gravity="center_horizontal"
             android:padding="5dp">
 
             <RadioButton
@@ -133,11 +127,11 @@
 
             <RadioButton
                 android:id="@+id/radio_enter"
-                android:text="Entering area"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                />
+                android:text="Entering area" />
+
             <RadioButton
                 android:id="@+id/radio_exit"
                 android:text="Exiting area"
@@ -296,7 +290,6 @@
             android:foregroundGravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:paddingBottom="20dp"
             android:onClick="onSaveActionClick"/>
 
     </LinearLayout>

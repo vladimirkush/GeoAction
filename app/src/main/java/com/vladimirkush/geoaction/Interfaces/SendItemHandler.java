@@ -7,6 +7,6 @@ import com.vladimirkush.geoaction.Models.LBAction;
  */
 
 public interface SendItemHandler {
-    public void sendItem(int adapterPosition, LBAction action );
+     void sendItem(int adapterPosition, LBAction action );
 
 }

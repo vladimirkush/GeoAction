@@ -5,8 +5,10 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
@@ -14,13 +16,24 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,7 +49,10 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.vladimirkush.geoaction.Adapters.ActionsListAdapter;
+import com.vladimirkush.geoaction.Adapters.SuggestionsAdapter;
 import com.vladimirkush.geoaction.Asynctasks.GetAddressAsyncTask;
+import com.vladimirkush.geoaction.Interfaces.SuggestionHandler;
 import com.vladimirkush.geoaction.Models.Friend;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Models.LBAction.ActionType;
@@ -56,7 +72,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class ActionCreate extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback {
+public class ActionCreate extends AppCompatActivity implements ResultCallback, SuggestionHandler {
     private final String LOG_TAG = "LOGTAG";
 
     //fields
@@ -88,8 +104,12 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     private EditText mEmailTo;
     private EditText mEmailSubject;
     private EditText mEmailMessage;
+    private PopupWindow mPopupWindow;
     private Toolbar mToolbar;
     private ActionBar mActionBar;
+    private RecyclerView mRecyclerView;
+    private ArrayList<LBAction> mSuggestionsList;
+    private SuggestionsAdapter mAdapter;
 
 
     @Override
@@ -118,8 +138,8 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         mEmailSubject = (EditText) findViewById(R.id.et_email_subj);
         mEmailMessage = (EditText) findViewById(R.id.et_email_text);
         mAddressLabel = (TextView) findViewById(R.id.label_address);
-        mToolbar= (Toolbar) findViewById(R.id.action_create_toolbar);
-        mMapChoserButton = (ImageButton) findViewById(R.id.map_image_button) ;
+        mToolbar = (Toolbar) findViewById(R.id.action_create_toolbar);
+        mMapChoserButton = (ImageButton) findViewById(R.id.map_image_button);
         mToolbar.setTitle("Create new action");
         setSupportActionBar(mToolbar);
 
@@ -130,20 +150,33 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
 
         Intent intent = getIntent();
         mIsEditMode = intent.getBooleanExtra(Constants.EDIT_MODE_KEY, false);
-        if(mIsEditMode){
+        if (mIsEditMode) {
             mToolbar.setTitle("Edit the action");
             long id = intent.getLongExtra(Constants.LBACTION_ID_KEY, -1);
             mEditedLBAction = dbHelper.getAction(id);
             Log.d(LOG_TAG, "Editing id: " + id);
-            if(id >= 0 || mEditedLBAction != null) {
+            if (id >= 0 || mEditedLBAction != null) {
                 setFieldsByAction(mEditedLBAction);
             }
-        }else{
+        } else {
             mRadioReminder.setChecked(true);    // default checked radio
             mRadioEnterArea.setChecked(true);
             setViewByActionType(ActionType.REMINDER);
             mRadiusLabel.setText("No location choosen");
         }
+
+        mPopupWindow = createPopupWindow();
+        mRecyclerView = (RecyclerView) mPopupWindow.getContentView().findViewById(R.id.rv_suggestions);
+        mSuggestionsList = dbHelper.getAllActions();
+        mAdapter = new SuggestionsAdapter(this, mSuggestionsList);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mAdapter.setSuggestionHandler(this);
+
+        // decorate RecyclerView
+        RecyclerView.ItemDecoration itemDecoration = new
+                DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        mRecyclerView.addItemDecoration(itemDecoration);
 
         //Friend friend = dbHelper.getAllFriends().get(0);
         //mMapChoserButton.setImageBitmap(friend.getUserIcon());
@@ -155,17 +188,17 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         mRadius = action.getRadius();
         mRadiusLabel.setText("Radius: " + mRadius + "m");
         //mAddressLabel.setText(AddressHelper.getAddress(this,mAreaCenter));
-        new GetAddressAsyncTask().execute(this, mAddressLabel,mAreaCenter);
+        new GetAddressAsyncTask().execute(this, mAddressLabel, mAreaCenter);
         LBAction.DirectionTrigger dir = action.getDirectionTrigger();
-        if(dir == LBAction.DirectionTrigger.ENTER){
+        if (dir == LBAction.DirectionTrigger.ENTER) {
             mRadioEnterArea.setChecked(true);
-        }else {
+        } else {
             mRadioExitArea.setChecked(true);
         }
         ActionType type = action.getActionType();
         setViewByActionType(type);
         // assign text values to fields
-        switch (type){
+        switch (type) {
             case REMINDER:
                 LBReminder rem = (LBReminder) action;
                 mRadioReminder.setChecked(true);
@@ -174,7 +207,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                 break;
 
             case SMS:
-                LBSms sms = (LBSms)action;
+                LBSms sms = (LBSms) action;
                 mRadioSMS.setChecked(true);
                 mSmsTo.setText(sms.getToAsSingleString());
                 mSmsMessage.setText(sms.getMessage());
@@ -270,7 +303,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     // clicked map button
     public void onLocationChooserClick(View view) {
         Intent intent = new Intent(this, LocationChooserActivity.class);
-        if(mIsEditMode || mAreaCenter != null) {   // in case we are editing an existing action or clicking for second time, send the params to mapchooser
+        if (mIsEditMode || mAreaCenter != null) {   // in case we are editing an existing action or clicking for second time, send the params to mapchooser
             intent.putExtra(Constants.AREA_CENTER_KEY, mAreaCenter);
             intent.putExtra(Constants.AREA_RADIUS_KEY, mRadius);
         }
@@ -280,9 +313,9 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     // Collect all the text data, create an LB action and register a geofence for it
     public void onSaveActionClick(View view) {
         // if in edit mode, we need to unregister the previous one
-        if(mIsEditMode){
+        if (mIsEditMode) {
             List<String> listIds = new ArrayList<String>();
-            listIds.add(mEditedLBAction.getID()+"");
+            listIds.add(mEditedLBAction.getID() + "");
             //unregisterGeofences(listIds);
             geofenceHelper.unregisterGeofences(listIds);
         }
@@ -295,11 +328,11 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
             reminder.setRadius(mRadius);
             reminder.setTriggerCenter(mAreaCenter);
 
-            if(mIsEditMode){    // If edit mode no insertion  - only update
+            if (mIsEditMode) {    // If edit mode no insertion  - only update
                 reminder.setID(mEditedLBAction.getID());
                 dbHelper.updateAction(reminder);
                 Log.d(LOG_TAG, "REMINDER updated id: " + reminder.getID());
-            }else {
+            } else {
                 long id = dbHelper.insertAction(reminder);  // insert in the db and get ID
                 reminder.setID(id);                         // assign ID
                 Log.d(LOG_TAG, "REMINDER Assigned id: " + id);
@@ -308,8 +341,8 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                 Backendless.Data.of(BackendlessHelper.ACTIONS_TABLE_NAME).save(map, new AsyncCallback<Map>() {
                     @Override
                     public void handleResponse(Map map) {
-                        String objID = (String)map.get(BackendlessHelper.ACTIONS_OBJECT_ID);
-                        Log.d(LOG_TAG, "Assigned id from BCKNDLS: "+objID);
+                        String objID = (String) map.get(BackendlessHelper.ACTIONS_OBJECT_ID);
+                        Log.d(LOG_TAG, "Assigned id from BCKNDLS: " + objID);
                         reminder.setExternalID(objID);
                         dbHelper.updateAction(reminder);
 
@@ -337,12 +370,12 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
             lbSMS.setRadius(mRadius);
             lbSMS.setTriggerCenter(mAreaCenter);
 
-            if(mIsEditMode) {// If edit mode no insertion  - only update
+            if (mIsEditMode) {// If edit mode no insertion  - only update
                 lbSMS.setID(mEditedLBAction.getID());
                 dbHelper.updateAction(lbSMS);
                 Log.d(LOG_TAG, "SMS updated id: " + lbSMS.getID());
 
-            }else {
+            } else {
                 long id = dbHelper.insertAction(lbSMS);  // insert in the db and get ID
                 lbSMS.setID(id);                         // assign ID
                 Log.d(LOG_TAG, "SMS Assigned id: " + id);
@@ -351,8 +384,8 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                 Backendless.Data.of(BackendlessHelper.ACTIONS_TABLE_NAME).save(map, new AsyncCallback<Map>() {
                     @Override
                     public void handleResponse(Map map) {
-                        String objID = (String)map.get(BackendlessHelper.ACTIONS_OBJECT_ID);
-                        Log.d(LOG_TAG, "Assigned id from BCKNDLS: "+objID);
+                        String objID = (String) map.get(BackendlessHelper.ACTIONS_OBJECT_ID);
+                        Log.d(LOG_TAG, "Assigned id from BCKNDLS: " + objID);
                         lbSMS.setExternalID(objID);
                         dbHelper.updateAction(lbSMS);
 
@@ -379,11 +412,11 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
             lbEmail.setRadius(mRadius);
             lbEmail.setTriggerCenter(mAreaCenter);
 
-            if(mIsEditMode) {// If edit mode no insertion  - only update
+            if (mIsEditMode) {// If edit mode no insertion  - only update
                 lbEmail.setID(mEditedLBAction.getID());
                 dbHelper.updateAction(lbEmail);
                 Log.d(LOG_TAG, "EMAIL updated id: " + lbEmail.getID());
-            }else {
+            } else {
                 long id = dbHelper.insertAction(lbEmail);  // insert in the db and get ID
                 lbEmail.setID(id);                         // assign ID
                 Log.d(LOG_TAG, "EMAIL Assigned id: " + id);
@@ -392,8 +425,8 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                 Backendless.Data.of(BackendlessHelper.ACTIONS_TABLE_NAME).save(map, new AsyncCallback<Map>() {
                     @Override
                     public void handleResponse(Map map) {
-                        String objID = (String)map.get(BackendlessHelper.ACTIONS_OBJECT_ID);
-                        Log.d(LOG_TAG, "Assigned id from BCKNDLS: "+objID);
+                        String objID = (String) map.get(BackendlessHelper.ACTIONS_OBJECT_ID);
+                        Log.d(LOG_TAG, "Assigned id from BCKNDLS: " + objID);
                         lbEmail.setExternalID(objID);
                         dbHelper.updateAction(lbEmail);
 
@@ -409,7 +442,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
             geofenceHelper.registerGeofence(lbEmail);
         }
         Intent returnIntent = new Intent();
-        setResult(RESULT_OK,returnIntent);
+        setResult(RESULT_OK, returnIntent);
         finish();
     }
 
@@ -448,7 +481,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
                 Log.d(LOG_TAG, "Center lat: " + mAreaCenter.latitude + " lon: " + mAreaCenter.longitude + " radius: " + mRadius + "m");
 
                 mRadiusLabel.setText("Radius: " + mRadius + "m");
-                new GetAddressAsyncTask().execute(this, mAddressLabel,mAreaCenter);
+                new GetAddressAsyncTask().execute(this, mAddressLabel, mAreaCenter);
             }
             if (resultCode == Constants.MAP_DATA_RESULT_CANCEL) {
                 Log.d(LOG_TAG, "area trigger chosing cancelled");
@@ -491,40 +524,71 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
+    private PopupWindow createPopupWindow() {
+        // Initialize a new instance of LayoutInflater service
+        LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
+
+        // Inflate the custom layout/view
+        View popupView = inflater.inflate(R.layout.suggest_popup_window, null);
+
+        // Set an elevation value for popup window
+        // Call requires API level 21
+        PopupWindow window = new PopupWindow(popupView, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT, true);
+        if (Build.VERSION.SDK_INT >= 21) {
+            window.setElevation(5.0f);
+        }
+
+        return window;
+    }
+
+    private void showSuggestionsPopup() {
+        if (mPopupWindow != null) {
+            mPopupWindow.showAsDropDown(findViewById(R.id.show_suggestions));
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.action_create_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.show_suggestions:
+                // todo show popup
+                showSuggestionsPopup();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onSuggestionClicked(int adapterPosition, LBAction action) {
+        mPopupWindow.dismiss();
+        setFieldsByAction(action);
+    }
+
     @Override
     protected void onDestroy() {
         dbHelper.close();
         super.onDestroy();
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
 
     protected void onStart() {
-        //mGoogleApiClient.connect();
         geofenceHelper.connectGoogleApi();
         super.onStart();
     }
 
     protected void onStop() {
-        //mGoogleApiClient.disconnect();
         geofenceHelper.disconnectGoogleApi();
         super.onStop();
     }
-
-
 
 
     // handles result of a pending intent

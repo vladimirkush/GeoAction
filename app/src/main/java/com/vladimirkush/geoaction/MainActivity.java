@@ -422,7 +422,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         String externalId = actionTemp.getExternalID();
         Log.d(LOG_TAG, "Sending action with id: "+id +" and external: "+externalId);
 
-        if(externalId != null && externalId != "") {
+        if(externalId != null && !externalId.equals("")) {
             String request = SEND_URL_PREFIX + externalId;
             Intent sendIntent = new Intent(android.content.Intent.ACTION_SEND);
             sendIntent.setType("text/plain");

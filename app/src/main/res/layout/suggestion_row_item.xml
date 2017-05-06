@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:weightSum="100">
+
+    <ImageView
+        android:id="@+id/sug_image_type"
+        android:layout_width="0dp"
+        android:paddingLeft="16dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:paddingRight="16dp"
+        android:layout_weight="25"
+        android:src="@mipmap/ic_default" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="75"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/sug_tv_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Test message 1"
+            android:textSize="20sp"
+            android:textColor="#000000"
+            android:ellipsize="end"
+            android:layout_weight="4"
+            android:lines="1"/>
+
+        <TextView
+            android:id="@+id/sug_tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:ellipsize="end"
+            android:lines="1"
+            android:text="Test message 2 very long 2"
+            android:textSize="15sp" />
+
+
+
+    </LinearLayout>
+
+</LinearLayout>
