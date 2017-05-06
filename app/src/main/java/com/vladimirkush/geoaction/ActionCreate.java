@@ -308,6 +308,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
         final LBAction actionForSave = action;
         if (mIsEditMode) {    // If edit mode no insertion  - only update
             actionForSave.setID(mEditedLBAction.getID());
+            actionForSave.setExternalID(mEditedLBAction.getExternalID());
             dbHelper.updateAction(actionForSave);
             Log.d(LOG_TAG, actionForSave.getActionType() + " updated id: " + actionForSave.getID());
         } else {
