@@ -77,14 +77,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // check permissions for location
-        if (!(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION}, Constants.PERMISSION_LOCATION_REQUEST);
-        }else{
-            Log.d(LOG_TAG, "Location permissions are already granted");
-        }
+
 
         // facebook logger
         mFBLogger= AppEventsLogger.newLogger(this);
@@ -441,36 +434,5 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case Constants.PERMISSION_LOCATION_REQUEST: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(LOG_TAG, "Location permission granted");
 
-                } else {
-                    alertNoLocationPermissions();
-
-                }
-
-            }
-
-        }
-    }
-
-    private void alertNoLocationPermissions() {
-        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(this);
-        dlgAlert.setMessage(getResources().getString(R.string.locatioNnotGrantedMsg));
-        dlgAlert.setTitle(getResources().getString(R.string.locatioNnotGrantedTitle));
-        dlgAlert.setPositiveButton(getResources().getString(R.string.locatioNnotGrantedButtonText), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                finish();
-            }
-        });
-        dlgAlert.setCancelable(true);
-        dlgAlert.create().show();
-    }
 }

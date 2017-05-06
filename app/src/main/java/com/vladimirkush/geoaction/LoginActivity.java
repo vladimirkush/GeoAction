@@ -1,9 +1,13 @@
 package com.vladimirkush.geoaction;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -64,7 +68,14 @@ public class LoginActivity extends AppCompatActivity {
         // init FB callback manager
         callbackManager = CallbackManager.Factory.create();
 
-
+        // check permissions for location
+        if (!(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION}, Constants.PERMISSION_LOCATION_REQUEST);
+        }else{
+            Log.d(LOG_TAG, "Location permissions are already granted");
+        }
 
         // check if logged in using StayLoggedIn
         if(mPersistantLogin) {
@@ -278,6 +289,40 @@ public class LoginActivity extends AppCompatActivity {
                 setUIEnabled(true);
             }
         }, mPersistantLogin);
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case Constants.PERMISSION_LOCATION_REQUEST: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(LOG_TAG, "Location permission granted");
+
+                } else {
+                    alertNoLocationPermissions();
+
+                }
+
+            }
+
+        }
+    }
+
+    private void alertNoLocationPermissions() {
+        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(this);
+        dlgAlert.setMessage(getResources().getString(R.string.locatioNnotGrantedMsg));
+        dlgAlert.setTitle(getResources().getString(R.string.locatioNnotGrantedTitle));
+        dlgAlert.setPositiveButton(getResources().getString(R.string.locatioNnotGrantedButtonText), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+        dlgAlert.setCancelable(true);
+        dlgAlert.create().show();
     }
 
 }

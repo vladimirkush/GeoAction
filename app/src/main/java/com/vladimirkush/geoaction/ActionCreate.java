@@ -12,6 +12,7 @@ import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -88,6 +89,7 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
     private EditText mEmailSubject;
     private EditText mEmailMessage;
     private Toolbar mToolbar;
+    private ActionBar mActionBar;
 
 
     @Override
@@ -121,8 +123,9 @@ public class ActionCreate extends AppCompatActivity implements GoogleApiClient.C
         mToolbar.setTitle("Create new action");
         setSupportActionBar(mToolbar);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        mActionBar = getSupportActionBar();
+        mActionBar.setDisplayHomeAsUpEnabled(true);
+        mActionBar.setDisplayShowHomeEnabled(true);
 
 
         Intent intent = getIntent();

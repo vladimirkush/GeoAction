@@ -79,7 +79,6 @@ public class CloudSyncronizer extends AsyncTask<Void, Void, Void> {
         }
         ArrayList<LBAction> actions = dbHelper.getAllActions();
         actionList.addAll(actions);
-        //while (!geofenceHelper.getGoogleApiClient().isConnected())  // wait for google api to connect
         geofenceHelper.registerGeofences(actionList);
         return null;
     }
