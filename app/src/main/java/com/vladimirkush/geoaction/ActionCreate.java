@@ -493,6 +493,15 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
         mRecyclerView.addItemDecoration(itemDecoration);
     }
 
+    private void updateSuggestionScores(LBAction savedAction){
+
+
+
+
+
+        savedAction.setScore(0);
+        dbHelper.insertSuggestion(savedAction);
+    }
 
 
     @Override

@@ -162,6 +162,7 @@
                android:layout_height="0dp"
                android:paddingBottom="5dp"
                android:layout_weight="1"
+               android:maxLines="1"
                android:hint="Title"/>
 
             <EditText
@@ -169,7 +170,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
-                android:minLines="3"
+                android:minLines="2"
                 android:gravity="start"
                 android:scrollbars="vertical"
                 android:hint="Text"
@@ -219,7 +220,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
-                android:minLines="3"
+                android:minLines="2"
                 android:gravity="start"
                 android:scrollbars="vertical"
                 android:hint="Message"
@@ -267,6 +268,7 @@
                 android:id="@+id/et_email_subj"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:maxLines="1"
                 android:hint="Subject"
                 />
 
@@ -275,7 +277,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
-                android:minLines="3"
+                android:minLines="2"
                 android:gravity="start"
                 android:scrollbars="vertical"
                 android:hint="Message"
