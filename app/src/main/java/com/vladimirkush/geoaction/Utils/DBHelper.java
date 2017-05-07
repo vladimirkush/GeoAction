@@ -520,6 +520,33 @@ public class DBHelper extends SQLiteOpenHelper {
         return actionsList;
     }
 
+    // GET all data from "suggestions" table as list
+    public ArrayList<LBAction> getTopSuggestions(int topNum){
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<LBAction> actionsList = new ArrayList<LBAction>();
+        Cursor  cursor = db.rawQuery("SELECT * FROM "+ ActionsEntry.ACTIONS_TABLE_SUGGESTIONS_NAME
+                        + " ORDER BY "
+                        + ActionsEntry.ACTIONS_COLUMN_SCORE + " DESC, "
+                        + ActionsEntry._ID + " DESC "
+                        +  " LIMIT " + topNum
+                , null);
+
+        if (cursor.moveToFirst()) {
+            while (!cursor.isAfterLast()) {
+
+                LBAction lbAction = getActionFromCursorRow(cursor, true);
+                if(lbAction==null){
+                    Log.e(LOG_TAG, "DB: error retrieving action in getAllSuggestions");
+                }
+
+                actionsList.add(lbAction);
+                cursor.moveToNext();
+            }// while
+        }
+
+        return actionsList;
+    }
+
     // GET all data from "friends" table as list
     public ArrayList<Friend> getAllFriends(){
         SQLiteDatabase db = this.getReadableDatabase();

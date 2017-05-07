@@ -9,7 +9,6 @@ import java.util.List;
 
 public class LBSms extends LBAction {
     private List<String> to;
-    private String message;
 
     public LBSms() {
         setActionType(ActionType.SMS);
@@ -22,14 +21,6 @@ public class LBSms extends LBAction {
 
     public void setTo(List<String> to) {
         this.to = to;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     public String getToAsSingleString(){

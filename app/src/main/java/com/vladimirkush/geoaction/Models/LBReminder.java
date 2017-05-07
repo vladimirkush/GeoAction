@@ -5,7 +5,6 @@ import com.vladimirkush.geoaction.Utils.Constants;
 
 public class LBReminder extends LBAction {
     private String title;
-    private String message;
 
     public LBReminder() {
         setActionType(ActionType.REMINDER);
@@ -20,11 +19,4 @@ public class LBReminder extends LBAction {
         this.title = title;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
 }

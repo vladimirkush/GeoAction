@@ -10,7 +10,6 @@ import java.util.List;
 public class LBEmail extends LBAction {
     private List<String> to;
     private String subject;
-    private String message;
 
     public LBEmail() {
         setActionType(ActionType.EMAIL);
@@ -31,14 +30,6 @@ public class LBEmail extends LBAction {
 
     public void setSubject(String subject) {
         this.subject = subject;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     public String getToAsSingleString(){

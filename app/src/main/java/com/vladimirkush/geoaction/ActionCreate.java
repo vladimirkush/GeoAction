@@ -52,8 +52,11 @@ import com.vladimirkush.geoaction.Utils.GeofenceHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 
 public class ActionCreate extends AppCompatActivity implements SuggestionListener {
@@ -324,6 +327,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
                     Log.d(LOG_TAG, "Assigned id from BCKNDLS: " + objID);
                     actionForSave.setExternalID(objID);
                     dbHelper.updateAction(actionForSave);
+                    updateSuggestionScores(actionForSave);  // update for suggestions
 
                 }
 
@@ -481,7 +485,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
 
     private void assignAdapter(PopupWindow mPopupWindow) {
         mRecyclerView = (RecyclerView) mPopupWindow.getContentView().findViewById(R.id.rv_suggestions);
-        mSuggestionsList = dbHelper.getAllActions();
+        mSuggestionsList = dbHelper.getTopSuggestions(3);
         mAdapter = new SuggestionsAdapter(this, mSuggestionsList);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -493,14 +497,53 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
         mRecyclerView.addItemDecoration(itemDecoration);
     }
 
+
     private void updateSuggestionScores(LBAction savedAction){
+        ArrayList<LBAction> currentSuggestions = dbHelper.getAllSuggestions();
+        long oldestID=0;
+        if(!currentSuggestions.isEmpty()) {
+             oldestID = currentSuggestions.get(currentSuggestions.size()-1).getID();
+        }
+        String newMessage = savedAction.getMessage();
+        String [] newWords = newMessage.split(" ");
+        double addingScore;
+        for (LBAction oldSuggestion: currentSuggestions){
+            addingScore = 0;
+            String oldMessage = oldSuggestion.getMessage();
+            String [] oldWords = oldMessage.split(" ");
 
+            int numWordsmatch = countWordsMatching(newWords, oldWords);
+            if (newMessage.equalsIgnoreCase(oldMessage)){
+                addingScore += 0.5;
+            }else if ( numWordsmatch >= 5){
+                addingScore += 0.4;
+            }else if ( numWordsmatch >= 3){
+                addingScore += 0.2;
+            }
+            //determine how old is an action based on the IDs difference
+            long idsDiff =  oldestID - oldSuggestion.getID() ;
+            addingScore -= idsDiff * 0.1;
+            double newScore = oldSuggestion.getScore() + addingScore;
+            Log.d(LOG_TAG, "ids diff " + idsDiff);
+            Log.d(LOG_TAG, "old score " + oldSuggestion.getScore() + " adding score " + addingScore);
 
+            oldSuggestion.setScore((newScore >=0) ? newScore : 0);
+            dbHelper.updateSuggestion(oldSuggestion);
+        }
 
-
-
+        // set score to 0 as it is the new suggestion
         savedAction.setScore(0);
         dbHelper.insertSuggestion(savedAction);
+    }
+
+    // count how many strings are in both arrays
+    private int countWordsMatching(String[] arr1, String[] arr2){
+
+        Set<String> set1 = new HashSet<String>(Arrays.asList(arr1));
+        Set<String> set2 = new HashSet<String>(Arrays.asList(arr2));
+        int size1 = set1.size();
+        set1.removeAll(set2);
+        return size1 - set1.size() ;
     }
 
 

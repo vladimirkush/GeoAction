@@ -11,6 +11,7 @@ public abstract class LBAction {
     private ActionType actionType;
     private long ID;
     private String externalID;
+    private String message;
     private int radius;
     private DirectionTrigger directionTrigger;
     private LatLng triggerCenter;
@@ -42,6 +43,14 @@ public abstract class LBAction {
 
     public void setID(long ID) {
         this.ID = ID;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public int getRadius() {

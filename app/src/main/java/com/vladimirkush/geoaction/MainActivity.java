@@ -153,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             @Override
             public void handleResponse(Void aVoid) {
                 deleteAllItems();
+                dbHelper.deleteAllSuggestions();
                 dbHelper.deleteAllFriends();
 
                 //stop friends tracking feature if activated
