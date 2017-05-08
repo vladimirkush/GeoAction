@@ -326,6 +326,16 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     }
 
+    private void alertCannotAddAction() {
+        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(this);
+        dlgAlert.setMessage("Maximum number of location-based actions is reached");
+        dlgAlert.setTitle("Cannot add new action");
+        dlgAlert.setPositiveButton("Got it", null);
+
+        dlgAlert.setCancelable(true);
+        dlgAlert.create().show();
+    }
+
 
 
 
@@ -333,8 +343,14 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-            Intent intent = new Intent(this, ActionCreate.class);
-            startActivityForResult(intent, Constants.CREATE_NEW_LBACTION_REQUEST);
+            if(mActionList.size()==100) {
+                // Prevent creating more than 100 geo actions,
+                // as android cannot support more than 100 geofences
+                alertCannotAddAction();
+            }else{
+                Intent intent = new Intent(this, ActionCreate.class);
+                startActivityForResult(intent, Constants.CREATE_NEW_LBACTION_REQUEST);
+            }
         }
         return true;
     }
