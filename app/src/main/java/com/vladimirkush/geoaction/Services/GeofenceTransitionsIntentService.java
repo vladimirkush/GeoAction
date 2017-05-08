@@ -6,6 +6,9 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.media.RingtoneManager;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.SmsManager;
@@ -22,6 +25,7 @@ import com.vladimirkush.geoaction.Models.LBSms;
 import com.vladimirkush.geoaction.R;
 import com.vladimirkush.geoaction.Utils.DBHelper;
 import com.vladimirkush.geoaction.Utils.GeofenceErrorMessages;
+import com.vladimirkush.geoaction.Utils.SharedPreferencesHelper;
 
 import java.util.List;
 
@@ -118,12 +122,15 @@ public class GeofenceTransitionsIntentService extends IntentService {
         long when = System.currentTimeMillis();
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.notification_icon)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_reminder))
                         .setContentTitle(title)
                         .setContentText(text)
-                        .setVibrate(new long[]{1000, 1000, 1000})
-                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                        .setSound(SharedPreferencesHelper.getNotificationURI(this))
                         .setAutoCancel(true);
+        if(SharedPreferencesHelper.isVibratePermitted(this)){
+            mBuilder.setVibrate(new long[]{1000, 1000, 1000});
+        }
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(this, LoginActivity.class);
 

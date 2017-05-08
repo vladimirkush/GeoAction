@@ -68,9 +68,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".FriendsActivity"
-            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".FriendsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SettingsActivity"
+            android:screenOrientation="portrait"/>
 
         <service
             android:name=".Services.GeofenceTransitionsIntentService"

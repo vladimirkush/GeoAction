@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
@@ -77,7 +78,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        // set app settings to default only for the first time
+        PreferenceManager.setDefaultValues(this, getString(R.string.shared_preferences_file_key), MODE_PRIVATE, R.xml.preferences, false);
 
         // facebook logger
         mFBLogger= AppEventsLogger.newLogger(this);
@@ -129,8 +131,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         Intent intent = new Intent(this, TrackService.class);
         mAlarmIntent = PendingIntent.getService(this, Constants.ALARM_MANAGER_REQUEST_CODE, intent, 0);
 
-        //SharedPreferencesHelper.setIsAlarmActive(this, false);
-        SharedPreferencesHelper.setIsAlarmPermitted(this, true); // TODO test switch)
+
         if (!SharedPreferencesHelper.isAlarmActive(this) &&
                 SharedPreferencesHelper.isFacebookLoggedIn(this)&&
                 SharedPreferencesHelper.isAlarmPermitted(this)) {
@@ -139,9 +140,13 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
             mAlarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     SystemClock.elapsedRealtime() + 1000, 60 * 1000, mAlarmIntent); // fire each minute
-            //mAlarmMgr.cancel(mAlarmIntent);
+            BackendlessHelper.setMeTrackableAsync(true);
         }else{
-            Log.d(LOG_TAG, "alarm not activated");
+            Log.d(LOG_TAG, "alarm not activated:");
+            Log.d(LOG_TAG, "is currently active: " + SharedPreferencesHelper.isAlarmActive(this));
+            Log.d(LOG_TAG, "is facebook logged in: " + SharedPreferencesHelper.isFacebookLoggedIn(this));
+            Log.d(LOG_TAG, "is permitted by setting: " + SharedPreferencesHelper.isAlarmPermitted(this));
+
 
 
         }
@@ -156,9 +161,11 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 dbHelper.deleteAllSuggestions();
                 dbHelper.deleteAllFriends();
 
+
                 //stop friends tracking feature if activated
                 if(SharedPreferencesHelper.isAlarmActive(getApplicationContext())) {
                     mAlarmMgr.cancel(mAlarmIntent);
+                    BackendlessHelper.setMeTrackableAsync(false);
                     SharedPreferencesHelper.setIsAlarmPermitted(getApplicationContext(), true);
                     SharedPreferencesHelper.setIsAlarmActive(getApplicationContext(), false);
                     Log.d(LOG_TAG, "Tracking service alarmmanager stopped");
@@ -166,7 +173,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
                 //set global flags
                 SharedPreferencesHelper.setIsFacebookLoggedIn(getApplicationContext(), false);
-
+                SharedPreferencesHelper.clearAllPreferences(getApplicationContext());
+                PreferenceManager.setDefaultValues(getApplicationContext(), getString(R.string.shared_preferences_file_key), MODE_PRIVATE, R.xml.preferences, true);
                 // lget back to login activity
                 Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -286,7 +294,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                                 startActivity(friendsIntent);
                                 break;
                             case 1: //Settings
-
+                                Intent settingsIntent  = new Intent(getApplicationContext(), SettingsActivity.class);
+                                startActivity(settingsIntent);
                                 break;
                             case 2: //Change password
 

@@ -1,8 +1,14 @@
 package com.vladimirkush.geoaction.Utils;
 
+import android.location.Location;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.backendless.Backendless;
+import com.backendless.BackendlessUser;
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
+import com.backendless.persistence.local.UserIdStorageFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.Models.LBAction.ActionType;
@@ -133,5 +139,61 @@ public class BackendlessHelper {
 
         return lbAction;
 
+    }
+
+    public static void setMeTrackableAsync(final boolean trackable){
+            String currentUserObjectId = UserIdStorageFactory.instance().getStorage().get();
+            if(currentUserObjectId != null && !currentUserObjectId.isEmpty()) {
+                Backendless.Data.of(BackendlessUser.class).findById(currentUserObjectId, new AsyncCallback<BackendlessUser>() {
+                    @Override
+                    public void handleResponse(BackendlessUser backendlessUser) {
+
+                        Log.d(LOG_TAG, "Current fb user: " + backendlessUser.getEmail());
+                        backendlessUser.setProperty("trackable", trackable);
+                        Backendless.UserService.update(backendlessUser, new AsyncCallback<BackendlessUser>() {
+                            @Override
+                            public void handleResponse(BackendlessUser backendlessUser) {
+                                Log.d(LOG_TAG, "Fb trackable updated in cloud: " + backendlessUser.getEmail());
+
+                            }
+
+                            @Override
+                            public void handleFault(BackendlessFault backendlessFault) {
+                                Log.d(LOG_TAG, "Fb trackable update in cloud failed: " + backendlessFault.getMessage());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void handleFault(BackendlessFault backendlessFault) {
+
+                    }
+                });
+            }else{
+                Log.d(LOG_TAG, "Backendless user is not logged in");
+
+            }
+
+    }
+
+
+    public static void updateMyLocationInCloudAsync(Location loaction){
+        BackendlessUser user = Backendless.UserService.CurrentUser();
+        if(user == null) return;
+        Log.d(LOG_TAG, "Current fb user: "+ user.getEmail() );
+        user.setProperty("latitude", loaction.getLatitude());
+        user.setProperty("longitude", loaction.getLongitude());
+        Backendless.UserService.update(user, new AsyncCallback<BackendlessUser>() {
+            @Override
+            public void handleResponse(BackendlessUser backendlessUser) {
+                Log.d(LOG_TAG, "Fb user updated in cloud: "+ backendlessUser.getEmail() );
+
+            }
+
+            @Override
+            public void handleFault(BackendlessFault backendlessFault) {
+                Log.d(LOG_TAG, "Fb user update in cloud failed: "+ backendlessFault.getMessage() );
+            }
+        });
     }
 }

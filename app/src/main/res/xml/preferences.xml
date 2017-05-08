@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/prefs_tracking_permitted"
+        android:title="Track friends"
+        android:summary="@string/prefstring_tracking_isfbuser" />
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/prefs_vibrate_permitted"
+        android:title="Vibrate on notification" />
+    <RingtonePreference
+        android:showDefault="true"
+        android:key="@string/prefs_ringtone_uri"
+        android:ringtoneType="notification"
+        android:title="Notification ringtone"
+        android:summary="default" />
+</PreferenceScreen>

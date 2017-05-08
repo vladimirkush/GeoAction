@@ -8,6 +8,7 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.media.RingtoneManager;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ import com.vladimirkush.geoaction.FriendsActivity;
 import com.vladimirkush.geoaction.MainActivity;
 import com.vladimirkush.geoaction.Models.Friend;
 import com.vladimirkush.geoaction.R;
+import com.vladimirkush.geoaction.Utils.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.DBHelper;
 import com.vladimirkush.services.FriendsTrackerService;
 
@@ -70,7 +72,7 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if(mLastLocation != null) {
                 // updating current location in cloud
-                updateMyLocationInCloud();
+                BackendlessHelper.updateMyLocationInCloudAsync(mLastLocation);
                 Log.d(LOG_TAG, "My location Lat:" + mLastLocation.getLatitude() + " Lon: " + mLastLocation.getLongitude());
                 ArrayList<String> fr = dbHelper.getAllTrackedFriiendsFBIDs();
                 //ArrayList<String> fr = new ArrayList<String>();
@@ -174,25 +176,7 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
         return diffMillis >= diffParamMills;
     }
 
-    private void updateMyLocationInCloud(){
-        BackendlessUser user = Backendless.UserService.CurrentUser();
-        if(user == null) return;
-        Log.d(LOG_TAG, "Current fb user: "+ user.getEmail() );
-        user.setProperty("latitude", mLastLocation.getLatitude());
-        user.setProperty("longitude", mLastLocation.getLongitude());
-        Backendless.UserService.update(user, new AsyncCallback<BackendlessUser>() {
-            @Override
-            public void handleResponse(BackendlessUser backendlessUser) {
-                Log.d(LOG_TAG, "Fb user updated in cloud: "+ backendlessUser.getEmail() );
 
-            }
-
-            @Override
-            public void handleFault(BackendlessFault backendlessFault) {
-                Log.d(LOG_TAG, "Fb user update in cloud failed: "+ backendlessFault.getMessage() );
-            }
-        });
-    }
 
     private void setNotNearFriendsStatus(ArrayList<String> foundFriends){
         ArrayList<Friend> friends = dbHelper.getAllFriends();
@@ -260,7 +244,8 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
         long when = System.currentTimeMillis();
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_stat_name)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_stat_name))
                         .setContentTitle(title)
                         .setContentText(text)
                         .setVibrate(new long[]{1000, 1000, 1000})
