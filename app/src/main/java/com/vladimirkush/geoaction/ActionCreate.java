@@ -29,6 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
@@ -498,25 +499,30 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
     }
 
 
-    private void updateSuggestionScores(LBAction savedAction){
+    private void updateSuggestionScores(LBAction newAction){
         ArrayList<LBAction> currentSuggestions = dbHelper.getAllSuggestions();
         long oldestID=0;
         if(!currentSuggestions.isEmpty()) {
              oldestID = currentSuggestions.get(currentSuggestions.size()-1).getID();
         }
-        String newMessage = savedAction.getMessage();
+        String newMessage = newAction.getMessage();
         String [] newWords = newMessage.split(" ");
         double addingScore;
+        boolean wasOneTheSame = false;
+        double oldScoreOfsame = 0;
         for (LBAction oldSuggestion: currentSuggestions){
             addingScore = 0;
+            boolean sameAsOld = false;
             String oldMessage = oldSuggestion.getMessage();
             String [] oldWords = oldMessage.split(" ");
 
             int numWordsmatch = countWordsMatching(newWords, oldWords);
             if (newMessage.equalsIgnoreCase(oldMessage)){
-                addingScore += 0.5;
+                sameAsOld = true;
+                wasOneTheSame =true;
+                oldScoreOfsame = oldSuggestion.getScore();
             }else if ( numWordsmatch >= 5){
-                addingScore += 0.4;
+                addingScore += 0.3;
             }else if ( numWordsmatch >= 3){
                 addingScore += 0.2;
             }
@@ -528,12 +534,24 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
             Log.d(LOG_TAG, "old score " + oldSuggestion.getScore() + " adding score " + addingScore);
 
             oldSuggestion.setScore((newScore >=0) ? newScore : 0);
-            dbHelper.updateSuggestion(oldSuggestion);
+            if(sameAsOld) {
+                // if the same content, prefer to use the new one than the old, and delete the old
+                dbHelper.deleteSuggestion(oldSuggestion.getID());
+            }else{
+                dbHelper.updateSuggestion(oldSuggestion);
+            }
         }
-
-        // set score to 0 as it is the new suggestion
-        savedAction.setScore(0);
-        dbHelper.insertSuggestion(savedAction);
+        if (wasOneTheSame) {
+            // if we had suggestions with the same message, they were all deleted
+            // and we need to insert a new one with high value, as it is the most recent and relevant
+            // for user (due to fact it was equal to at least one suggestion in the past)
+            newAction.setScore((oldScoreOfsame + 0.2) > 1 ? (oldScoreOfsame + 0.2) : 1 );
+            dbHelper.insertSuggestion(newAction);
+        }else{
+            // set score to 0 as it is the new suggestion
+            newAction.setScore(0);
+            dbHelper.insertSuggestion(newAction);
+        }
     }
 
     // count how many strings are in both arrays
@@ -559,7 +577,12 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.show_suggestions:
-                showSuggestionsPopup();
+                int size = dbHelper.getAllSuggestions().size();
+                if(size >0) {
+                    showSuggestionsPopup();
+                }else{
+                    Toast.makeText(this, "No suggestions yet, create action first", Toast.LENGTH_LONG).show();
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -570,6 +593,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
             mPopupWindow.showAsDropDown(findViewById(R.id.show_suggestions));
         }
     }
+
     @Override
     public void onSuggestionClicked(int adapterPosition, LBAction action) {
         mPopupWindow.dismiss();
