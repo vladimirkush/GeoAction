@@ -88,7 +88,7 @@
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:onClick="onLocationChooserClick"
-            android:src="@drawable/google_map_500_ic"
+            android:src="@drawable/google_map_500_bw_ic"
             android:scaleType="fitXY"
             android:background="@null"
             android:adjustViewBounds="true"

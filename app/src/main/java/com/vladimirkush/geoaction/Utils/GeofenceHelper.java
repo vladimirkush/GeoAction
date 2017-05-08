@@ -142,12 +142,10 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Log.d(LOG_TAG, "GeofenceHelper::onConnected()");
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.d(LOG_TAG, "GeofenceHelper::onConnectionSuspended()");
 
     }
 

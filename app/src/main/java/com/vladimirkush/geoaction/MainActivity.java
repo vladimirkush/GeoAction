@@ -298,7 +298,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                                 startActivity(settingsIntent);
                                 break;
                             case 2: //Change password
-
+                                Intent changePassIntent  = new Intent(getApplicationContext(), ChangePasswordActivity.class);
+                                startActivityForResult(changePassIntent, Constants.CHANGE_PASSWORD_REQEST_CODE);
                                 break;
                             case 3: // Logout
                                 logOutAsync();
@@ -365,6 +366,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 mActionList.addAll(actions);
                 mAdapter.notifyDataSetChanged();
 
+            }
+        }else if(requestCode == Constants.CHANGE_PASSWORD_REQEST_CODE ){
+            if(resultCode == RESULT_OK){
+                logOutAsync();
             }
         }
 

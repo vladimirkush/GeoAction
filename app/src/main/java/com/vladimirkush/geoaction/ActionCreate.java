@@ -92,6 +92,8 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
     private EditText mEmailTo;
     private EditText mEmailSubject;
     private EditText mEmailMessage;
+
+
     private PopupWindow mPopupWindow;
     private Toolbar mToolbar;
     private ActionBar mActionBar;
@@ -417,7 +419,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Constants.MAP_DATA_REQUEST_CODE) {
             if (resultCode == Constants.MAP_DATA_RESULT_OK) {
-
+                mMapChoserButton.setImageResource(R.drawable.google_map_500_ic);
                 mAreaCenter = data.getParcelableExtra(Constants.AREA_CENTER_KEY);
                 mRadius = data.getIntExtra(Constants.AREA_RADIUS_KEY, -1);
                 //Toast.makeText(this, "sucess in getting map data", Toast.LENGTH_LONG).show();

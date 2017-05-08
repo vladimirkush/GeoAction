@@ -73,7 +73,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".SettingsActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".Services.GeofenceTransitionsIntentService"
@@ -82,7 +82,7 @@
             android:name=".Services.TrackService"
             android:exported="false" />
 
-
+        <activity android:name=".ChangePasswordActivity"></activity>
     </application>
 
 </manifest>
