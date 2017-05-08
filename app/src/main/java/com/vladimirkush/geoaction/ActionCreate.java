@@ -502,8 +502,10 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
     private void updateSuggestionScores(LBAction newAction){
         ArrayList<LBAction> currentSuggestions = dbHelper.getAllSuggestions();
         long oldestID=0;
+        int numOfSuggestions = 0;
         if(!currentSuggestions.isEmpty()) {
-             oldestID = currentSuggestions.get(currentSuggestions.size()-1).getID();
+            numOfSuggestions = currentSuggestions.size();
+             oldestID = currentSuggestions.get(numOfSuggestions-1).getID();
         }
         String newMessage = newAction.getMessage();
         String [] newWords = newMessage.split(" ");
@@ -528,18 +530,23 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
             }
             //determine how old is an action based on the IDs difference
             long idsDiff =  oldestID - oldSuggestion.getID() ;
-            addingScore -= idsDiff * 0.1;
-            double newScore = oldSuggestion.getScore() + addingScore;
             Log.d(LOG_TAG, "ids diff " + idsDiff);
-            Log.d(LOG_TAG, "old score " + oldSuggestion.getScore() + " adding score " + addingScore);
-
-            oldSuggestion.setScore((newScore >=0) ? newScore : 0);
-            if(sameAsOld) {
-                // if the same content, prefer to use the new one than the old, and delete the old
+            Log.d(LOG_TAG, "numOfSuggestions " + numOfSuggestions);
+            if(numOfSuggestions > 3 && idsDiff >=10){
                 dbHelper.deleteSuggestion(oldSuggestion.getID());
             }else{
-                dbHelper.updateSuggestion(oldSuggestion);
+                addingScore -= idsDiff * 0.1;
+                double newScore = oldSuggestion.getScore() + addingScore;
+                oldSuggestion.setScore((newScore >=0) ? newScore : 0);
+                if(sameAsOld) {
+                    // if the same content, prefer to use the new one than the old, and delete the old
+                    dbHelper.deleteSuggestion(oldSuggestion.getID());
+                }else{
+                    dbHelper.updateSuggestion(oldSuggestion);
+                }
+
             }
+
         }
         if (wasOneTheSame) {
             // if we had suggestions with the same message, they were all deleted
