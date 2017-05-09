@@ -3,16 +3,24 @@ package com.vladimirkush.geoaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -37,19 +45,27 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.vladimirkush.geoaction.Utils.Constants;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
+import static com.vladimirkush.geoaction.R.id.map;
+
 public class LocationChooserActivity extends AppCompatActivity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private final String LOG_TAG = "LOGTAG";
     private final float   ZOOM_RATE = 14;
 
+    private Toolbar         mToolbar;
+    private ActionBar       mActionBar;
     private GoogleMap       mMap;
     private GoogleApiClient mGoogleApiClient;
     private Location        mLastLocation;
     private LocationRequest mLocationRequest;
     private Marker          mMarker;
     private Circle          mCircle;
-    private int          mRadius = 200;
+    private int             mRadius = 200;
     private LatLng          mAreaCenter;
 
     private TextView        mRadiusTextView;
@@ -64,6 +80,14 @@ public class LocationChooserActivity extends AppCompatActivity
         setContentView(R.layout.activity_location_chooser);
         //FriendsTrackerService.initApplication(this);
         mRadiusTextView = (TextView) findViewById(R.id.tv_radius);
+
+        mToolbar = (Toolbar) findViewById(R.id.location_chooser_toolbar);
+        mToolbar.setTitle("Chose location");
+        setSupportActionBar(mToolbar);
+        mActionBar = getSupportActionBar();
+        mActionBar.setDisplayHomeAsUpEnabled(true);
+        mActionBar.setDisplayShowHomeEnabled(true);
+
         Intent intent = getIntent();
         if(intent.getParcelableExtra(Constants.AREA_CENTER_KEY)!= null){
             mIsEditMode = true;
@@ -84,7 +108,7 @@ public class LocationChooserActivity extends AppCompatActivity
 
         // init mapFragment and map object
         MapFragment mapFragment = (MapFragment) getFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(map);
         mapFragment.getMapAsync(this);
 
         mZoomOnceFlag = false;
@@ -366,5 +390,70 @@ public class LocationChooserActivity extends AppCompatActivity
 
             mMap.setMyLocationEnabled(show);
         }
+    }
+
+    private LatLng getLocationFromText(String text){
+        Geocoder geoCoder = new Geocoder(this, Locale.getDefault());
+        try {
+            List<Address> addresses = geoCoder.getFromLocationName(text, 5);
+            if (addresses.size() > 0) {
+                Double lat = (double) (addresses.get(0).getLatitude());
+                Double lon = (double) (addresses.get(0).getLongitude());
+
+                Log.d(LOG_TAG, "lat from text: " + lat + " lon from text:" + lon);
+                LatLng latLng = new LatLng(lat, lon);
+                return latLng;
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        }
+        return null;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.address_search_menu, menu);
+
+        SearchView searchView = (SearchView) menu.findItem(R.id.address_search).getActionView();
+        // Assumes current activity is the searchable activity
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                LatLng latLng = getLocationFromText(query);
+                if(latLng != null) {
+                    if(mMarker != null)
+                        mMarker.remove();
+
+                    if(mCircle != null)
+                        mCircle.remove();
+
+                    mAreaCenter = latLng;
+                    mMarker = mMap.addMarker(new MarkerOptions()
+                            .position(mAreaCenter)
+                            .title("center of area")
+                            .draggable(false));
+
+                    mCircle = mMap.addCircle(new CircleOptions()
+                            .center(mAreaCenter)
+                            .radius(mRadius)
+                            .clickable(false));
+                    mRadiusTextView.setText("Radius: " + (int) mCircle.getRadius() + "m");
+                    CameraUpdate upd = CameraUpdateFactory.newLatLngZoom(mAreaCenter, ZOOM_RATE);
+                    mMap.animateCamera(upd);
+                }else{
+                    Toast.makeText(getApplicationContext(), "address not found", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+        return true;
     }
 }

@@ -46,7 +46,8 @@
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".LocationChooserActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait">
+        </activity>
         <activity
             android:name=".Utils.AndroidDatabaseManager"
             android:screenOrientation="portrait"
