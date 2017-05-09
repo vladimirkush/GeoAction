@@ -17,11 +17,15 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 
+import com.vladimirkush.geoaction.Models.Friend;
 import com.vladimirkush.geoaction.R;
 import com.vladimirkush.geoaction.Services.TrackService;
 import com.vladimirkush.geoaction.Utils.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.Constants;
+import com.vladimirkush.geoaction.Utils.DBHelper;
 import com.vladimirkush.geoaction.Utils.SharedPreferencesHelper;
+
+import java.util.ArrayList;
 
 
 public class SettingsFragment extends PreferenceFragment {
@@ -30,11 +34,13 @@ public class SettingsFragment extends PreferenceFragment {
     private Activity mActivity;
     private AlarmManager mAlarmMgr;
     private PendingIntent mAlarmIntent;
+    private DBHelper mDbHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-         mActivity = getActivity();
+        mActivity = getActivity();
+        mDbHelper = new DBHelper(mActivity);
         //configure alarm
         mAlarmMgr = (AlarmManager) mActivity.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(mActivity, TrackService.class);
@@ -91,6 +97,7 @@ public class SettingsFragment extends PreferenceFragment {
                                 mAlarmMgr.cancel(mAlarmIntent);
                                 SharedPreferencesHelper.setIsAlarmActive(mActivity, false);
                                 BackendlessHelper.setMeTrackableAsync(false);
+                                setNotNearFriendsStatus();
 
                             }
                         }
@@ -100,7 +107,15 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
 
+    private void setNotNearFriendsStatus(){
+        ArrayList<Friend> friends = mDbHelper.getAllFriends();
+        for(Friend f:friends){
+            f.setNear(false);
+            mDbHelper.updateFriend(f);
+        }
 
+
+    }
 
 
     @Override
