@@ -122,6 +122,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
             Log.d(LOG_TAG, "Editing id: " + id);
             if (id >= 0 || mEditedLBAction != null) {
                 setFieldsByAction(mEditedLBAction);
+                mMapChoserButton.setImageResource(R.drawable.google_map_500_ic);
             }
         } else {
             mRadioReminder.setChecked(true);    // default checked radio
@@ -607,6 +608,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
     public void onSuggestionClicked(int adapterPosition, LBAction action) {
         mPopupWindow.dismiss();
         setFieldsByAction(action);
+        mMapChoserButton.setImageResource(R.drawable.google_map_500_ic);
     }
 
     @Override
