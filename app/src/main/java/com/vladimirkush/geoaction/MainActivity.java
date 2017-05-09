@@ -231,7 +231,13 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 .withIdentifier(0)
                 .withSelectable(false)
                 .withIcon(R.drawable.people)
-                .withName("Locate Friends");
+                .withName("Locate Friends")
+                .withEnabled(false)
+                .withDescription("you must login with facebook");
+        if(SharedPreferencesHelper.isFacebookLoggedIn(this)){
+            itemLocateFriends.withEnabled(true).withDescription(null);
+        }
+
         PrimaryDrawerItem itemSettings = new PrimaryDrawerItem()
                 .withIdentifier(1)
                 .withSelectable(false)
@@ -241,7 +247,13 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 .withIdentifier(2)
                 .withSelectable(false)
                 .withIcon(R.drawable.key)
-                .withName("Change password");
+                .withName("Change password")
+                .withEnabled(true);
+        if(SharedPreferencesHelper.isFacebookLoggedIn(this)){
+            itemChangePassword.withEnabled(false)
+            .withDescription("available for non-facebook users");
+        }
+
         PrimaryDrawerItem itemLogOut = new PrimaryDrawerItem()
                 .withIdentifier(3)
                 .withSelectable(false)
@@ -255,10 +267,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 .withIdentifier(5)
                 .withSelectable(false)
                 .withName("Delete all actions");
-        SecondaryDrawerItem itemStopTrackingService = new SecondaryDrawerItem()
-                .withIdentifier(6)
-                .withSelectable(false)
-                .withName("Stop tracking service");
+
 
         // Nav Drawer building
         mDrawer = new DrawerBuilder()
@@ -279,9 +288,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                         new DividerDrawerItem(),
                         itemDBManager,
                         new DividerDrawerItem(),
-                        itemDeleteAllActions,
-                        new DividerDrawerItem(),
-                        itemStopTrackingService
+                        itemDeleteAllActions
                         )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
@@ -312,12 +319,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                             case 5: //Delete al items
                                 deleteAllItems();
                                 //deleteAllItemsFromCloud();
-                                break;
-                            case 6: //stop tracking service
-                                mAlarmMgr.cancel(mAlarmIntent);
-                                SharedPreferencesHelper.setIsAlarmPermitted(getApplicationContext(), false);
-                                SharedPreferencesHelper.setIsAlarmActive(getApplicationContext(), false);
-                                Log.d(LOG_TAG, "Tracking service alarmmanager stopped");
                                 break;
                         }
                         return true;
