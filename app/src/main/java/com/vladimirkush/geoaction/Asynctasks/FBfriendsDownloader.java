@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
@@ -94,6 +95,8 @@ public class FBfriendsDownloader extends AsyncTask<Void, Void, Void> {
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
+                            }catch (Exception e){
+                                Toast.makeText(getApplicationContext(), "Facebook service unavailable", Toast.LENGTH_LONG).show();
                             }
                         }
                     }).executeAsync();

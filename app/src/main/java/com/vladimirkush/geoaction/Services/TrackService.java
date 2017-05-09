@@ -34,6 +34,7 @@ import com.vladimirkush.geoaction.Models.Friend;
 import com.vladimirkush.geoaction.R;
 import com.vladimirkush.geoaction.Utils.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.DBHelper;
+import com.vladimirkush.geoaction.Utils.SharedPreferencesHelper;
 import com.vladimirkush.services.FriendsTrackerService;
 
 import java.util.ArrayList;
@@ -245,12 +246,14 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_stat_name))
+                        .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.two_friends))
                         .setContentTitle(title)
                         .setContentText(text)
-                        .setVibrate(new long[]{1000, 1000, 1000})
-                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                        .setSound(SharedPreferencesHelper.getNotificationURI(this))
                         .setAutoCancel(true);
+        if(SharedPreferencesHelper.isVibratePermitted(this)){
+            mBuilder.setVibrate(new long[]{1000, 1000, 1000});
+        }
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(this, FriendsActivity.class);
 
