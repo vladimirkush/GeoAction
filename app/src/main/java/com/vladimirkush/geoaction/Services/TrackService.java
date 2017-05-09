@@ -29,6 +29,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.vladimirkush.geoaction.FriendsActivity;
+import com.vladimirkush.geoaction.LoginActivity;
 import com.vladimirkush.geoaction.MainActivity;
 import com.vladimirkush.geoaction.Models.Friend;
 import com.vladimirkush.geoaction.R;
@@ -256,6 +257,8 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
         }
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(this, FriendsActivity.class);
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        //Intent mainIntent = new Intent(this, LoginActivity.class);
 
         // The stack builder object will contain an artificial back stack for the
         // started Activity.
@@ -263,9 +266,11 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
         // your application to the Home screen.
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         // Adds the back stack for the Intent (but not the Intent itself)
-        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addParentStack(FriendsActivity.class);
         // Adds the Intent that starts the Activity to the top of the stack
+        //stackBuilder.addNextIntent(mainIntent);
         stackBuilder.addNextIntent(resultIntent);
+
         PendingIntent resultPendingIntent =
                 stackBuilder.getPendingIntent(
                         0,
