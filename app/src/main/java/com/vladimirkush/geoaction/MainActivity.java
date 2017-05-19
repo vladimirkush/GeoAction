@@ -2,15 +2,13 @@ package com.vladimirkush.geoaction;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -154,42 +152,54 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     }
 
     private void logOutAsync(){
-        Backendless.UserService.logout(new AsyncCallback<Void>() {
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Logging out...");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        Thread thread = new Thread(new Runnable() {
             @Override
-            public void handleResponse(Void aVoid) {
-                deleteAllItems();
-                dbHelper.deleteAllSuggestions();
-                dbHelper.deleteAllFriends();
+            public void run() {
+                BackendlessHelper.setMeTrackableSync(false);
+                Backendless.UserService.logout(new AsyncCallback<Void>() {
+                    @Override
+                    public void handleResponse(Void aVoid) {
+                        deleteAllItems();
+                        dbHelper.deleteAllSuggestions();
+                        dbHelper.deleteAllFriends();
 
 
-                //stop friends tracking feature if activated
-                if(SharedPreferencesHelper.isAlarmActive(getApplicationContext())) {
-                    mAlarmMgr.cancel(mAlarmIntent);
-                    BackendlessHelper.setMeTrackableAsync(false);
-                    SharedPreferencesHelper.setIsAlarmPermitted(getApplicationContext(), true);
-                    SharedPreferencesHelper.setIsAlarmActive(getApplicationContext(), false);
-                    Log.d(LOG_TAG, "Tracking service alarmmanager stopped");
-                }
+                        //stop friends tracking feature if activated
+                        if(SharedPreferencesHelper.isAlarmActive(getApplicationContext())) {
+                            mAlarmMgr.cancel(mAlarmIntent);
+                            SharedPreferencesHelper.setIsAlarmPermitted(getApplicationContext(), true);
+                            SharedPreferencesHelper.setIsAlarmActive(getApplicationContext(), false);
+                            Log.d(LOG_TAG, "Tracking service alarmmanager stopped");
+                        }
 
-                //set global flags
-                SharedPreferencesHelper.setIsFacebookLoggedIn(getApplicationContext(), false);
-                SharedPreferencesHelper.clearAllPreferences(getApplicationContext());
-                PreferenceManager.setDefaultValues(getApplicationContext(), getString(R.string.shared_preferences_file_key), MODE_PRIVATE, R.xml.preferences, true);
-                // lget back to login activity
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        //set global flags
+                        SharedPreferencesHelper.setIsFacebookLoggedIn(getApplicationContext(), false);
+                        SharedPreferencesHelper.clearAllPreferences(getApplicationContext());
+                        PreferenceManager.setDefaultValues(getApplicationContext(), getString(R.string.shared_preferences_file_key), MODE_PRIVATE, R.xml.preferences, true);
+                        // lget back to login activity
+                        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-                // notify user on sucessfull logout
-                Toast.makeText(getApplicationContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
-                startActivity(intent);
-                finish();
-            }
+                        // notify user on sucessfull logout
+                        Toast.makeText(getApplicationContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+                        startActivity(intent);
+                        progressDialog.dismiss();
+                        finish();
+                    }
 
-            @Override
-            public void handleFault(BackendlessFault backendlessFault) {
-                Toast.makeText(getApplicationContext(), "failed to log out", Toast.LENGTH_SHORT).show();
+                    @Override
+                    public void handleFault(BackendlessFault backendlessFault) {
+                        Toast.makeText(getApplicationContext(), "failed to log out", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
+        thread.start();
     }
 
     private void deleteAllItems(){

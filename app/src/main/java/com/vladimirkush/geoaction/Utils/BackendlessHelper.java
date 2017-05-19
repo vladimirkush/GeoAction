@@ -7,6 +7,7 @@ import android.util.Log;
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessException;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.local.UserIdStorageFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -45,10 +46,6 @@ public class BackendlessHelper {
     public static final String ACTIONS_COLUMN_TO = "recipients";
     public static final String ACTIONS_COLUMN_MESSAGE = "message";
     public static final String ACTIONS_COLUMN_SUBJECT = "subject";  // for reminder used for title
-
-
-
-
 
 
     public static Map getMapForSingleAction(LBAction action){
@@ -160,13 +157,13 @@ public class BackendlessHelper {
                             @Override
                             public void handleFault(BackendlessFault backendlessFault) {
                                 Log.d(LOG_TAG, "Fb trackable update in cloud failed: " + backendlessFault.getMessage());
+
                             }
                         });
                     }
 
                     @Override
                     public void handleFault(BackendlessFault backendlessFault) {
-
                     }
                 });
             }else{
@@ -174,6 +171,22 @@ public class BackendlessHelper {
 
             }
 
+    }
+
+
+    public static void setMeTrackableSync(final boolean trackable){
+        String currentUserObjectId = UserIdStorageFactory.instance().getStorage().get();
+        if(currentUserObjectId != null && !currentUserObjectId.isEmpty()) {
+            try {
+                BackendlessUser backendlessUser = Backendless.Data.of(BackendlessUser.class).findById(currentUserObjectId);
+                Log.d(LOG_TAG, "Current fb user: " + backendlessUser.getEmail());
+                backendlessUser.setProperty("trackable", trackable);
+                Backendless.UserService.update(backendlessUser);
+            }catch (BackendlessException e){
+                Log.d(LOG_TAG, "Exception during sync FBuser update:" + e.getDetail() );
+                e.printStackTrace();
+            }
+        }
     }
 
 
