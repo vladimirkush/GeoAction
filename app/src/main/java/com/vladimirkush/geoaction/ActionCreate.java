@@ -379,7 +379,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
                 LBEmail lbEmail = new LBEmail();
                 lbEmail.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
                 String toAddresses = mEmailTo.getText().toString();
-                String[] addressesArr = toAddresses.replaceAll("^[,\\s]+", "").split("[,\\s]+");;
+                String[] addressesArr = toAddresses.replaceAll("^[,\\s]+", "").split("[,\\s]+");
                 List<String> addressList = new ArrayList<String>(Arrays.asList(addressesArr));
                 lbEmail.setTo(addressList);
                 lbEmail.setSubject(mEmailSubject.getText().toString());

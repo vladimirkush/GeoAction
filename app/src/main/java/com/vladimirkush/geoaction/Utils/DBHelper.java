@@ -10,7 +10,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.provider.BaseColumns;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -685,7 +684,7 @@ public class DBHelper extends SQLiteOpenHelper {
             case SMS:
                 LBSms actSms = new LBSms();
                 String toSms = cursor.getString(cursor.getColumnIndexOrThrow(ActionsEntry.ACTIONS_COLUMN_TO));
-                String[] arrTo = TextUtils.split(toSms, ",");                            //split "to" by comma into array
+                String[] arrTo = toSms.replaceAll("^[,\\s]+", "").split("[,\\s]+");   //split "to" by comma into array
                 List<String> strings = new ArrayList<String>(Arrays.asList(arrTo));   // turn array into list
                 actSms.setTo(strings);
                 actSms.setMessage(cursor.getString(cursor.getColumnIndexOrThrow(ActionsEntry.ACTIONS_COLUMN_MESSAGE)));
@@ -695,7 +694,7 @@ public class DBHelper extends SQLiteOpenHelper {
             case EMAIL:
                 LBEmail actEmail = new LBEmail();
                 String toEml = cursor.getString(cursor.getColumnIndexOrThrow(ActionsEntry.ACTIONS_COLUMN_TO));
-                String[] arrEml = TextUtils.split(toEml, ",");                            //split "to" by comma into array
+                String[] arrEml = toEml.replaceAll("^[,\\s]+", "").split("[,\\s]+"); //split "to" by comma into array
                 List<String> stringsEml = new ArrayList<String>(Arrays.asList(arrEml));   // turn array into list
                 actEmail.setTo(stringsEml);
                 actEmail.setMessage(cursor.getString(cursor.getColumnIndexOrThrow(ActionsEntry.ACTIONS_COLUMN_MESSAGE)));
