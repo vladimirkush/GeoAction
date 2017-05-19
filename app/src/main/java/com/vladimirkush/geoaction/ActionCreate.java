@@ -318,6 +318,18 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
             actionForSave.setExternalID(mEditedLBAction.getExternalID());
             dbHelper.updateAction(actionForSave);
             Log.d(LOG_TAG, actionForSave.getActionType() + " updated id: " + actionForSave.getID());
+            HashMap map = (HashMap) BackendlessHelper.getMapForSingleAction(action);
+            Backendless.Persistence.of(BackendlessHelper.ACTIONS_TABLE_NAME).save(map, new AsyncCallback<Map>() {
+                    @Override
+                    public void handleResponse(Map hashMap) {
+                        Log.d(LOG_TAG, "object updated in cloud");
+                    }
+
+                    @Override
+                    public void handleFault(BackendlessFault backendlessFault) {
+                        Log.d(LOG_TAG, "failed updating in cloud");
+                    }
+                });
         } else {
             long id = dbHelper.insertAction(actionForSave);  // insert in the db and get ID
             actionForSave.setID(id);                         // assign ID
