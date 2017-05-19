@@ -1,4 +1,4 @@
-package com.vladimirkush.geoaction.Utils;//add your package name here example: package com.example.dbm;
+package com.vladimirkush.geoaction.Utils;
 
 //all required import files
 import java.util.ArrayList;
@@ -31,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class AndroidDatabaseManager extends Activity implements OnItemClickListener {
+	private final int SOME_ID = 299;
 
 //a static class to save cursor,table values etc which is used by functions to share data in the program.
 	static class indexInfo
@@ -832,7 +833,7 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
       	  crudadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
      
           crud_dropdown.setAdapter(crudadapter);
-          lcrud.setId(299);
+          lcrud.setId(SOME_ID);
           lcrud.addView(crud_dropdown,paramcrudtext);
 
           RelativeLayout.LayoutParams rlcrudparam = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
