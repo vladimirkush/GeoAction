@@ -289,6 +289,7 @@
         <Button
             android:id="@+id/btn_save_action"
             android:text="Save"
+            android:backgroundTint="@color/colorPrimaryLight"
             android:foregroundGravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="60dp"
