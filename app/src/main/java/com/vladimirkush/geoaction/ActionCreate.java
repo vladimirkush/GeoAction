@@ -8,15 +8,14 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,8 +33,6 @@ import android.widget.Toast;
 import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
-import com.google.android.gms.common.api.Result;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.vladimirkush.geoaction.Adapters.SuggestionsAdapter;
 import com.vladimirkush.geoaction.Asynctasks.GetAddressAsyncTask;
@@ -57,7 +54,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 
 public class ActionCreate extends AppCompatActivity implements SuggestionListener {
@@ -211,6 +207,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
     public void onRadioButtonClick(View view) {
         // Is the button now checked?
         boolean checked = ((RadioButton) view).isChecked();
+        cleanErrors();
 
         // Check which radio button was clicked
         switch (view.getId()) {
@@ -296,6 +293,9 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
 
     // Collect all the text data, create an LB action and register a geofence for it
     public void onSaveActionClick(View view) {
+        if(!checkInput()){  // first of all check input
+            return;
+        }
         // if in edit mode, we need to unregister the previous one
         if (mIsEditMode) {
             List<String> listIds = new ArrayList<String>();
@@ -367,7 +367,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
                 LBSms lbSMS = new LBSms();
                 lbSMS.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
                 String toNumbers = mSmsTo.getText().toString();
-                String[] numbers = TextUtils.split(toNumbers, ",");
+                String[] numbers = toNumbers.replaceAll("^[,\\s]+", "").split("[,\\s]+");;
                 List<String> numsList = new ArrayList<String>(Arrays.asList(numbers));
                 lbSMS.setTo(numsList);
                 lbSMS.setMessage(mSmsMessage.getText().toString());
@@ -379,7 +379,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
                 LBEmail lbEmail = new LBEmail();
                 lbEmail.setDirectionTrigger(mRadioEnterArea.isChecked() ? LBAction.DirectionTrigger.ENTER : LBAction.DirectionTrigger.EXIT);
                 String toAddresses = mEmailTo.getText().toString();
-                String[] addressesArr = TextUtils.split(toAddresses, ",");
+                String[] addressesArr = toAddresses.replaceAll("^[,\\s]+", "").split("[,\\s]+");;
                 List<String> addressList = new ArrayList<String>(Arrays.asList(addressesArr));
                 lbEmail.setTo(addressList);
                 lbEmail.setSubject(mEmailSubject.getText().toString());
@@ -547,7 +547,6 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
                 }else{
                     dbHelper.updateSuggestion(oldSuggestion);
                 }
-
             }
 
         }
@@ -572,6 +571,74 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
         int size1 = set1.size();
         set1.removeAll(set2);
         return size1 - set1.size() ;
+    }
+
+    private boolean checkInput(){
+        cleanErrors();
+        boolean inputChecked=true;
+        if(mAreaCenter == null || mRadius==0){
+            inputChecked=false;
+            mRadiusLabel.setError("No trigger area chosen!");
+        }
+        if (mRadioReminder.isChecked()) {
+            if(mReminderText.getText().toString().equals("")){
+                inputChecked=false;
+                mReminderText.setError("The message cannot be empty");
+            }
+        } else if (mRadioSMS.isChecked()) {
+            String message = mSmsMessage.getText().toString();
+            String smsRecipients = mSmsTo.getText().toString();
+            if(message.equals("")){
+                inputChecked=false;
+                mSmsMessage.setError("The message cannot be empty");
+            }
+            if(smsRecipients.equals("")){
+                inputChecked=false;
+                mSmsTo.setError("You must enter at least one number");
+            }else{
+                String[] numbersArr = smsRecipients.replaceAll("^[,\\s]+", "").split("[,\\s]+");
+                for (String number : numbersArr){
+                    Log.d(LOG_TAG,"number checking:"+ number);
+                    if(!Patterns.PHONE.matcher(number).matches()){
+                        mSmsTo.setError("One of the numbers is in incorrect format. Use comma for separate");
+                        inputChecked = false;
+                        break;
+                    }
+                }
+            }
+
+        } else {
+            String message = mEmailMessage.getText().toString();
+            String emailRecipients = mEmailTo.getText().toString();
+            if(message.equals("")){
+                inputChecked=false;
+                mEmailMessage.setError("The message cannot be empty");
+            }
+            if(emailRecipients.equals("")){
+                inputChecked=false;
+                mEmailTo.setError("You must enter at least one address");
+            }else{
+                String[] addressesArr = emailRecipients.replaceAll("^[,\\s]+", "").split("[,\\s]+");
+                for (String address : addressesArr){
+                    address.trim();
+                    if(!android.util.Patterns.EMAIL_ADDRESS.matcher(address).matches()){
+                        mEmailTo.setError("one of the emails is in incorrect format. Use comma for separate");
+                        inputChecked = false;
+                        break;
+                    }
+                }
+            }
+        }
+        return inputChecked;
+    }
+
+    private void cleanErrors(){
+        mRadiusLabel.setError(null);
+        mReminderText.setError(null);
+        mSmsMessage.setError(null);
+        mSmsTo.setError(null);
+        mEmailMessage.setError(null);
+        mEmailTo.setError(null);
     }
 
 
