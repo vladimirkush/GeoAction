@@ -8,7 +8,7 @@
     tools:context="com.vladimirkush.geoaction.RecieveActivity"
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
-    android:weightSum="15">
+    android:weightSum="13">
 
     <TextView
         android:id="@+id/receive_title_type"
@@ -17,7 +17,7 @@
         android:layout_gravity="center_horizontal"
         android:gravity="center"
         android:text="Incoming Geo Action: SMS"
-        android:textSize="22sp"
+        android:textSize="20sp"
         android:textColor="@color/primary_dark"
         android:paddingTop="8dp"
         android:paddingBottom="20dp"/>
@@ -41,7 +41,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="0542118389, aba@aba.aba"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:maxLines="3"
             android:gravity="start"
             android:scrollbars="vertical"
@@ -67,7 +67,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Shoplist"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textColor="@color/primary_dark"/>
 
     </LinearLayout>
@@ -94,7 +94,7 @@
             android:scrollbars="vertical"
             android:text="buy milk and suff "
             android:textColor="@color/primary_dark"
-            android:textSize="20sp" />
+            android:textSize="18sp" />
 
     </LinearLayout>
 
@@ -105,7 +105,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:name="com.google.android.gms.maps.MapFragment"
-        android:paddingBottom="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
         android:layout_weight="8"/>
 
     <LinearLayout
@@ -113,6 +114,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="4dp"
         android:orientation="horizontal">
 
         <TextView
@@ -146,6 +148,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_height="wrap_content"
         android:paddingTop="5dp"
+        android:layout_marginBottom="8dp"
         android:textStyle="italic"
         android:text="Aba hilel 70, Ramat gan"
         android:textColor="#7b7777"
@@ -156,13 +159,17 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="2"
+        android:textColor="@color/colorPrimaryLight"
+        android:backgroundTint="@color/colorPrimaryDark"
         android:text="Accept"
         android:onClick="onAcceptClick"/>
     <Button
         android:id="@+id/receive_cancell_btn"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:textColor="@color/colorPrimaryLight"
+        android:backgroundTint="@color/colorPrimaryDark"
         android:layout_weight="2"
-        android:text="Cancell"
+        android:text="Cancel"
         android:onClick="onCancellClick"/>
 </LinearLayout>

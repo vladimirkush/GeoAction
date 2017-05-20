@@ -30,7 +30,7 @@
         android:id="@+id/tv_radius"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:text="radius"
+        android:text="Radius"
         android:textSize="25sp"
         android:textAlignment="center"
         android:layout_weight="0.8"/>
@@ -39,6 +39,8 @@
         android:text="Confirm"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:textColor="@color/colorPrimaryLight"
+        android:backgroundTint="@color/colorPrimaryDark"
         android:onClick="onConfirmClick"
         android:layout_weight="1.2"/>
 </LinearLayout>

@@ -201,6 +201,8 @@
                     android:text="To:"
                     android:layout_width="0dp"
                     android:layout_weight="1"
+                    android:textColor="@color/colorPrimaryLight"
+                    android:backgroundTint="@color/colorPrimaryDark"
                     android:layout_height="wrap_content"
                     android:onClick="btnSMSToOnclick"
                     android:paddingLeft="2dp"
@@ -253,6 +255,8 @@
                     android:onClick="btnEmailToOnClick"
                     android:layout_height="wrap_content"
                     android:paddingLeft="2dp"
+                    android:textColor="@color/colorPrimaryLight"
+                    android:backgroundTint="@color/colorPrimaryDark"
                     android:paddingRight="2dp"/>
 
                 <EditText
@@ -289,7 +293,8 @@
         <Button
             android:id="@+id/btn_save_action"
             android:text="Save"
-            android:backgroundTint="@color/colorPrimaryLight"
+            android:textColor="@color/colorPrimaryLight"
+            android:backgroundTint="@color/colorPrimaryDark"
             android:foregroundGravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="60dp"

@@ -12,13 +12,32 @@
     tools:context="com.vladimirkush.geoaction.LoginActivity"
     android:animateLayoutChanges="true"
     android:orientation="vertical"
-    android:weightSum="10">
+    android:weightSum="11">
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:scaleX="2"
+        android:scaleY="2"
+        android:layout_gravity="center"
+        android:src="@mipmap/ic_launcher"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="center"
+        android:text="Geo Action"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:textColor="#730079"/>
 
 
     <EditText
         android:id="@+id/email_et"
-        android:layout_width="match_parent"
+        android:layout_width="280dp"
+        android:layout_gravity="center"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:hint="@string/email_field_hint"
@@ -27,7 +46,8 @@
 
     <EditText
         android:id="@+id/passw_et"
-        android:layout_width="match_parent"
+        android:layout_width="280dp"
+        android:layout_gravity="center"
         android:height="0dp"
         android:layout_weight="1"
         android:hint="@string/password_field_hint"
@@ -37,7 +57,8 @@
 
     <EditText
         android:id="@+id/passw_reenter_et"
-        android:layout_width="match_parent"
+        android:layout_width="280dp"
+        android:layout_gravity="center"
         android:height="0dp"
         android:layout_weight="1"
         android:hint="@string/re_enter_password_field_hint"
@@ -48,7 +69,10 @@
 
     <Button
         android:text="@string/login_btn_text"
-        android:layout_width="match_parent"
+        android:layout_width="280dp"
+        android:layout_gravity="center"
+        android:textColor="@color/colorPrimaryLight"
+        android:backgroundTint="@color/colorPrimaryDark"
         android:layout_height="0dp"
         android:id="@+id/login_button"
         android:onClick="loginOnClick"
@@ -57,8 +81,11 @@
 
     <Button
         android:text="@string/register_btn_text"
-        android:layout_width="match_parent"
+        android:layout_width="280dp"
+        android:layout_gravity="center"
         android:layout_height="0dp"
+        android:backgroundTint="@color/colorPrimaryDark"
+        android:textColor="@color/colorPrimaryLight"
         android:id="@+id/register_button"
         android:layout_weight="1"
         android:onClick="registerOnClick"/>
@@ -67,14 +94,16 @@
 
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="0.5"
         android:text="~or~"
         android:textStyle="bold"
         android:gravity="center_horizontal|center_vertical"/>
 
+
     <ImageButton
         android:id="@+id/fb_login_btn"
-        android:layout_width="match_parent"
+        android:layout_width="280dp"
+        android:layout_gravity="center"
         android:layout_height="0dp"
         android:src="@drawable/fb_login_bckgrnd"
         android:scaleType="centerCrop"
