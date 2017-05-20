@@ -37,13 +37,13 @@ import java.util.ArrayList;
 
 
 public class TrackService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
-    private final String LOG_TAG = "LOGTAG";
-    private final long MILLIS_NOSPAM_DIFF = 1000 * 60 * 2;  // 30m
-    private DBHelper dbHelper;
-    private GoogleApiClient mGoogleApiClient;
-    private Location mLastLocation;
-    private LocationRequest mLocationRequest;
-    FriendsTrackerService mFriendsTrackerService;
+    private final String        LOG_TAG = "LOGTAG";
+    private final long          MILLIS_NOSPAM_DIFF = 1000 * 60 * 2;  // 2m
+    private DBHelper            dbHelper;
+    private GoogleApiClient     mGoogleApiClient;
+    private Location            mLastLocation;
+    private LocationRequest     mLocationRequest;
+    FriendsTrackerService       mFriendsTrackerService;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

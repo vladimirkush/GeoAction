@@ -83,15 +83,19 @@
         <activity
             android:name=".SettingsActivity"
             android:screenOrientation="portrait" />
-
+        <activity android:name=".ChangePasswordActivity"
+            android:screenOrientation="portrait"
+            />
         <service
-            android:name=".Services.GeofenceTransitionsIntentService"
+            android:name="com.vladimirkush.geoaction.Services.RebootCompleteService"
             android:exported="false" />
         <service
-            android:name=".Services.TrackService"
+            android:name="com.vladimirkush.geoaction.Services.TrackService"
+            android:exported="false" />
+        <service
+            android:name="com.vladimirkush.geoaction.Services.GeofenceTransitionsIntentService"
             android:exported="false" />
 
-        <activity android:name=".ChangePasswordActivity"></activity>
     </application>
 
 </manifest>

@@ -3,6 +3,7 @@ package com.vladimirkush.geoaction.Utils;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -20,7 +21,6 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.vladimirkush.geoaction.Models.LBAction;
-import com.vladimirkush.geoaction.R;
 import com.vladimirkush.geoaction.Services.GeofenceTransitionsIntentService;
 
 import java.util.List;
@@ -30,15 +30,15 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
 
     private PendingIntent   mGeofencePendingIntent;
     private GoogleApiClient mGoogleApiClient;
-    private Activity        mActivity;
+    private Context         mContext;
 
     // ctor
-    public GeofenceHelper(Activity activity) {
-        this.mActivity = activity;
+    public GeofenceHelper(Context context) {
+        this.mContext = context;
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(mActivity)
+            mGoogleApiClient = new GoogleApiClient.Builder(mContext)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
@@ -65,21 +65,20 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
         if (mGeofencePendingIntent != null) {
             return mGeofencePendingIntent;
         }
-        Intent intent = new Intent(mActivity, GeofenceTransitionsIntentService.class);
+        Intent intent = new Intent(mContext, GeofenceTransitionsIntentService.class);
         intent.putExtra(Constants.LBACTION_ID_KEY, lbAction.getID());
 
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
         // calling addGeofences() and removeGeofences().
-        return PendingIntent.getService(mActivity, 0, intent, PendingIntent.
+        return PendingIntent.getService(mContext, 0, intent, PendingIntent.
                 FLAG_UPDATE_CURRENT);
     }
 
 
     public void registerGeofence(LBAction lbAction) {
-        if (!(ActivityCompat.checkSelfPermission(mActivity, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(mActivity, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
-            ActivityCompat.requestPermissions(mActivity, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION}, Constants.PERMISSION_LOCATION_REQUEST);
+        if (!(ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
+            Log.d(LOG_TAG, "No permissions granted");
         } else {
             //pIntent = getGeofencePendingIntent(lbAction);
             LocationServices.GeofencingApi.addGeofences(
@@ -88,7 +87,24 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
                     getGeofencePendingIntent(lbAction)
             ).setResultCallback(this);
         }
+    }
 
+    public void registerGeofence(LBAction lbAction, GoogleApiClient gac) {
+        if (!(ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
+            Log.d(LOG_TAG, "No permissions granted");
+        } else {
+            //pIntent = getGeofencePendingIntent(lbAction);
+            LocationServices.GeofencingApi.addGeofences(
+                    gac,
+                    getGeofencingRequest(lbAction),
+                    getGeofencePendingIntent(lbAction)
+            ).setResultCallback(this);
+        }
+    }
+
+    public boolean isApiConnected(){
+        return mGoogleApiClient.isConnected();
     }
 
     //Creates request for registering a Geofence in the system for tracking
@@ -119,6 +135,15 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
     public void registerGeofences(List<LBAction> actions){
         for(LBAction act:actions){
             registerGeofence(act);
+        }
+
+        Log.d(LOG_TAG, "GeofenceHelper - registered geofences: " + actions.size());
+
+    }
+
+    public void registerGeofences(List<LBAction> actions, GoogleApiClient gac){
+        for(LBAction act:actions){
+            registerGeofence(act, gac);
         }
 
         Log.d(LOG_TAG, "GeofenceHelper - registered geofences: " + actions.size());
