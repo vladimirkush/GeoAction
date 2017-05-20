@@ -8,15 +8,15 @@ public abstract class LBAction {
     public enum Status {ACTIVE, PAUSED};
     public enum ActionType{REMINDER, SMS, EMAIL};
 
-    private ActionType actionType;
-    private long ID;
-    private String externalID;
-    private String message;
-    private int radius;
-    private DirectionTrigger directionTrigger;
-    private LatLng triggerCenter;
-    private Status status;
-    private double score;
+    private ActionType          actionType;
+    private long                ID;
+    private String              externalID;
+    private String              message;
+    private int                 radius;
+    private DirectionTrigger    directionTrigger;
+    private LatLng              triggerCenter;
+    private Status              status;
+    private double              score;
 
 
 

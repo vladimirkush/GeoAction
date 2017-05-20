@@ -29,12 +29,12 @@ import java.util.ArrayList;
 
 
 public class SettingsFragment extends PreferenceFragment {
-    private final String LOG_TAG = "LOGTAG";
+    private final String    LOG_TAG = "LOGTAG";
     private SharedPreferences.OnSharedPreferenceChangeListener mListener;
-    private Activity mActivity;
-    private AlarmManager mAlarmMgr;
-    private PendingIntent mAlarmIntent;
-    private DBHelper mDbHelper;
+    private Activity        mActivity;
+    private AlarmManager    mAlarmMgr;
+    private PendingIntent   mAlarmIntent;
+    private DBHelper        mDbHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

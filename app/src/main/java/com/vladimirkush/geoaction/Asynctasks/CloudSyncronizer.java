@@ -4,7 +4,6 @@ package com.vladimirkush.geoaction.Asynctasks;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
-import android.os.SystemClock;
 import android.util.Log;
 
 import com.backendless.Backendless;
@@ -21,18 +20,18 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class CloudSyncronizer extends AsyncTask<Void, Void, Void> {
-    private final String LOG_TAG = "LOGTAG";
+    private final String        LOG_TAG = "LOGTAG";
 
-    private DBHelper dbHelper;
-    private Activity activity;
-    private ProgressDialog mProgressDialog;
-    private ActionsListAdapter adapter;
+    private DBHelper            dbHelper;
+    private Activity mActivity;
+    private ProgressDialog      mProgressDialog;
+    private ActionsListAdapter  adapter;
     private ArrayList<LBAction> actionList;
-    private GeofenceHelper geofenceHelper;
+    private GeofenceHelper      geofenceHelper;
 
     // ctor
     public CloudSyncronizer(Activity activity, ActionsListAdapter adapter, ArrayList<LBAction> actionList){
-        this.activity = activity;
+        this.mActivity = activity;
         dbHelper = new DBHelper(activity);
         geofenceHelper = new GeofenceHelper(activity);
         geofenceHelper.connectGoogleApi();
@@ -45,7 +44,7 @@ public class CloudSyncronizer extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        mProgressDialog = new ProgressDialog(activity);
+        mProgressDialog = new ProgressDialog(mActivity);
         mProgressDialog.setMessage("Syncing...");
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         mProgressDialog.setCancelable(false);

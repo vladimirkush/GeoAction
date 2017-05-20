@@ -9,8 +9,8 @@ import com.vladimirkush.geoaction.Utils.AddressHelper;
 
 
 public class GetAddressAsyncTask extends AsyncTask<Object, Void, Void> {
-    private TextView mAddressLabel;
-    private String mAddress;
+    private TextView    mAddressLabel;
+    private String      mAddress;
     @Override
     protected Void doInBackground(Object[] params) {
 

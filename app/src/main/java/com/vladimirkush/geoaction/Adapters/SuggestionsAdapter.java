@@ -21,10 +21,10 @@ import java.util.List;
 
 
 public class SuggestionsAdapter extends   RecyclerView.Adapter<SuggestionsAdapter.ViewHolder> {
-    private final String LOG_TAG = "LOGTAG";
+    private final String        LOG_TAG = "LOGTAG";
 
-    private List<LBAction> mActionList;
-    private SuggestionListener mSuggestionListener;
+    private List<LBAction>      mActionList;
+    private SuggestionListener  mSuggestionListener;
 
     // ctor
     public SuggestionsAdapter(Context mContext, ArrayList<LBAction> mActionList) {
@@ -33,13 +33,13 @@ public class SuggestionsAdapter extends   RecyclerView.Adapter<SuggestionsAdapte
     }
 
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        public ImageView imageType;
-        public TextView messageTv;
-        public TextView titleTv;
-        public View v;
+     static class ViewHolder extends RecyclerView.ViewHolder {
+         ImageView imageType;
+         TextView messageTv;
+         TextView titleTv;
+         View v;
 
-        public ViewHolder(View itemView) {
+         ViewHolder(View itemView) {
             super(itemView);
             v=itemView;
             imageType = (ImageView) itemView.findViewById(R.id.sug_image_type);

@@ -37,9 +37,7 @@ public class AddressHelper {
 
         // Handle case where no address was found.
         if (addresses == null || addresses.size()  == 0) {
-
             Log.e(LOG_TAG, "No addresses returned");
-
         } else {
             Address address = addresses.get(0);
             ArrayList<String> addressFragments = new ArrayList<String>();

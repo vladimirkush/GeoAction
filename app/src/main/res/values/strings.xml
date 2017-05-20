@@ -16,6 +16,9 @@
     <string name="re_enter_password_field_hint">re-enter password</string>
     <string name="email_field_hint">email</string>
 
+
+    <!--    Message strings   -->
+
     <string name="locatioNnotGrantedMsg">This app needs access to your location</string>
     <string name="locatioNnotGrantedTitle">Location Not Found</string>
     <string name="locatioNnotGrantedButtonText">Close app</string>

@@ -5,13 +5,13 @@ import android.graphics.Bitmap;
 public class Friend {
     public enum Status {TRACED, UNTRACED};
 
-    private long ID;
-    private String fbID;
-    private String name;
-    private Status status;
-    private Bitmap userIcon;
-    private double lat;
-    private double lon;
+    private long    ID;
+    private String  fbID;
+    private String  name;
+    private Status  status;
+    private Bitmap  userIcon;
+    private double  lat;
+    private double  lon;
     private boolean isNear;
 
 

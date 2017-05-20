@@ -4,8 +4,8 @@ package com.vladimirkush.geoaction.Models;
 import java.util.List;
 
 public class LBEmail extends LBAction {
-    private List<String> to;
-    private String subject;
+    private List<String>    to;
+    private String          subject;
 
     public LBEmail() {
         setActionType(ActionType.EMAIL);

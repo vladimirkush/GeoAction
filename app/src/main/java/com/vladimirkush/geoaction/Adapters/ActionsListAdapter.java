@@ -32,14 +32,14 @@ import java.util.List;
 
 
 public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapter.ViewHolder>  {
-    private final String LOG_TAG = "LOGTAG";
+    private final String        LOG_TAG = "LOGTAG";
 
-    private List<LBAction> mActionList;
-    private Context mContext;
-    private DBHelper dbHelper;
+    private List<LBAction>      mActionList;
+    private Context             mContext;
+    private DBHelper            dbHelper;
 
-    private DeleteItemHandler mDeleteItemHandler;
-    private SendItemHandler mSendItemHandler;
+    private DeleteItemHandler   mDeleteItemHandler;
+    private SendItemHandler     mSendItemHandler;
 
 
     // ctor
@@ -51,18 +51,18 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
 
 
 
-    public static class ViewHolder extends RecyclerView.ViewHolder   {
-        public ImageView imageType;
-        public TextView messageTv;
-        public TextView titleTv;
-        public TextView toTv;
-        public ImageButton statusBtn;
+    static class ViewHolder extends RecyclerView.ViewHolder   {
+         ImageView imageType;
+         TextView messageTv;
+         TextView titleTv;
+         TextView toTv;
+         ImageButton statusBtn;
 
-        public View v;
+         View v;
 
         // Create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             v=itemView;
             imageType = (ImageView) itemView.findViewById(R.id.image_type);
@@ -219,11 +219,6 @@ public class ActionsListAdapter extends   RecyclerView.Adapter<ActionsListAdapte
 
     private void handleDelete(int position, LBAction action){
         Log.d(LOG_TAG, "Handling default delete for id: " + action.getID() + "and pos: "+ position);
-        /*int res =  dbHelper.deleteAction(action.getID());
-        if (res == 1){
-            mActionList.remove(action);
-            notifyItemRemoved(position);
-        }*/
     }
 
     private void handleSend(int position, LBAction action){

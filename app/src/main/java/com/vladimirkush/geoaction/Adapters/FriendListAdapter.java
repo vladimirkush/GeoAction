@@ -22,11 +22,11 @@ import com.vladimirkush.geoaction.Utils.DBHelper;
 import java.util.ArrayList;
 
 public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.ViewHolder> {
-    private final String LOG_TAG = "LOGTAG";
+    private final String        LOG_TAG = "LOGTAG";
 
-    private Context mContext;
-    private DBHelper dbHelper;
-    private ArrayList<Friend> mFriendList;
+    private Context             mContext;
+    private DBHelper            dbHelper;
+    private ArrayList<Friend>   mFriendList;
 
 
     public FriendListAdapter(Context mContext, ArrayList<Friend> mFriendList) {
@@ -63,10 +63,7 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         // inflate a layout for the view
         View friendsView = inflater.inflate(R.layout.friends_row_item, parent, false);
 
-
-        // Return a new holder instance
-        ViewHolder viewHolder = new ViewHolder(friendsView);
-        return viewHolder;
+        return  new ViewHolder(friendsView);
     }
 
     @Override
