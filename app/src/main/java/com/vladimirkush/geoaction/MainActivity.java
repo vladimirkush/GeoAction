@@ -31,6 +31,7 @@ import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.vladimirkush.geoaction.Adapters.ActionsListAdapter;
@@ -67,10 +68,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private RecyclerView        rvActionList;
     private Drawer              mDrawer;
     private Toolbar             mToolbar;
-    private  AppEventsLogger    mFBLogger;
+    private AppEventsLogger    mFBLogger;
 
-    private AlarmManager mAlarmMgr;
-    private PendingIntent mAlarmIntent;
+    private AlarmManager        mAlarmMgr;
+    private PendingIntent       mAlarmIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -231,7 +232,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         // Header
         AccountHeader header = new AccountHeaderBuilder()
                 .withActivity(this)
-                .withHeaderBackground(R.color.md_amber_800)// todo change for picture
+                //.withHeaderBackground(R.color.md_amber_800)// todo change for picture
+                .withHeaderBackground(R.drawable.geoaction_big_logo)
                 .build();
 
         // Menu items
