@@ -26,11 +26,11 @@ import com.vladimirkush.geoaction.Services.GeofenceTransitionsIntentService;
 import java.util.List;
 
 public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback {
-    private final String LOG_TAG = "LOGTAG";
+    private final String    LOG_TAG = "LOGTAG";
 
-    private PendingIntent mGeofencePendingIntent;
+    private PendingIntent   mGeofencePendingIntent;
     private GoogleApiClient mGoogleApiClient;
-    private Activity mActivity;
+    private Activity        mActivity;
 
     // ctor
     public GeofenceHelper(Activity activity) {
@@ -80,7 +80,6 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
                 ActivityCompat.checkSelfPermission(mActivity, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
             ActivityCompat.requestPermissions(mActivity, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
                     android.Manifest.permission.ACCESS_COARSE_LOCATION}, Constants.PERMISSION_LOCATION_REQUEST);
-            // TODO no permissions granted
         } else {
             //pIntent = getGeofencePendingIntent(lbAction);
             LocationServices.GeofencingApi.addGeofences(
@@ -128,13 +127,10 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
 
 
     public void unregisterGeofences(List<String> geofenceIDs) {
-
         LocationServices.GeofencingApi.removeGeofences(
                 mGoogleApiClient,
-                // This is the same pending intent that was used in addGeofences().
                 geofenceIDs
-        )
-                .setResultCallback(this); // Result processed in onResult().
+        ).setResultCallback(this); // Result processed in onResult().
     }
 
 

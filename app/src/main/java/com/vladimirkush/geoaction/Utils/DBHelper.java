@@ -34,39 +34,39 @@ import java.util.List;
 public class DBHelper extends SQLiteOpenHelper {
 
     // inner classes - Contract for table columns
-    public static class ActionsEntry implements BaseColumns {
-        public static final String ACTIONS_TABLE_NAME = "actions";
-        public static final String ACTIONS_TABLE_SUGGESTIONS_NAME = "suggestions";
+    private static class ActionsEntry implements BaseColumns {
+         static final String ACTIONS_TABLE_NAME = "actions";
+         static final String ACTIONS_TABLE_SUGGESTIONS_NAME = "suggestions";
 
-        public static final String ACTIONS_COLUMN_EXTERNAL_ID = "externalId";
-        public static final String ACTIONS_COLUMN_ACTION_TYPE = "actionType";
-        public static final String ACTIONS_COLUMN_RADIUS = "radius";
-        public static final String ACTIONS_COLUMN_DIRECTION_TRIGGER = "directionTrigger";
-        public static final String ACTIONS_COLUMN_LAT = "latitude";
-        public static final String ACTIONS_COLUMN_LON = "longitude";
-        public static final String ACTIONS_COLUMN_STATUS = "status";
-        public static final String ACTIONS_COLUMN_TO = "recipients";
-        public static final String ACTIONS_COLUMN_MESSAGE = "message";
-        public static final String ACTIONS_COLUMN_SUBJECT = "subject";  // for reminder used for title
-        public static final String ACTIONS_COLUMN_SCORE = "score";      // used in suggestions table
+         static final String ACTIONS_COLUMN_EXTERNAL_ID = "externalId";
+         static final String ACTIONS_COLUMN_ACTION_TYPE = "actionType";
+         static final String ACTIONS_COLUMN_RADIUS = "radius";
+         static final String ACTIONS_COLUMN_DIRECTION_TRIGGER = "directionTrigger";
+         static final String ACTIONS_COLUMN_LAT = "latitude";
+         static final String ACTIONS_COLUMN_LON = "longitude";
+         static final String ACTIONS_COLUMN_STATUS = "status";
+         static final String ACTIONS_COLUMN_TO = "recipients";
+         static final String ACTIONS_COLUMN_MESSAGE = "message";
+         static final String ACTIONS_COLUMN_SUBJECT = "subject";  // for reminder used for title
+         static final String ACTIONS_COLUMN_SCORE = "score";      // used in suggestions table
     }
 
-    public static class FriendsEntry implements BaseColumns{
-        public static final String FRIENDS_TABLE_NAME = "friends";
-        public static final String FRIENDS_COLUMN_FBID = "fbid";
-        public static final String FRIENDS_COLUMN_NAME = "name";
-        public static final String FRIENDS_COLUMN_STATUS = "status";
-        public static final String FRIENDS_COLUMN_USERICON = "usericon";
-        public static final String FRIENDS_COLUMN_LAT = "lat";
-        public static final String FRIENDS_COLUMN_LON = "lon";
-        public static final String FRIENDS_COLUMN_ISNEAR = "isNear";
-        public static final String FRIENDS_COLUMN_LAST_NEAR_TIME = "lastNearTimeMillis";
+    private static class FriendsEntry implements BaseColumns{
+         static final String FRIENDS_TABLE_NAME = "friends";
+         static final String FRIENDS_COLUMN_FBID = "fbid";
+         static final String FRIENDS_COLUMN_NAME = "name";
+         static final String FRIENDS_COLUMN_STATUS = "status";
+         static final String FRIENDS_COLUMN_USERICON = "usericon";
+         static final String FRIENDS_COLUMN_LAT = "lat";
+         static final String FRIENDS_COLUMN_LON = "lon";
+         static final String FRIENDS_COLUMN_ISNEAR = "isNear";
+         static final String FRIENDS_COLUMN_LAST_NEAR_TIME = "lastNearTimeMillis";
 
     }
 
     // ----constants----
-    public static final String LOG_TAG = "LOGTAG";
-    public static final String DATABASE_NAME = "GeoActionsCache.db";
+    private static final String LOG_TAG = "LOGTAG";
+    private static final String DATABASE_NAME = "GeoActionsCache.db";
 
     private Context context;
     // ----prebuilt queries----
@@ -482,7 +482,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor  cursor = db.rawQuery("select * from " + ActionsEntry.ACTIONS_TABLE_NAME, null);
 
         if (cursor.moveToFirst()) {
-            while (cursor.isAfterLast() == false) {
+            while (!cursor.isAfterLast()) {
 
                 LBAction lbAction = getActionFromCursorRow(cursor, false);
                 if(lbAction==null){
@@ -504,7 +504,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor  cursor = db.rawQuery("select * from " + ActionsEntry.ACTIONS_TABLE_SUGGESTIONS_NAME, null);
 
         if (cursor.moveToFirst()) {
-            while (cursor.isAfterLast() == false) {
+            while (!cursor.isAfterLast()) {
 
                 LBAction lbAction = getActionFromCursorRow(cursor, true);
                 if(lbAction==null){
@@ -556,7 +556,7 @@ public class DBHelper extends SQLiteOpenHelper {
                                         , null);
 
         if (cursor.moveToFirst()) {
-            while (cursor.isAfterLast() == false) {
+            while (!cursor.isAfterLast()) {
 
                 Friend friend = getFriendFromCursorRow(cursor);
                 if(friend==null){
@@ -596,7 +596,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
         if (cursor.moveToFirst()) {
-            while (cursor.isAfterLast() == false) {
+            while (!cursor.isAfterLast()) {
 
                 String fbid = cursor.getString(cursor.getColumnIndexOrThrow(FriendsEntry.FRIENDS_COLUMN_FBID));
                 if (fbid == null) {
@@ -609,7 +609,7 @@ public class DBHelper extends SQLiteOpenHelper {
         }
 
 
-
+        cursor.close();
         return ids;
     }
 
@@ -739,7 +739,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
-    public ArrayList<Cursor> getData(String Query){
+     ArrayList<Cursor> getData(String Query){
         //get writable database
         SQLiteDatabase sqlDB = this.getWritableDatabase();
         String[] columns = new String[] { "mesage" };

@@ -30,8 +30,8 @@ import com.vladimirkush.geoaction.Utils.SharedPreferencesHelper;
 import java.util.List;
 
 public class GeofenceTransitionsIntentService extends IntentService {
-    private final String LOG_TAG = "LOGTAG";
-    private DBHelper dbHelper;
+    private final String    LOG_TAG = "LOGTAG";
+    private DBHelper        dbHelper;
 
     public GeofenceTransitionsIntentService() {
         super("GeofenceTransitionsIntentService");
@@ -98,11 +98,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
                         Log.d(LOG_TAG, "Detected paused action: "+lbAction.getID() + "of type "+lbAction.getActionType());
                     }
                 }
-
             }
-
             Log.d(LOG_TAG, geofenceTransitionDetails);
-
         } else {
             // Log the error.
             Log.e(LOG_TAG, "invalid transition type");
