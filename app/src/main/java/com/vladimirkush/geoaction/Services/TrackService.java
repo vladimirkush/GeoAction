@@ -37,17 +37,17 @@ import java.util.ArrayList;
 
 
 public class TrackService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
-    private final String    LOG_TAG = "LOGTAG";
-    private final long      MILLIS_NOSPAM_DIFF = 1000 * 60 * 2;  // 2m
-    private DBHelper        dbHelper;
+    private final String LOG_TAG = "LOGTAG";
+    private final long MILLIS_NOSPAM_DIFF = 1000 * 60 * 2;  // 30m
+    private DBHelper dbHelper;
     private GoogleApiClient mGoogleApiClient;
-    private Location        mLastLocation;
+    private Location mLastLocation;
     private LocationRequest mLocationRequest;
-    FriendsTrackerService   mFriendsTrackerService;
+    FriendsTrackerService mFriendsTrackerService;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(LOG_TAG, "Service started");
+        Log.d(LOG_TAG, "Service - onStartCommand");
 
         mGoogleApiClient.connect();
         return START_STICKY;
@@ -58,6 +58,8 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         startLocationUpdates();
+
+        Log.d(LOG_TAG, "Service - onConnected()");
         if (!(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
             Log.d(LOG_TAG, "Track service - no permissions for location. Calling stopSelf()");
@@ -71,12 +73,12 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
                 Log.d(LOG_TAG, "My location Lat:" + mLastLocation.getLatitude() + " Lon: " + mLastLocation.getLongitude());
                 ArrayList<String> fr = dbHelper.getAllTrackedFriiendsFBIDs();
 
+                // web service call
                 mFriendsTrackerService.getFriendsNearMeAsync(fr, mLastLocation.getLatitude(), mLastLocation.getLongitude(), new AsyncCallback<ArrayList<String>>() {
                     @Override
                     public void handleResponse(ArrayList<String> strings) {
-                        handleResponse(strings);
+                        handleResponseIds(strings);
                         stopSelf();
-
                     }
 
                     @Override
@@ -95,50 +97,57 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
 
     }
 
-    /** handles web service responce. Strings holds ids of the friends that are near the user  */
-    private void handleResponse (ArrayList<String> strings){
+    private void handleResponseIds(ArrayList<String> ids){
         long currentTimeMillis = System.currentTimeMillis();
-        if (strings.size() > 0) {   // at least one friend is found nearby
-            if (strings.size() > 1) { // several friends are found nearby
+        if (ids.size() > 0) {           // there is at least one friend detected nearby
+            if (ids.size() > 1) {       // there are more than  one friend detected nearby
 
                 boolean wasAtLeastOneNotNotifiedYet =true;
-                for (String fbid : strings) {
+
+                for (String fbid : ids) {
                     Log.d(LOG_TAG, "found " + fbid);
-                    Friend friend = dbHelper.getFriendByFBId(fbid);
-                    friend.setNear(true);
+                    Friend f = dbHelper.getFriendByFBId(fbid);
+                    f.setNear(true);
 
                     // if happened longer then MILLIS_NOSPAM_DIFF, update timestamp
-                    if(checkIfTimeLongerThan(friend.getLastNearTimeMillis(), currentTimeMillis, MILLIS_NOSPAM_DIFF)){
-                        friend.setLastNearTimeMillis(currentTimeMillis);
+                    if(checkIfTimeLongerThan(f.getLastNearTimeMillis(), currentTimeMillis, MILLIS_NOSPAM_DIFF)){
+                        f.setLastNearTimeMillis(currentTimeMillis);
                     }else{
                         wasAtLeastOneNotNotifiedYet = false;
                     }
-                    dbHelper.updateFriend(friend);
+                    dbHelper.updateFriend(f);
                 }
                 if(wasAtLeastOneNotNotifiedYet) {
                     sendNotification("Friends near you", "You have several friends around!");
                 }
-            } else if (strings.size() == 1) {   // exactly one friend is found nearby
-                Friend friend = dbHelper.getFriendByFBId(strings.get(0));
-                friend.setNear(true);
-                if(checkIfTimeLongerThan(friend.getLastNearTimeMillis(), currentTimeMillis, MILLIS_NOSPAM_DIFF)){
-                    sendNotification("Friend near you", friend.getName() + " is around you!");
+            } else if (ids.size() == 1) {   // there is exactly one friend detected nearby
+                Friend f = dbHelper.getFriendByFBId(ids.get(0));
+                f.setNear(true);
+
+                if(checkIfTimeLongerThan(f.getLastNearTimeMillis(), currentTimeMillis, MILLIS_NOSPAM_DIFF)){
+                    sendNotification("Friend near you", f.getName() + " is around you!");
                     // if happened longer then MILLIS_NOSPAM_DIFF, update timestamp
-                    friend.setLastNearTimeMillis(currentTimeMillis);
-                    dbHelper.updateFriend(friend);
+                    f.setLastNearTimeMillis(currentTimeMillis);
+                    dbHelper.updateFriend(f);
+
                 }else{
                     Log.d(LOG_TAG, "friends timstamp does not exceed the difference, no notification");
+
                 }
+
             }
-        }else { // no friends found nearby
+
+
+        }else { // there are no friends detected nearby
             Log.d(LOG_TAG, "No friends found");
         }
-        setNotNearFriendsStatus(strings);
+        setNotNearFriendsStatus(ids);
         Log.d(LOG_TAG, "Handle response ended. Stopping service..");
     }
 
     @Override
     public void onCreate() {
+        Log.d(LOG_TAG, "Service - onCreate()");
         FriendsTrackerService.initApplication(this);
         mFriendsTrackerService = FriendsTrackerService.getInstance();
 
@@ -161,14 +170,13 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
 
 
     }
-
     private boolean checkIfTimeLongerThan(long pastTimeMills, long currentTimeMills, long diffParamMills){
         long diffMillis = currentTimeMills - pastTimeMills ;
         return diffMillis >= diffParamMills;
     }
 
 
-
+    /** Set all undetected friends as not near anymore */
     private void setNotNearFriendsStatus(ArrayList<String> foundFriends){
         ArrayList<Friend> friends = dbHelper.getAllFriends();
         int count= 0;
@@ -185,6 +193,7 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
 
 
     protected void startLocationUpdates() {
+        Log.d(LOG_TAG, "Location updates started");
 
         // check if permissions granted
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
@@ -267,6 +276,7 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
         mBuilder.setContentIntent(resultPendingIntent);
         NotificationManager mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // mId allows you to update the notification later on.
         int mId = (int) when;
         mNotificationManager.notify(mId, mBuilder.build());
     }

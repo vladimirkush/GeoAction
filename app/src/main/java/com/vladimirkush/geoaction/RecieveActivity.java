@@ -54,33 +54,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RecieveActivity extends AppCompatActivity implements OnMapReadyCallback,  ResultCallback {
-    private final String LOG_TAG = "LOGTAG";
-    private final String MAIN_TITLE = "New Geo Action Incoming: ";
+    private final String    LOG_TAG = "LOGTAG";
+    private final String    MAIN_TITLE = "New Geo Action Incoming: ";
 
     //views
-    private TextView mMainTitle;
-    private TextView mToContent;
-    private TextView mSubjectLabel;
-    private TextView mSubjectContent;
-    private TextView mMessageContent;
-    private TextView mRadiusContent;
-    private TextView mDirection;
-    private TextView mAddress;
+    private TextView        mMainTitle;
+    private TextView        mToContent;
+    private TextView        mSubjectLabel;
+    private TextView        mSubjectContent;
+    private TextView        mMessageContent;
+    private TextView        mRadiusContent;
+    private TextView        mDirection;
+    private TextView        mAddress;
 
-    private Button mAcceptBtn;
-    private Button mCancelBtn;
+    private Button          mAcceptBtn;
+    private Button          mCancelBtn;
 
-    private LinearLayout mToLayout;
-    private LinearLayout mSubjectLayout;
+    private LinearLayout    mToLayout;
+    private LinearLayout    mSubjectLayout;
 
-    private Circle mCircle;
-    private int mRadius;
-    private LatLng markerLocation;
+    private Circle          mCircle;
+    private int             mRadius;
+    private LatLng          markerLocation;
 
-    private String externalId;
-    private LBAction lbAction;
-    private GoogleMap mMap;
-    private GeofenceHelper mGeofenceHelper;
+    private String          externalId;
+    private LBAction        lbAction;
+    private GoogleMap       mMap;
+    private GeofenceHelper  mGeofenceHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,7 +130,7 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
 
                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                                mCircle.getCenter(), getZoomLevel(mCircle)));
-                        String addressStr = AddressHelper.getAddress(getApplicationContext(),lbAction.getTriggerCenter());
+                       String addressStr = AddressHelper.getAddress(getApplicationContext(),lbAction.getTriggerCenter());
                        mAddress.setText(addressStr); // set address
                    }
 

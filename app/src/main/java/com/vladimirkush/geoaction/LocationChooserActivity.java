@@ -54,11 +54,10 @@ import static com.vladimirkush.geoaction.R.id.map;
 public class LocationChooserActivity extends AppCompatActivity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
-    private final String LOG_TAG = "LOGTAG";
-    private final float   ZOOM_RATE = 14;
+    private final String    LOG_TAG = "LOGTAG";
+    private final float     ZOOM_RATE = 14;
 
-    private Toolbar         mToolbar;
-    private ActionBar       mActionBar;
+
     private GoogleMap       mMap;
     private GoogleApiClient mGoogleApiClient;
     private Location        mLastLocation;
@@ -67,18 +66,19 @@ public class LocationChooserActivity extends AppCompatActivity
     private Circle          mCircle;
     private int             mRadius = 200;
     private LatLng          mAreaCenter;
-
-    private TextView        mRadiusTextView;
-
     private boolean         mIsEditMode =  false;
     private boolean         mZoomOnceFlag;
     private boolean         mIsLocationUpdateStarted = false;
+
+    private TextView        mRadiusTextView;
+    private Toolbar         mToolbar;
+    private ActionBar       mActionBar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location_chooser);
-        //FriendsTrackerService.initApplication(this);
         mRadiusTextView = (TextView) findViewById(R.id.tv_radius);
 
         mToolbar = (Toolbar) findViewById(R.id.location_chooser_toolbar);

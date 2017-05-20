@@ -14,12 +14,12 @@ package com.vladimirkush.services;
 
 public class FriendsTrackerService
 {
-    static final String BACKENDLESS_HOST = "https://api.backendless.com";
-    static final String SERVICE_NAME = "FriendsTrackerService";
-    static final String SERVICE_VERSION_NAME = "1.0.0";
-    static final String APP_VERSION = "v1";
-    static final String APP_ID = "C337AADB-C5FF-6F79-FF35-1C8CCE400600";
-    static final String SECRET_KEY = "E7EF3DA5-FE66-15DC-FF2D-32B0EFA9C800";
+    private static final String BACKENDLESS_HOST = "https://api.backendless.com";
+    private static final String SERVICE_NAME = "FriendsTrackerService";
+    private static final String SERVICE_VERSION_NAME = "1.0.0";
+    private static final String APP_VERSION = "v1";
+    private static final String APP_ID = "C337AADB-C5FF-6F79-FF35-1C8CCE400600";
+    private static final String SECRET_KEY = "E7EF3DA5-FE66-15DC-FF2D-32B0EFA9C800";
 
     private static FriendsTrackerService ourInstance = new FriendsTrackerService();
 

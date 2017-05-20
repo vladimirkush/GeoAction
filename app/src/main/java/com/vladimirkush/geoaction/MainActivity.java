@@ -53,20 +53,21 @@ import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnTouchListener, DeleteItemHandler, SendItemHandler {
-    private final String LOG_TAG = "LOGTAG";
-    private final String SEND_URL_PREFIX = "http://geoaction.service/?id=";
+    private final String        LOG_TAG = "LOGTAG";
+    private final String        SEND_URL_PREFIX = "http://geoaction.service/?id=";
+    private final int           MAX_GEOFENCES = 100;
 
-    private GoogleApiClient mGoogleApiClient;
+    private GoogleApiClient     mGoogleApiClient;
     private ArrayList<LBAction> mActionList;
-    private DBHelper dbHelper;
-    private GeofenceHelper geofenceHelper;
-    private ActionsListAdapter mAdapter;
+    private DBHelper            dbHelper;
+    private GeofenceHelper      geofenceHelper;
+    private ActionsListAdapter  mAdapter;
     private FloatingActionButton fab;
-    private String mUserId;
-    private RecyclerView rvActionList;
-    private Drawer mDrawer;
-    private Toolbar mToolbar;
-    private  AppEventsLogger mFBLogger;
+    private String              mUserId;
+    private RecyclerView        rvActionList;
+    private Drawer              mDrawer;
+    private Toolbar             mToolbar;
+    private  AppEventsLogger    mFBLogger;
 
     private AlarmManager mAlarmMgr;
     private PendingIntent mAlarmIntent;
@@ -90,11 +91,11 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         dbHelper = new DBHelper(getApplicationContext());
         geofenceHelper = new GeofenceHelper(this);
 
-
+        // Floating action button setup
         fab = (FloatingActionButton) findViewById(R.id.fab) ;
         fab.setOnTouchListener(this);
-        //mIsLoginPersistent = (boolean)getIntent().getExtras().get(Constants.LOGIN_IS_PERSISTENT_KEY);
 
+        // recycle view adapter setup
         rvActionList = (RecyclerView) findViewById(R.id.rvActionsList);
         mActionList = dbHelper.getAllActions();
         mAdapter = new ActionsListAdapter(this, mActionList);
@@ -106,11 +107,13 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         RecyclerView.ItemDecoration itemDecoration = new
                 DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         rvActionList.addItemDecoration(itemDecoration);
+
         // set handlers for delete and send
         mAdapter.setDeleteItemHandler(this);
         mAdapter.setSendItemHandler(this);
         mUserId = Backendless.UserService.loggedInUser();
 
+        // Download all necessary data from external sources
         Intent incomingIntent = getIntent();
         // download all FB data
         if (SharedPreferencesHelper.isFacebookLoggedIn(this)) {
@@ -128,8 +131,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         mAlarmMgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, TrackService.class);
         mAlarmIntent = PendingIntent.getService(this, Constants.ALARM_MANAGER_REQUEST_CODE, intent, 0);
-
-
         if (!SharedPreferencesHelper.isAlarmActive(this) &&
                 SharedPreferencesHelper.isFacebookLoggedIn(this)&&
                 SharedPreferencesHelper.isAlarmPermitted(this)) {
@@ -144,9 +145,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             Log.d(LOG_TAG, "is currently active: " + SharedPreferencesHelper.isAlarmActive(this));
             Log.d(LOG_TAG, "is facebook logged in: " + SharedPreferencesHelper.isFacebookLoggedIn(this));
             Log.d(LOG_TAG, "is permitted by setting: " + SharedPreferencesHelper.isAlarmPermitted(this));
-
-
-
         }
 
     }
@@ -355,9 +353,9 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-            if(mActionList.size()==100) {
+            if(mActionList.size()== MAX_GEOFENCES) {
                 // Prevent creating more than 100 geo actions,
-                // as android cannot support more than 100 geofences
+                // as android cannot support more than 100 geofences per app
                 alertCannotAddAction();
             }else{
                 Intent intent = new Intent(this, ActionCreate.class);
@@ -376,26 +374,18 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 mActionList.clear();
                 mActionList.addAll(actions);
                 mAdapter.notifyDataSetChanged();
-
             }
         }else if(requestCode == Constants.CHANGE_PASSWORD_REQEST_CODE ){
             if(resultCode == RESULT_OK){
                 logOutAsync();
             }
         }
-
-
     }
-
-
 
     @Override
     protected void onResume() {
         super.onResume();
-
         mAdapter.notifyDataSetChanged();
-
-
     }
 
 

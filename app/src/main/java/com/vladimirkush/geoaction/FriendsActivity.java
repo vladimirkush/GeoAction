@@ -14,11 +14,11 @@ import com.vladimirkush.geoaction.Utils.DBHelper;
 import java.util.ArrayList;
 
 public class FriendsActivity extends AppCompatActivity {
-    private Toolbar mToolbar;
-    private DBHelper dbHelper;
-    private RecyclerView rvFriendList;
-    private ArrayList<Friend> mfriendList;
-    private FriendListAdapter friendListAdapter;
+    private Toolbar             mToolbar;
+    private DBHelper            dbHelper;
+    private RecyclerView        rvFriendList;
+    private ArrayList<Friend>   mfriendList;
+    private FriendListAdapter   friendListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

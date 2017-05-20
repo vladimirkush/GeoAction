@@ -20,13 +20,13 @@ import com.backendless.persistence.local.UserTokenStorageFactory;
 import com.vladimirkush.geoaction.Utils.Constants;
 
 public class ChangePasswordActivity extends AppCompatActivity {
-    private final String LOG_TAG = "LOGTAG";
+    private final String    LOG_TAG = "LOGTAG";
 
-    private Toolbar mToolbar;
-    private ActionBar mActionBar;
-    private EditText mPassOne;
-    private EditText mPassTwo;
-    private Button mConfirm;
+    private Toolbar         mToolbar;
+    private ActionBar       mActionBar;
+    private EditText        mPassOne;
+    private EditText        mPassTwo;
+    private Button          mConfirm;
     private BackendlessUser mUser;
 
     @Override

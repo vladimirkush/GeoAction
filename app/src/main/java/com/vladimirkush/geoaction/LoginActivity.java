@@ -32,17 +32,17 @@ import java.util.Map;
 
 
 public class LoginActivity extends AppCompatActivity {
-    private final String LOG_TAG = "LOGTAG";
+    private final String    LOG_TAG = "LOGTAG";
 
-    private EditText mEmailEt;
-    private EditText mPasswordEt;
-    private EditText mReenterPasswordEt;
-    private Button mLoginBtn;
-    private Button mRegisterBtn;
-    private ImageButton mFBLoginBtn;
+    private EditText        mEmailEt;
+    private EditText        mPasswordEt;
+    private EditText        mReenterPasswordEt;
+    private Button          mLoginBtn;
+    private Button          mRegisterBtn;
+    private ImageButton     mFBLoginBtn;
 
-    private boolean mLoginMode = true;
-    private boolean mPersistantLogin = true;
+    private boolean         mLoginMode = true;
+    private boolean         mPersistantLogin = true;
     private CallbackManager callbackManager;
 
     @Override

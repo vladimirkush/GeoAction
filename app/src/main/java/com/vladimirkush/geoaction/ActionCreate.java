@@ -60,40 +60,40 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
     private final String LOG_TAG = "LOGTAG";
 
     //fields
-    private LatLng mAreaCenter;
-    private int mRadius;
-    private boolean mIsEditMode;
-    private LBAction mEditedLBAction;
-    private DBHelper dbHelper;
-    private GeofenceHelper geofenceHelper;
+    private LatLng          mAreaCenter;
+    private int             mRadius;
+    private boolean         mIsEditMode;
+    private LBAction        mEditedLBAction;
+    private DBHelper        dbHelper;
+    private GeofenceHelper  geofenceHelper;
 
     // views
-    private RadioButton mRadioReminder;
-    private RadioButton mRadioSMS;
-    private RadioButton mRadioEmail;
-    private RadioButton mRadioEnterArea;
-    private RadioButton mRadioExitArea;
-    private ImageButton mMapChoserButton;
-    private LinearLayout mReminderLayout;
-    private LinearLayout mSMSLayout;
-    private LinearLayout mEmailLayout;
-    private TextView mRadiusLabel;
-    private TextView mAddressLabel;
+    private RadioButton     mRadioReminder;
+    private RadioButton     mRadioSMS;
+    private RadioButton     mRadioEmail;
+    private RadioButton     mRadioEnterArea;
+    private RadioButton     mRadioExitArea;
+    private ImageButton     mMapChoserButton;
+    private LinearLayout    mReminderLayout;
+    private LinearLayout    mSMSLayout;
+    private LinearLayout    mEmailLayout;
+    private TextView        mRadiusLabel;
+    private TextView        mAddressLabel;
 
-    private EditText mSmsTo;
-    private EditText mSmsMessage;
-    private EditText mReminderTitle;
-    private EditText mReminderText;
+    private EditText        mSmsTo;
+    private EditText        mSmsMessage;
+    private EditText        mReminderTitle;
+    private EditText        mReminderText;
 
-    private EditText mEmailTo;
-    private EditText mEmailSubject;
-    private EditText mEmailMessage;
+    private EditText        mEmailTo;
+    private EditText        mEmailSubject;
+    private EditText        mEmailMessage;
 
 
-    private PopupWindow mPopupWindow;
-    private Toolbar mToolbar;
-    private ActionBar mActionBar;
-    private RecyclerView mRecyclerView;
+    private PopupWindow     mPopupWindow;
+    private Toolbar         mToolbar;
+    private ActionBar       mActionBar;
+    private RecyclerView    mRecyclerView;
     private ArrayList<LBAction> mSuggestionsList;
     private SuggestionsAdapter mAdapter;
 
@@ -462,6 +462,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
                 } else {
                     mSmsTo.append(", " + number);
                 }
+                cursor.close();
             }
         } else if (requestCode == Constants.CONTACT_EMAILS_PICK_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
@@ -478,6 +479,8 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
                 } else {
                     mEmailTo.append(", " + emailAddr);
                 }
+                cursor.close();
+
             }
         }
     }
@@ -513,7 +516,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
         mRecyclerView.addItemDecoration(itemDecoration);
     }
 
-
+    /** Implements  naiive algorithm for updating scores of suggestions */
     private void updateSuggestionScores(LBAction newAction){
         ArrayList<LBAction> currentSuggestions = dbHelper.getAllSuggestions();
         long oldestID=0;
@@ -523,16 +526,18 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
              oldestID = currentSuggestions.get(numOfSuggestions-1).getID();
         }
         String newMessage = newAction.getMessage();
-        String [] newWords = newMessage.split(" ");
+        String[] newWords = newMessage.replaceAll("^[,;\\s]+", "").split("[,;\\s]+");
         double addingScore;
         boolean wasOneTheSame = false;
         double oldScoreOfsame = 0;
-        for (LBAction oldSuggestion: currentSuggestions){
+        for (LBAction oldSuggestion: currentSuggestions){   // check every suggestion in database
             addingScore = 0;
             boolean sameAsOld = false;
             String oldMessage = oldSuggestion.getMessage();
-            String [] oldWords = oldMessage.split(" ");
+            String[] oldWords = oldMessage.replaceAll("^[,;\\s]+", "").split("[,;\\s]+");
 
+            // determine how much the suggestion fits the new action
+            // by number of same words
             int numWordsmatch = countWordsMatching(newWords, oldWords);
             if (newMessage.equalsIgnoreCase(oldMessage)){
                 sameAsOld = true;
@@ -543,18 +548,17 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
             }else if ( numWordsmatch >= 3){
                 addingScore += 0.2;
             }
+
             //determine how old is an action based on the IDs difference
             long idsDiff =  oldestID - oldSuggestion.getID() ;
-            Log.d(LOG_TAG, "ids diff " + idsDiff);
-            Log.d(LOG_TAG, "numOfSuggestions " + numOfSuggestions);
             if(numOfSuggestions > 3 && idsDiff >=10){
                 dbHelper.deleteSuggestion(oldSuggestion.getID());
             }else{
-                addingScore -= idsDiff * 0.1;
+                addingScore -= idsDiff * 0.1;   // "aging" of old suggestions
                 double newScore = oldSuggestion.getScore() + addingScore;
                 oldSuggestion.setScore((newScore >=0) ? newScore : 0);
                 if(sameAsOld) {
-                    // if the same content, prefer to use the new one than the old, and delete the old
+                    // if the same content, prefer to use the new one than the old, so delete the old
                     dbHelper.deleteSuggestion(oldSuggestion.getID());
                 }else{
                     dbHelper.updateSuggestion(oldSuggestion);
@@ -564,7 +568,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
         }
         if (wasOneTheSame) {
             // if we had suggestions with the same message, they were all deleted
-            // and we need to insert a new one with high value, as it is the most recent and relevant
+            // and we need to insert a new one with high score, as it is the most recent and relevant
             // for user (due to fact it was equal to at least one suggestion in the past)
             newAction.setScore((oldScoreOfsame + 0.2) > 1 ? (oldScoreOfsame + 0.2) : 1 );
             dbHelper.insertSuggestion(newAction);
