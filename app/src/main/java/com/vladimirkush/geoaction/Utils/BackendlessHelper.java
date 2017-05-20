@@ -36,16 +36,16 @@ public class BackendlessHelper {
     public static final String ACTIONS_TABLE_NAME = "Actions";
 
     public static final String ACTIONS_OBJECT_ID = "objectId";
-    public static final String ACTIONS_lOCAL_ID = "localId";
-    public static final String ACTIONS_COLUMN_ACTION_TYPE = "actionType";
-    public static final String ACTIONS_COLUMN_RADIUS = "radius";
-    public static final String ACTIONS_COLUMN_DIRECTION_TRIGGER = "directionTrigger";
-    public static final String ACTIONS_COLUMN_LAT = "latitude";
-    public static final String ACTIONS_COLUMN_LON = "longitude";
-    public static final String ACTIONS_COLUMN_STATUS = "status";
-    public static final String ACTIONS_COLUMN_TO = "recipients";
-    public static final String ACTIONS_COLUMN_MESSAGE = "message";
-    public static final String ACTIONS_COLUMN_SUBJECT = "subject";  // for reminder used for title
+    private static final String ACTIONS_lOCAL_ID = "localId";
+    private static final String ACTIONS_COLUMN_ACTION_TYPE = "actionType";
+    private static final String ACTIONS_COLUMN_RADIUS = "radius";
+    private static final String ACTIONS_COLUMN_DIRECTION_TRIGGER = "directionTrigger";
+    private static final String ACTIONS_COLUMN_LAT = "latitude";
+    private static final String ACTIONS_COLUMN_LON = "longitude";
+    private static final String ACTIONS_COLUMN_STATUS = "status";
+    private static final String ACTIONS_COLUMN_TO = "recipients";
+    private static final String ACTIONS_COLUMN_MESSAGE = "message";
+    private static final String ACTIONS_COLUMN_SUBJECT = "subject";  // for reminder used for title
 
 
     public static Map getMapForSingleAction(LBAction action){

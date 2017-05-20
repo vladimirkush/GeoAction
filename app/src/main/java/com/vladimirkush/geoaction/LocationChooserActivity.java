@@ -56,6 +56,7 @@ public class LocationChooserActivity extends AppCompatActivity
 
     private final String    LOG_TAG = "LOGTAG";
     private final float     ZOOM_RATE = 14;
+    private final int       MIN_RADIUS = 50;
 
 
     private GoogleMap       mMap;
@@ -359,6 +360,9 @@ public class LocationChooserActivity extends AppCompatActivity
     private void adjustCircleRadius(LatLng clickPosition, LatLng center ){
 
         int radius = (int)getDistanceBetween(clickPosition, center );
+        if (radius < MIN_RADIUS){
+            radius = MIN_RADIUS;
+        }
         mCircle.setRadius(radius);
         mRadiusTextView.setText("Radius: "+ radius + "m");
 
@@ -418,7 +422,6 @@ public class LocationChooserActivity extends AppCompatActivity
         inflater.inflate(R.menu.address_search_menu, menu);
 
         SearchView searchView = (SearchView) menu.findItem(R.id.address_search).getActionView();
-        // Assumes current activity is the searchable activity
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {

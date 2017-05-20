@@ -41,6 +41,7 @@ public class SettingsFragment extends PreferenceFragment {
         super.onCreate(savedInstanceState);
         mActivity = getActivity();
         mDbHelper = new DBHelper(mActivity);
+
         //configure alarm
         mAlarmMgr = (AlarmManager) mActivity.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(mActivity, TrackService.class);

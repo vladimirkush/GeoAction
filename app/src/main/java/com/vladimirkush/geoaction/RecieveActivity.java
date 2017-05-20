@@ -252,7 +252,7 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
         LBAction.ActionType type = action.getActionType();
         mRadius = action.getRadius();
         markerLocation = action.getTriggerCenter();
-        String radiusStr = mRadius+"m";
+        String radiusStr = "Radius: " + mRadius + "m";
         mRadiusContent.setText(radiusStr);
         String titleStr = MAIN_TITLE + type.toString();
         mMainTitle.setText(titleStr);

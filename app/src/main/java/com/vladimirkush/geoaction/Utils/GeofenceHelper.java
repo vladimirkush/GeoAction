@@ -80,7 +80,6 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
                 ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
             Log.d(LOG_TAG, "No permissions granted");
         } else {
-            //pIntent = getGeofencePendingIntent(lbAction);
             LocationServices.GeofencingApi.addGeofences(
                     mGoogleApiClient,
                     getGeofencingRequest(lbAction),
@@ -94,7 +93,6 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
                 ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
             Log.d(LOG_TAG, "No permissions granted");
         } else {
-            //pIntent = getGeofencePendingIntent(lbAction);
             LocationServices.GeofencingApi.addGeofences(
                     gac,
                     getGeofencingRequest(lbAction),

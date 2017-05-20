@@ -50,7 +50,6 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
              tvName = (TextView) itemView.findViewById(R.id.tv_friend_name);
              tvIsNear = (TextView) itemView.findViewById(R.id.tv_isnear);
              swichTracing = (Switch) itemView.findViewById(R.id.switch_tracing);
-            // mProfPic = (ProfilePictureView) itemView.findViewById(R.id.profpic_fb);
         }
     }
 
@@ -71,7 +70,6 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         final Friend friend = mFriendList.get(position);
 
         holder.fbIconView.setImageBitmap(friend.getUserIcon());
-        //holder.mProfPic.setProfileId(friend.getFbID());
         holder.tvName.setText(friend.getName());
         if(friend.isNear()) {
             holder.tvName.setTextColor(Color.parseColor("green"));

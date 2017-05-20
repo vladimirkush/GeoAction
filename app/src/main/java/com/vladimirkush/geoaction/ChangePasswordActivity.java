@@ -138,7 +138,4 @@ public class ChangePasswordActivity extends AppCompatActivity {
         });
     }
 
-
-
-    /**/
 }

@@ -122,7 +122,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Radius: "
             android:textSize="20sp"
             android:textColor="@color/primary_dark"/>
 
@@ -130,14 +129,12 @@
             android:id="@+id/receive_radius_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="200m"
             android:textColor="@color/primary_dark"
             android:textSize="20sp" />
         <TextView
             android:id="@+id/receive_direction"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text=", on Entering area"
             android:textColor="#000000"
             android:textSize="20sp" />
 
@@ -150,7 +147,6 @@
         android:paddingTop="5dp"
         android:layout_marginBottom="8dp"
         android:textStyle="italic"
-        android:text="Aba hilel 70, Ramat gan"
         android:textColor="#7b7777"
         android:textSize="15sp" />
 
@@ -161,7 +157,7 @@
         android:layout_weight="2"
         android:textColor="@color/colorPrimaryLight"
         android:backgroundTint="@color/colorPrimaryDark"
-        android:text="Accept"
+        android:text="@string/accept_en"
         android:onClick="onAcceptClick"/>
     <Button
         android:id="@+id/receive_cancell_btn"
@@ -170,6 +166,6 @@
         android:textColor="@color/colorPrimaryLight"
         android:backgroundTint="@color/colorPrimaryDark"
         android:layout_weight="2"
-        android:text="Cancel"
+        android:text="@string/cancel"
         android:onClick="onCancellClick"/>
 </LinearLayout>

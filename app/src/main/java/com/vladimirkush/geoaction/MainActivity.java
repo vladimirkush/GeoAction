@@ -232,7 +232,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         // Header
         AccountHeader header = new AccountHeaderBuilder()
                 .withActivity(this)
-                //.withHeaderBackground(R.color.md_amber_800)// todo change for picture
                 .withHeaderBackground(R.drawable.geoaction_big_logo)
                 .build();
 

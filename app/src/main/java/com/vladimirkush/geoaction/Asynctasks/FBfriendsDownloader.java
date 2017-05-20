@@ -27,8 +27,8 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 
 
 public class FBfriendsDownloader extends AsyncTask<Void, Void, Void> {
-    private final String LOG_TAG = "LOGTAG";
-    DBHelper dbHelper;
+    private final String    LOG_TAG = "LOGTAG";
+    private DBHelper        dbHelper;
 
     @Override
     protected Void doInBackground(Void... params) {
@@ -100,7 +100,6 @@ public class FBfriendsDownloader extends AsyncTask<Void, Void, Void> {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    //mImageView.setBitmap(profilePic);
                     Log.d(LOG_TAG, "Userpic bytes downloaded: " + profilePic.getByteCount());
                 }
             }).start();

@@ -33,4 +33,30 @@
     <!--    PREFERENCES strings   -->
     <string name="prefstring_tracking_notfbuser">Available only when connected to Facebook</string>
     <string name="prefstring_tracking_isfbuser">When disactivated, your friends will not be able to track you as well</string>
+
+    <string name="chose_action_type">Chose action type:</string>
+    <string name="reminder">Reminder</string>
+    <string name="sms">SMS</string>
+    <string name="email">Email</string>
+    <string name="chose_trigger_area_for_action">Chose trigger area for action:</string>
+    <string name="chose_trigger_area_direction">Chose trigger area direction:</string>
+    <string name="entering_area">Entering area</string>
+    <string name="exiting_area">Exiting area</string>
+    <string name="add_reminder_title_and_text">Add reminder title and text:</string>
+    <string name="title">Title</string>
+    <string name="text">Text</string>
+    <string name="set_up_sms_message">Set up SMS message:</string>
+    <string name="to">To:</string>
+    <string name="message">Message</string>
+    <string name="set_up_email_message">Set up email message:</string>
+    <string name="subject">Subject</string>
+    <string name="save">Save</string>
+    <string name="confirm">confirm</string>
+    <string name="radius">Radius</string>
+    <string name="accept_en">Accept</string>
+    <string name="cancel">Cancel</string>
+    <string name="top_actions">top actions</string>
+    <string name="search">search</string>
+    <string name="send">Send</string>
+    <string name="delete">Delete</string>
 </resources>

@@ -1,6 +1,5 @@
 package com.vladimirkush.geoaction.Utils;
 
-//all required import files
 import java.util.ArrayList;
 import java.util.LinkedList;
 import android.app.Activity;

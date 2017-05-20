@@ -40,7 +40,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Chose action type:"
+            android:text="@string/chose_action_type"
             android:padding="5dp"/>
 
         <RadioGroup
@@ -53,21 +53,21 @@
 
             <RadioButton
                 android:id="@+id/radio_reminder"
-                android:text="Reminder"
+                android:text="@string/reminder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onRadioButtonClick"/>
             <RadioButton
                 android:id="@+id/radio_sms"
-                android:text="SMS"
+                android:text="@string/sms"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onRadioButtonClick"/>
             <RadioButton
                 android:id="@+id/radio_email"
-                android:text="Email"
+                android:text="@string/email"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -80,7 +80,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Chose trigger area for action:"
+            android:text="@string/chose_trigger_area_for_action"
             android:padding="5dp"/>
 
         <ImageButton
@@ -115,7 +115,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Chose trigger area direction:"
+            android:text="@string/chose_trigger_area_direction"
             android:padding="5dp"/>
 
         <RadioGroup
@@ -130,11 +130,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Entering area" />
+                android:text="@string/entering_area" />
 
             <RadioButton
                 android:id="@+id/radio_exit"
-                android:text="Exiting area"
+                android:text="@string/exiting_area"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -153,7 +153,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Add reminder title and text:"
+                android:text="@string/add_reminder_title_and_text"
                 android:padding="5dp"/>
 
            <EditText
@@ -163,7 +163,7 @@
                android:paddingBottom="5dp"
                android:layout_weight="1"
                android:maxLines="1"
-               android:hint="Title"/>
+               android:hint="@string/title"/>
 
             <EditText
                 android:id="@+id/et_reminder_text"
@@ -173,7 +173,7 @@
                 android:minLines="2"
                 android:gravity="start"
                 android:scrollbars="vertical"
-                android:hint="Text"
+                android:hint="@string/text"
                 />
 
         </LinearLayout>
@@ -188,7 +188,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Set up SMS message:"
+                android:text="@string/set_up_sms_message"
                 android:padding="5dp"/>
 
             <LinearLayout
@@ -198,7 +198,7 @@
 
                 <Button
                     android:id="@+id/btn_sms_to"
-                    android:text="To:"
+                    android:text="@string/to"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:textColor="@color/colorPrimaryLight"
@@ -225,7 +225,7 @@
                 android:minLines="2"
                 android:gravity="start"
                 android:scrollbars="vertical"
-                android:hint="Message"
+                android:hint="@string/message"
                 />
 
         </LinearLayout>
@@ -239,7 +239,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Set up email message:"
+                android:text="@string/set_up_email_message"
                 android:padding="5dp"/>
 
             <LinearLayout
@@ -249,7 +249,7 @@
 
                 <Button
                     android:id="@+id/btn_email_to"
-                    android:text="To:"
+                    android:text="@string/to"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:onClick="btnEmailToOnClick"
@@ -273,7 +273,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="1"
-                android:hint="Subject"
+                android:hint="@string/subject"
                 />
 
             <EditText
@@ -284,7 +284,7 @@
                 android:minLines="2"
                 android:gravity="start"
                 android:scrollbars="vertical"
-                android:hint="Message"
+                android:hint="@string/message"
                 />
 
         </LinearLayout>
@@ -292,7 +292,7 @@
 
         <Button
             android:id="@+id/btn_save_action"
-            android:text="Save"
+            android:text="@string/save"
             android:textColor="@color/colorPrimaryLight"
             android:backgroundTint="@color/colorPrimaryDark"
             android:foregroundGravity="center_vertical"

@@ -330,7 +330,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
 
- /*// test block - only for showing hash in logs
+ /* test block - only for showing hash in logs for facebook
         try {
             PackageInfo info = getPackageManager().getPackageInfo(
                     "com.vladimirkush.geoaction",

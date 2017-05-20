@@ -126,6 +126,7 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
 
                 if(checkIfTimeLongerThan(f.getLastNearTimeMillis(), currentTimeMillis, MILLIS_NOSPAM_DIFF)){
                     sendNotification("Friend near you", f.getName() + " is around you!");
+
                     // if happened longer then MILLIS_NOSPAM_DIFF, update timestamp
                     f.setLastNearTimeMillis(currentTimeMillis);
                     dbHelper.updateFriend(f);
@@ -147,7 +148,6 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
 
     @Override
     public void onCreate() {
-        Log.d(LOG_TAG, "Service - onCreate()");
         FriendsTrackerService.initApplication(this);
         mFriendsTrackerService = FriendsTrackerService.getInstance();
 
@@ -222,7 +222,6 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
 
     @Override
     public void onDestroy() {
-        Log.d(LOG_TAG, "Service - onDestroy()");
         stopLocationUpdates();
         mGoogleApiClient.disconnect();
         super.onDestroy();

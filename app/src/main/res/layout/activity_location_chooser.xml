@@ -30,13 +30,13 @@
         android:id="@+id/tv_radius"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:text="Radius"
+        android:text="@string/radius"
         android:textSize="25sp"
         android:textAlignment="center"
         android:layout_weight="0.8"/>
 
     <Button
-        android:text="Confirm"
+        android:text="@string/confirm"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:textColor="@color/colorPrimaryLight"

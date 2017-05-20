@@ -46,11 +46,7 @@ public class DeleteBulkFromCloud extends AsyncTask<Void,Void,String> {
             Log.d(LOG_TAG, "response code: " + responseCode);
 
 
-        } catch (MalformedURLException e) {
-
-            e.printStackTrace();
-            Log.d(LOG_TAG, e.getMessage());
-        } catch (IOException e) {
+        }  catch (IOException e) {
 
             e.printStackTrace();
             Log.d(LOG_TAG, e.getMessage());
