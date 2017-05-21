@@ -190,23 +190,34 @@ public class BackendlessHelper {
     }
 
 
-    public static void updateMyLocationInCloudAsync(Location loaction){
-        BackendlessUser user = Backendless.UserService.CurrentUser();
-        if(user == null) return;
-        Log.d(LOG_TAG, "Current fb user: "+ user.getEmail() );
-        user.setProperty("latitude", loaction.getLatitude());
-        user.setProperty("longitude", loaction.getLongitude());
-        Backendless.UserService.update(user, new AsyncCallback<BackendlessUser>() {
+    public static void updateMyLocationInCloudAsync(final Location loaction){
+        String userId = UserIdStorageFactory.instance().getStorage().get();
+        Backendless.UserService.findById(userId, new AsyncCallback<BackendlessUser>() {
             @Override
             public void handleResponse(BackendlessUser backendlessUser) {
-                Log.d(LOG_TAG, "Fb user updated in cloud: "+ backendlessUser.getEmail() );
+                Log.d(LOG_TAG, "Current fb user: "+ backendlessUser.getEmail() );
+                backendlessUser.setProperty("latitude", loaction.getLatitude());
+                backendlessUser.setProperty("longitude", loaction.getLongitude());
+                Backendless.UserService.update(backendlessUser, new AsyncCallback<BackendlessUser>() {
+                    @Override
+                    public void handleResponse(BackendlessUser backendlessUser) {
+                        Log.d(LOG_TAG, "Fb user updated in cloud: "+ backendlessUser.getEmail() );
 
+                    }
+
+                    @Override
+                    public void handleFault(BackendlessFault backendlessFault) {
+                        Log.d(LOG_TAG, "Fb user update in cloud failed: "+ backendlessFault.getMessage() );
+                    }
+                });
             }
 
             @Override
             public void handleFault(BackendlessFault backendlessFault) {
-                Log.d(LOG_TAG, "Fb user update in cloud failed: "+ backendlessFault.getMessage() );
+                Log.d(LOG_TAG, "Error retreiving user for location update: "+ backendlessFault.getMessage() );
             }
         });
+
+
     }
 }
