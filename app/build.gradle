@@ -42,7 +42,6 @@ dependencies {
     // VectorDrawableCompat
     compile "com.android.support:animated-vector-drawable:${supportLibVersion}"
     // AnimatedVectorDrawableCompat
-    compile "com.android.support:design:${supportLibVersion}"
     compile('com.mikepenz:materialdrawer:5.8.2@aar') {
         transitive = true
 

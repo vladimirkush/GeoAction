@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_alert_timeout_labels">
+        <item>1m</item>
+        <item>1h</item>
+        <item>8h</item>
+        <item>12h</item>
+        <item>24h</item>
+    </string-array>
+
+    <string-array name="pref_alert_timeout_values">
+        <item>60000</item>
+        <item>3600000</item>
+        <item>28800000</item>
+        <item>43200000</item>
+        <item>86400000</item>
+    </string-array>
+    
+</resources>

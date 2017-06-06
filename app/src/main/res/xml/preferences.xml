@@ -6,6 +6,15 @@
         android:key="@string/prefs_tracking_permitted"
         android:title="Track friends"
         android:summary="@string/prefstring_tracking_isfbuser" />
+    <ListPreference
+        android:key="@string/prefs_tracking_timeout"
+        android:title="Alerting frequency"
+        android:summary="@string/prefstring_tracking_timeout"
+        android:entries="@array/pref_alert_timeout_labels"
+        android:entryValues="@array/pref_alert_timeout_values"
+        android:defaultValue="43200000"/>
+
+    />
     <SwitchPreference
         android:defaultValue="true"
         android:key="@string/prefs_vibrate_permitted"

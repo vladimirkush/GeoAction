@@ -110,7 +110,7 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
                     f.setNear(true);
 
                     // if happened longer then MILLIS_NOSPAM_DIFF, update timestamp
-                    if(checkIfTimeLongerThan(f.getLastNearTimeMillis(), currentTimeMillis, MILLIS_NOSPAM_DIFF)){
+                    if(checkIfTimeLongerThan(f.getLastNearTimeMillis(), currentTimeMillis, SharedPreferencesHelper.getAlertingTimeOutMillis(this))){
                         f.setLastNearTimeMillis(currentTimeMillis);
                     }else{
                         wasAtLeastOneNotNotifiedYet = false;
@@ -124,7 +124,7 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
                 Friend f = dbHelper.getFriendByFBId(ids.get(0));
                 f.setNear(true);
 
-                if(checkIfTimeLongerThan(f.getLastNearTimeMillis(), currentTimeMillis, MILLIS_NOSPAM_DIFF)){
+                if(checkIfTimeLongerThan(f.getLastNearTimeMillis(), currentTimeMillis,  SharedPreferencesHelper.getAlertingTimeOutMillis(this))){
                     sendNotification("Friend near you", f.getName() + " is around you!");
 
                     // if happened longer then MILLIS_NOSPAM_DIFF, update timestamp

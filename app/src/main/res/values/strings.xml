@@ -27,12 +27,14 @@
     <string name="prefs_fb_logged_in">fb_logged_in</string>
     <string name="prefs_tracking_activated">tracking_activated</string>
     <string name="prefs_tracking_permitted">tracking_permitted</string>
+    <string name="prefs_tracking_timeout">tracking_timeout</string>
     <string name="prefs_vibrate_permitted">vibrate_permitted</string>
     <string name="prefs_ringtone_uri">ringtone_uri</string>
 
     <!--    PREFERENCES strings   -->
     <string name="prefstring_tracking_notfbuser">Available only when connected to Facebook</string>
     <string name="prefstring_tracking_isfbuser">When disactivated, your friends will not be able to track you as well</string>
+    <string name="prefstring_tracking_timeout">How often you will be alerted if friends are around</string>
 
     <string name="chose_action_type">Chose action type:</string>
     <string name="reminder">Reminder</string>

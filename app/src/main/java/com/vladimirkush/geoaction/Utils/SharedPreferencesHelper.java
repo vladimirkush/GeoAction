@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.util.Log;
 
 import com.vladimirkush.geoaction.R;
 
 public class SharedPreferencesHelper {
+    static final String    LOG_TAG = "LOGTAG";
 
 
 
@@ -74,6 +76,14 @@ public class SharedPreferencesHelper {
                 ctx.getString(R.string.shared_preferences_file_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.clear().apply();
+    }
+
+    public static long getAlertingTimeOutMillis(Context ctx){
+        SharedPreferences sharedPref = ctx.getSharedPreferences(
+                ctx.getString(R.string.shared_preferences_file_key), Context.MODE_PRIVATE);
+        String millisStr =  sharedPref.getString(ctx.getString(R.string.prefs_tracking_timeout), "60000");
+        Log.d(LOG_TAG, millisStr + " millis timeout set" );
+        return Long.parseLong(millisStr);
     }
 
 }
