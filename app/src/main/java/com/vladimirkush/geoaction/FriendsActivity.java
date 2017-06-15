@@ -9,7 +9,7 @@ import android.support.v7.widget.Toolbar;
 
 import com.vladimirkush.geoaction.Adapters.FriendListAdapter;
 import com.vladimirkush.geoaction.Models.Friend;
-import com.vladimirkush.geoaction.Utils.DBHelper;
+import com.vladimirkush.geoaction.DataAccess.DBHelper;
 
 import java.util.ArrayList;
 

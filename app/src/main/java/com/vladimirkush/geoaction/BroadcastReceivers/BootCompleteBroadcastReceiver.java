@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.vladimirkush.geoaction.Services.RebootCompleteService;
+import com.vladimirkush.geoaction.LocalServices.RebootCompleteService;
 
 
 public class BootCompleteBroadcastReceiver extends BroadcastReceiver {

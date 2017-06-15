@@ -1,4 +1,4 @@
-package com.vladimirkush.geoaction.Utils;
+package com.vladimirkush.geoaction.DataAccess;
 
 import android.location.Location;
 import android.text.TextUtils;

@@ -12,8 +12,8 @@ import com.backendless.exceptions.BackendlessException;
 import com.backendless.persistence.BackendlessDataQuery;
 import com.vladimirkush.geoaction.Adapters.ActionsListAdapter;
 import com.vladimirkush.geoaction.Models.LBAction;
-import com.vladimirkush.geoaction.Utils.BackendlessHelper;
-import com.vladimirkush.geoaction.Utils.DBHelper;
+import com.vladimirkush.geoaction.DataAccess.BackendlessHelper;
+import com.vladimirkush.geoaction.DataAccess.DBHelper;
 import com.vladimirkush.geoaction.Utils.GeofenceHelper;
 
 import java.util.ArrayList;

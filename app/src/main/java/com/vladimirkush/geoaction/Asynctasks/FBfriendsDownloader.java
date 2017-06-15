@@ -12,15 +12,14 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.vladimirkush.geoaction.Models.Friend;
-import com.vladimirkush.geoaction.Utils.DBHelper;
-import com.vladimirkush.geoaction.Utils.SharedPreferencesHelper;
+import com.vladimirkush.geoaction.DataAccess.DBHelper;
+import com.vladimirkush.geoaction.DataAccess.SharedPreferencesHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import static com.facebook.FacebookSdk.getApplicationContext;

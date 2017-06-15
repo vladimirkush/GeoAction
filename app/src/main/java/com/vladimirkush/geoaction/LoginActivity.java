@@ -1,9 +1,7 @@
 package com.vladimirkush.geoaction;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -20,11 +18,10 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
-import com.backendless.persistence.local.UserIdStorageFactory;
 import com.backendless.persistence.local.UserTokenStorageFactory;
 import com.facebook.CallbackManager;
 import com.vladimirkush.geoaction.Utils.Constants;
-import com.vladimirkush.geoaction.Utils.SharedPreferencesHelper;
+import com.vladimirkush.geoaction.DataAccess.SharedPreferencesHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;

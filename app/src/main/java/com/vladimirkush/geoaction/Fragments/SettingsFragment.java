@@ -19,11 +19,11 @@ import android.util.Log;
 
 import com.vladimirkush.geoaction.Models.Friend;
 import com.vladimirkush.geoaction.R;
-import com.vladimirkush.geoaction.Services.TrackService;
-import com.vladimirkush.geoaction.Utils.BackendlessHelper;
+import com.vladimirkush.geoaction.LocalServices.TrackService;
+import com.vladimirkush.geoaction.DataAccess.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.Constants;
-import com.vladimirkush.geoaction.Utils.DBHelper;
-import com.vladimirkush.geoaction.Utils.SharedPreferencesHelper;
+import com.vladimirkush.geoaction.DataAccess.DBHelper;
+import com.vladimirkush.geoaction.DataAccess.SharedPreferencesHelper;
 
 import java.util.ArrayList;
 

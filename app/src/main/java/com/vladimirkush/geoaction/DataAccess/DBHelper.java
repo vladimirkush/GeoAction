@@ -1,4 +1,4 @@
-package com.vladimirkush.geoaction.Utils;
+package com.vladimirkush.geoaction.DataAccess;
 
 import android.content.ContentValues;
 import android.content.Context;

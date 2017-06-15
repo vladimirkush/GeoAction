@@ -1,7 +1,6 @@
 package com.vladimirkush.geoaction.Utils;
 
 
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -21,7 +20,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.vladimirkush.geoaction.Models.LBAction;
-import com.vladimirkush.geoaction.Services.GeofenceTransitionsIntentService;
+import com.vladimirkush.geoaction.LocalServices.GeofenceTransitionsIntentService;
 
 import java.util.List;
 
@@ -74,7 +73,7 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
                 FLAG_UPDATE_CURRENT);
     }
 
-
+    /** register geofence with lbaction parameters */
     public void registerGeofence(LBAction lbAction) {
         if (!(ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
@@ -88,6 +87,7 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
         }
     }
 
+    /** register geofence with lbaction parameters and initialized GoogleApiClient */
     public void registerGeofence(LBAction lbAction, GoogleApiClient gac) {
         if (!(ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
@@ -130,6 +130,7 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
         return geofence;
     }
 
+    /** register multiple geofences based on list of actions */
     public void registerGeofences(List<LBAction> actions){
         for(LBAction act:actions){
             registerGeofence(act);
@@ -139,6 +140,7 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
 
     }
 
+    /** register multiple geofences based on list of actions using GoogleApiClients initialized externally*/
     public void registerGeofences(List<LBAction> actions, GoogleApiClient gac){
         for(LBAction act:actions){
             registerGeofence(act, gac);
@@ -148,7 +150,7 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
 
     }
 
-
+    /** Remove all geofences from OS based by their ID*/
     public void unregisterGeofences(List<String> geofenceIDs) {
         LocationServices.GeofencingApi.removeGeofences(
                 mGoogleApiClient,
@@ -161,10 +163,12 @@ public class GeofenceHelper implements GoogleApiClient.ConnectionCallbacks, Goog
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+
     }
 
     @Override
     public void onConnectionSuspended(int i) {
+        Log.d(LOG_TAG, "GeofenceHelper::onConnectionSuspended()");
 
     }
 

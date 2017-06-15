@@ -42,9 +42,9 @@ import com.vladimirkush.geoaction.Models.LBAction.ActionType;
 import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
 import com.vladimirkush.geoaction.Models.LBSms;
-import com.vladimirkush.geoaction.Utils.BackendlessHelper;
+import com.vladimirkush.geoaction.DataAccess.BackendlessHelper;
 import com.vladimirkush.geoaction.Utils.Constants;
-import com.vladimirkush.geoaction.Utils.DBHelper;
+import com.vladimirkush.geoaction.DataAccess.DBHelper;
 import com.vladimirkush.geoaction.Utils.GeofenceHelper;
 
 import java.util.ArrayList;

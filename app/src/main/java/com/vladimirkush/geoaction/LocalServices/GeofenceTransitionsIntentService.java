@@ -1,4 +1,4 @@
-package com.vladimirkush.geoaction.Services;
+package com.vladimirkush.geoaction.LocalServices;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
@@ -6,10 +6,7 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.media.RingtoneManager;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -23,9 +20,9 @@ import com.vladimirkush.geoaction.Models.LBEmail;
 import com.vladimirkush.geoaction.Models.LBReminder;
 import com.vladimirkush.geoaction.Models.LBSms;
 import com.vladimirkush.geoaction.R;
-import com.vladimirkush.geoaction.Utils.DBHelper;
+import com.vladimirkush.geoaction.DataAccess.DBHelper;
 import com.vladimirkush.geoaction.Utils.GeofenceErrorMessages;
-import com.vladimirkush.geoaction.Utils.SharedPreferencesHelper;
+import com.vladimirkush.geoaction.DataAccess.SharedPreferencesHelper;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.vladimirkush.geoaction.Services;
+package com.vladimirkush.geoaction.LocalServices;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -21,9 +21,9 @@ import com.google.android.gms.location.LocationServices;
 import com.vladimirkush.geoaction.Models.LBAction;
 import com.vladimirkush.geoaction.R;
 import com.vladimirkush.geoaction.Utils.Constants;
-import com.vladimirkush.geoaction.Utils.DBHelper;
+import com.vladimirkush.geoaction.DataAccess.DBHelper;
 import com.vladimirkush.geoaction.Utils.GeofenceHelper;
-import com.vladimirkush.geoaction.Utils.SharedPreferencesHelper;
+import com.vladimirkush.geoaction.DataAccess.SharedPreferencesHelper;
 
 import java.util.ArrayList;
 

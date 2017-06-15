@@ -1,4 +1,4 @@
-package com.vladimirkush.geoaction.Utils;
+package com.vladimirkush.geoaction.DataAccess;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

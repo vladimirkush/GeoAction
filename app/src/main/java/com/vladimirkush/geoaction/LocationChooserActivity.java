@@ -139,15 +139,7 @@ public class LocationChooserActivity extends AppCompatActivity
 
     }
 
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(LOG_TAG, "onConnectionSuspended");
-    }
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.d(LOG_TAG, "onConnectionFailed");
-    }
 
     @Override
     public void onLocationChanged(Location location) {
@@ -421,6 +413,7 @@ public class LocationChooserActivity extends AppCompatActivity
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.address_search_menu, menu);
 
+        // setup search behavior
         SearchView searchView = (SearchView) menu.findItem(R.id.address_search).getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -458,5 +451,21 @@ public class LocationChooserActivity extends AppCompatActivity
             }
         });
         return true;
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.d(LOG_TAG, "onConnectionSuspended");
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.d(LOG_TAG, "onConnectionFailed");
     }
 }

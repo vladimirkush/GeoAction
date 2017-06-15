@@ -12,12 +12,11 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import com.facebook.login.widget.ProfilePictureView;
 import com.vladimirkush.geoaction.Models.Friend;
 import com.vladimirkush.geoaction.R;
-import com.vladimirkush.geoaction.Utils.DBHelper;
+import com.vladimirkush.geoaction.DataAccess.DBHelper;
 
 import java.util.ArrayList;
 

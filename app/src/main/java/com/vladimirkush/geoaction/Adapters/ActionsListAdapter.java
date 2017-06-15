@@ -25,7 +25,7 @@ import com.vladimirkush.geoaction.Models.LBReminder;
 import com.vladimirkush.geoaction.Models.LBSms;
 import com.vladimirkush.geoaction.R;
 import com.vladimirkush.geoaction.Utils.Constants;
-import com.vladimirkush.geoaction.Utils.DBHelper;
+import com.vladimirkush.geoaction.DataAccess.DBHelper;
 
 import java.util.ArrayList;
 import java.util.List;
