@@ -16,7 +16,7 @@ import java.util.List;
 public class AddressHelper {
     public static final String LOG_TAG = "LOGTAG";
 
-
+    /** Get textual address from latlon, using geocoder */
     public static String getAddress (Context context, LatLng location){
         List<Address> addresses = null;
         Geocoder geocoder = new Geocoder(context);
