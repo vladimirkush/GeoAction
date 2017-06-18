@@ -570,7 +570,7 @@ public class ActionCreate extends AppCompatActivity implements SuggestionListene
             // if we had suggestions with the same message, they were all deleted
             // and we need to insert a new one with high score, as it is the most recent and relevant
             // for user (due to fact it was equal to at least one suggestion in the past)
-            newAction.setScore((oldScoreOfsame + 0.2) > 1 ? (oldScoreOfsame + 0.2) : 1 );
+            newAction.setScore((oldScoreOfsame + 0.2) > 1 ?  1 : (oldScoreOfsame + 0.2) );
             dbHelper.insertSuggestion(newAction);
         }else{
             // set score to 0 as it is the new suggestion

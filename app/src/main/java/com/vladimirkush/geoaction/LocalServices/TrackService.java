@@ -38,7 +38,6 @@ import java.util.ArrayList;
 
 public class TrackService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private final String        LOG_TAG = "LOGTAG";
-    private final long          MILLIS_NOSPAM_DIFF = 1000 * 60 * 2;  // 2m
     private DBHelper            dbHelper;
     private GoogleApiClient     mGoogleApiClient;
     private Location            mLastLocation;
@@ -109,7 +108,7 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
                     Friend f = dbHelper.getFriendByFBId(fbid);
                     f.setNear(true);
 
-                    // if happened longer then MILLIS_NOSPAM_DIFF, update timestamp
+                    // if happened longer then timeout, update timestamp
                     if(checkIfTimeLongerThan(f.getLastNearTimeMillis(), currentTimeMillis, SharedPreferencesHelper.getAlertingTimeOutMillis(this))){
                         f.setLastNearTimeMillis(currentTimeMillis);
                     }else{
@@ -127,7 +126,7 @@ public class TrackService extends Service implements GoogleApiClient.ConnectionC
                 if(checkIfTimeLongerThan(f.getLastNearTimeMillis(), currentTimeMillis,  SharedPreferencesHelper.getAlertingTimeOutMillis(this))){
                     sendNotification("Friend near you", f.getName() + " is around you!");
 
-                    // if happened longer then MILLIS_NOSPAM_DIFF, update timestamp
+                    // if happened longer then timeout, update timestamp
                     f.setLastNearTimeMillis(currentTimeMillis);
                     dbHelper.updateFriend(f);
 
