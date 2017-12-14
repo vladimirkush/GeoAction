@@ -146,18 +146,18 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_TABLE_ACTIONS);
         db.execSQL(SQL_CREATE_TABLE_FRIENDS);
         db.execSQL(SQL_CREATE_TABLE_SUGGESTIONS);
-        Log.d(LOG_TAG, "DB: " + DATABASE_NAME + "created");
+        Log.d(LOG_TAG, "DB: " + DATABASE_NAME + " created");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
-        Log.d(LOG_TAG, "DB: " + DATABASE_NAME + "upgraded");
+        Log.d(LOG_TAG, "DB: " + DATABASE_NAME + " upgraded");
 
     }
 
     public void deleteDB(){
         context.deleteDatabase(DATABASE_NAME);
-        Log.d(LOG_TAG, "DB: " + DATABASE_NAME + "deleted");
+        Log.d(LOG_TAG, "DB: " + DATABASE_NAME + " deleted");
     }
 
     // INSERT new action to DB, return Pk _ID

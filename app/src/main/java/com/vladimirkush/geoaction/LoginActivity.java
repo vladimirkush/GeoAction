@@ -59,8 +59,8 @@ public class LoginActivity extends AppCompatActivity {
         // init Backendless API
         String backendlessKey = getString(R.string.backendless_key);
         String backendlessAppId = getString(R.string.backendless_app_id);
-        String version = "v1";
-        Backendless.initApp( this, backendlessAppId, backendlessKey, version );
+        //String version = "v1";  // Backendless have removed the versioning mechanism
+        Backendless.initApp( getApplicationContext(), backendlessAppId, backendlessKey );
 
         // init FB callback manager
         callbackManager = CallbackManager.Factory.create();
@@ -193,6 +193,7 @@ public class LoginActivity extends AppCompatActivity {
         Backendless.UserService.login( email, pass, new AsyncCallback<BackendlessUser>() {
             public void handleResponse( BackendlessUser user ) {
                 // user has been logged in
+
                 Log.d(LOG_TAG, user.getEmail() + " has logged in");
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.putExtra(Constants.LOGIN_IS_PERSISTENT_KEY, mPersistantLogin);

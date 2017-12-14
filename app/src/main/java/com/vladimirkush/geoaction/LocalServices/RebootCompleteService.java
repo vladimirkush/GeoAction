@@ -45,8 +45,7 @@ public class RebootCompleteService extends Service implements GoogleApiClient.Co
         // init Backendless API
         String backendlessKey = getString(R.string.backendless_key);
         String backendlessAppId = getString(R.string.backendless_app_id);
-        String version = "v1";
-        Backendless.initApp( this, backendlessAppId, backendlessKey, version );
+        Backendless.initApp( this, backendlessAppId, backendlessKey );
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {

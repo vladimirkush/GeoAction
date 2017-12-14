@@ -94,8 +94,8 @@ public class RecieveActivity extends AppCompatActivity implements OnMapReadyCall
         // init Backendless API
         String backendlessKey = getString(R.string.backendless_key);
         String backendlessAppId = getString(R.string.backendless_app_id);
-        String version = "v1";
-        Backendless.initApp( this, backendlessAppId, backendlessKey, version );
+
+        Backendless.initApp( this, backendlessAppId, backendlessKey );
 
         Backendless.Persistence.of( BackendlessHelper.ACTIONS_TABLE_NAME ).findById(externalId, new AsyncCallback<Map>() {
                @Override
