@@ -106,7 +106,7 @@
         android:layout_gravity="center"
         android:layout_height="0dp"
         android:src="@drawable/fb_login_bckgrnd"
-        android:scaleType="centerCrop"
+        android:scaleType="centerInside"
         android:background="@null"
         android:onClick="facebookLoginOnClick"
         android:layout_weight="1"/>
