@@ -297,7 +297,7 @@
             android:backgroundTint="@color/colorPrimaryDark"
             android:foregroundGravity="center_vertical"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="70dp"
             android:onClick="onSaveActionClick"/>
 
     </LinearLayout>

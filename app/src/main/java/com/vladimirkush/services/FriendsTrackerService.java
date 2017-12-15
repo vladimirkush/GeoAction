@@ -16,7 +16,7 @@ public class FriendsTrackerService
 {
     private static final String BACKENDLESS_HOST = "https://api.backendless.com";
     private static final String SERVICE_NAME = "FriendsTrackerService";
-    private static final String APP_ID = "C337AADB-C5FF-6F79-FF35-1C8CCE400600";
+    private static final String APP_ID = "19FDA3FF-038D-A5EA-FF92-A37CAF417500";
     private static final String SECRET_KEY = "E7EF3DA5-FE66-15DC-FF2D-32B0EFA9C800";
 
     private static FriendsTrackerService ourInstance = new FriendsTrackerService();
